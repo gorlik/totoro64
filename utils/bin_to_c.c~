@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+#define BUF_SIZE (32*1024)
+
+unsigned char buffer[BUF_SIZE];
+
+int main(int argc, char *argv[])
+{
+  int i,j;
+  size_t fsize;
+  FILE *f;
+
+  if(argc!=2) {
+    fprintf(stderr,"usage: make_table filename\n");
+    return 0;
+  }
+
+  f=fopen(argv[1],"rb");
+  fsize=fread(buffer, BUF_SIZE, 1, f);
+  fclose(f);
+
+  fprintf(stderr,"file size:%d\n",fsize);
+
+  printf("/* automatically generated from: %s */\n",argv[1]);
+
+  printf("#pragma rodata-name (\"TABLES\")\n");
+  printf("const unsigned char table[] = {\n");
+
+  for(j=0;j<fsize;j++) {
+      if(i%16==0) printf("  ");
+      printf("$%02X",buffer[j]);
+      if(i%16==15) printf(",\n");
+      else printf(", ");
+  }
+
+  printf("};\n");
+
+  return 0;
+}
