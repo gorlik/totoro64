@@ -3,7 +3,8 @@ A Studio Ghibli inspired fan game for the Commodore 64
 
 Help chu-totoro catch the acorns before the timer expires.
 Good for kids to learn coding while having fun.
-![alt text](screenshot.png "totoro64 screenshot" width="700")
+
+<img alt="totoro64 screenshot" src="screenshot.png" width="700">
 
 The game fits on a standard 16K Commdore 64 cartridge.
 Can be played with VICE if the real HW is not avaiable.
