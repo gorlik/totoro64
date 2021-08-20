@@ -32,9 +32,9 @@ HeaderB:
 @carttye:
 	.byt	$00,$00
 @EXROM:
-	.byt	$01
+	.byt	$00
 @GAME:
-	.byt	$01
+	.byt	$00
 @reserved1:
 	.byt	$00,$00,$00,$00,$00,$00
 @Name:	;You put the name of the cartridge here.
@@ -72,9 +72,11 @@ Start:
 	jsr	$FF81		;Init. screen
 
 ; Set up the stack.
-	lda    	#<(__RAM_START__ + __RAM_SIZE__)
+	;	lda    	#<(__HIRAM_START__ + __HIRAM_SIZE__)
+	lda    	#<($D000)
 	sta	sp
-	lda	#>(__RAM_START__ + __RAM_SIZE__)
+	;	lda	#>(__HIRAM_START__ + __HIRAM_SIZE__)
+	lda	#>($D000)
        	sta	sp+1   		; Set argument stack ptr
 
 ; If we have IRQ functions, chain our stub into the IRQ vector
@@ -91,7 +93,6 @@ Start:
 ;      	sta	IRQVec
 ;      	stx	IRQVec+1
 ;      	cli
-
 
 NoIRQ1:
 	lda	#<__DATA_RUN__
@@ -116,11 +117,6 @@ NoIRQ1:
 ; Clear the BSS data.
 
         jsr     zerobss
-
-; Push the command-line arguments; and, call main().
-;ra:
-;	inc	$D021
-;	jmp	ra
 
         jsr     callmain
 
@@ -147,9 +143,4 @@ NoIRQ2:
 ;	ldx	#>exitmsg
 ;	jsr	_puts
 ;	jsr	_cgetc
-	jmp	64738		;Kernal reset address as best I know it.
-
-;.rodata
-;exitmsg:
-;	.byt	"Your program has ended.  Press any key",13,"to continue...",0
-
+	jmp	64738		;Kernal reset address
