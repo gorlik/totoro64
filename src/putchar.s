@@ -22,7 +22,6 @@
 .import _charset
 
 .export _PutLine
-.export _PutCharHR
 
 .segment "BSS"
 t1:
@@ -34,15 +33,7 @@ t1:
 ; ****************** PutChar *********************
 ;  Put a character
 .proc _PutCharHR: near
-	;; c1: input char
-
-	lda _c1
-	bpl skip
-	sec
-	sbc #96
-skip:
-        tax
-	ldx _c1
+	;; X: input char
 	ldy #$00
 .repeat 8,cline
 	lda _charset+cline*256,x	;
@@ -53,7 +44,7 @@ skip:
 	lda _line_addr
 	clc
 	adc #$08
-	bne no_carry
+	bcc no_carry
 	inc _line_addr+1
 no_carry:
 	sta _line_addr
@@ -63,20 +54,17 @@ no_carry:
 
 ; ****************** PutLine *********************
 ;  Put a line of text
-	;; c1: temp char to print
 	;; t1: counter for next char to write
 .proc _PutLine: near
-	ldy #$00
-start:
-	lda _STR_BUF,y
-	beq end
-skip:	sta _c1
-	iny
+	ldy #$FF
+start:	iny
 	sty t1
-	jsr _PutCharHR
+	ldx _STR_BUF,y		; next char to print
+	beq end			; test for null terminator
+	jsr _PutCharHR		; char to print is in X
         lda t1
 	cmp #40
-	beq end
+	beq end			; max 40 characters
 	tay
 	jmp start
 end:
