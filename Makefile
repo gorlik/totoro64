@@ -4,6 +4,7 @@ all: c64
 c64: artwork
 	mkdir -p build-c64
 	cd build-c64; make -f ../Makefile.c64
+	grep ^RODATA build-c64/game.map
 
 #c128:
 #	mkdir -p build-c128
