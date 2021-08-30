@@ -21,18 +21,14 @@
 
 .import _charset
 
-
-				;CHAR=_charset
-	
 .export _PutLine
 .export _PutCharHR
 
-.segment "ZP_2" : zeropage
+.segment "BSS"
 t1:
 	.res 1
-t2:
-	.res 1
-	
+
+
 .segment	"CODE"
 
 ; ****************** PutChar *********************
@@ -41,9 +37,9 @@ t2:
 	;; c1: input char
 
 	lda _c1
-			bpl skip
-			sec
-		        sbc #96
+	bpl skip
+	sec
+	sbc #96
 skip:
         tax
 	ldx _c1
@@ -67,12 +63,11 @@ no_carry:
 
 ; ****************** PutLine *********************
 ;  Put a line of text
-; FIXME: support for reverse is broken - no underline
-	;;  c1, c2: temp char to print
+	;; c1: temp char to print
 	;; t1: counter for next char to write
 .proc _PutLine: near
 	ldy #$00
-start:	
+start:
 	lda _STR_BUF,y
 	beq end
 skip:	sta _c1
