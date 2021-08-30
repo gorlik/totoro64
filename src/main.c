@@ -49,7 +49,7 @@
 #define MAX_X 312
 #define MAX_PX (MAX_X-24)
 
-#define CLR_TOP() memset(SCR_BASE,0x0,640) 
+#define CLR_TOP() memset(SCR_BASE,0x0,640)
 
 #ifdef DEBUG
 #define DEBUG_BORDER(a) VIC.bordercolor=a
@@ -58,6 +58,8 @@
 #define DEBUG_BORDER(a)
 #define DEBUG_BORDER_INC()
 #endif
+
+void IRQ(void);
 
 const unsigned char run_seq[] =
   {
@@ -87,6 +89,32 @@ const struct stage_t stage[] =
 struct game_state_t gstate;
 struct player_t totoro;
 struct acorn_t acorn[4];
+
+
+extern unsigned char track1[];
+extern unsigned char instr1;
+extern unsigned char time1;
+extern unsigned char loop1;
+extern unsigned char next_loop1;
+extern unsigned char vpb;
+
+extern const unsigned char *t1addr;
+extern const unsigned char *t2addr;
+#pragma zpsym("t1addr")
+#pragma zpsym("t2addr")
+
+void __fastcall__ setup_sid(void)
+{
+  memset(&SID,0,24);
+  SID.amp = 0x1f; // set volume to 15
+  SID.v1.ad = 0x80;
+  SID.v1.sr = 0xf6;
+  loop1=0;
+  t1addr=track1;
+  instr1=0x10; // triangular
+  time1 = 0;
+  vpb=8;
+}
 
 void __fastcall__ totoro_set_pos(void)
 {
@@ -183,11 +211,12 @@ void __fastcall__ totoro_update(void)
   
   totoro.xpos+=(totoro.xv>>2);
 
-  if(!(gstate.mode&0xfe)) {
-    if(totoro.xpos<MIN_X) {
-      totoro.xpos=MIN_X;
-      totoro.xv=-1;
-    } else if(totoro.xpos>MAX_PX) {
+
+  if(totoro.xpos<MIN_X) {
+    totoro.xpos=MIN_X;
+    totoro.xv=-1;
+  } else if(totoro.xpos>MAX_PX) {
+    if(!(gstate.mode&0xfe)) {
       totoro.xpos=MAX_PX;
       totoro.xv=1;
     }
@@ -267,15 +296,15 @@ void __fastcall__ acorn_update(void)
 void __fastcall__ acorn_init(void)
 {
   // init data
-  for(itmp=0;itmp<4;itmp++)
-    acorn[itmp].en=0;
+  for(ctmp=0;ctmp<4;ctmp++)
+    acorn[ctmp].en=0;
 }
 
 unsigned char __fastcall__ acorn_find(void)
 {
-  unsigned char c;
-  for(c=0;c<4;c++)
-    if(acorn[c].en==0) return c;
+  //  unsigned char c;
+  for(ctmp=0;ctmp<4;ctmp++)
+    if(acorn[ctmp].en==0) return ctmp;
   return 0x80;
 }
 
@@ -357,8 +386,8 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_color[7]=COLOR_RED;
 
   VIC.spr_mcolor=0x00; // all no multicolor
-  VIC.spr_exp_x=0xFF;  // all exp x
-  VIC.spr_exp_y=0xFF;  // all exp y
+  VIC.spr_exp_x=0xf0;  // all exp x
+  VIC.spr_exp_y=0xf0;  // all exp y
 
   // GGLABS
   POKE(0x7f8+0,248);
@@ -370,11 +399,17 @@ void __fastcall__ Title_Sprite_Setup(void)
   POKE(0x7f8+5,253);
   POKE(0x7f8+6,254);
   POKE(0x7f8+7,255);
-
+  /*
   VIC.spr_pos[0].x=80;
   VIC.spr_pos[1].x=80+48;
   VIC.spr_pos[2].x=80+48*2;
   VIC.spr_pos[3].x=80+48*3;
+  */
+  VIC.spr_pos[0].x=128;
+  VIC.spr_pos[1].x=128+24;
+  VIC.spr_pos[2].x=128+24*2;
+  VIC.spr_pos[3].x=128+24*3;
+  
   VIC.spr_pos[4].x=80;
   VIC.spr_pos[5].x=80+48;
   VIC.spr_pos[6].x=80+48*2;
@@ -384,6 +419,7 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[1].y=60;
   VIC.spr_pos[2].y=60;
   VIC.spr_pos[3].y=60;
+  
   VIC.spr_pos[4].y=120;
   VIC.spr_pos[5].y=120;
   VIC.spr_pos[6].y=120;
@@ -425,8 +461,8 @@ void __fastcall__ update_top_bar(void)
       printat(18,0);
       break;
     case 2:
-      sprintf(STR_BUF,"ST: %d  IDX: %d  SP: %d", gstate.stage,
-	      gstate.stage_idx, stage[gstate.stage_idx].speed);
+      sprintf(STR_BUF,"ST:%d  ML:%d  SP:%d", gstate.stage,
+	      loop1, stage[gstate.stage_idx].speed);
       break;
     case 3:
       printat(18,1);
@@ -636,6 +672,9 @@ void __fastcall__ game_loop(void)
     if(MODE_PLAY_DEMO()) gstate.time--;
     gstate.frame=0;
   }
+
+  if(gstate.time==20) vpb=7;
+  if(gstate.time==10) vpb=6;
   
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK); 
@@ -645,19 +684,28 @@ int main()
 {
   static unsigned char flag;
   static unsigned int bonus;
-  
+
   inflatemem (SPR_DATA, sprite_src_data);
   memcpy((unsigned char *)(0x4000-64*8),SPR_DATA+35*64,64*8);
+  setup_sid();
+
+  //    printf("v1addr %04x\n",v1addr);
+  
+  *((unsigned int *)0x0314)=(unsigned int)IRQ;
+  VIC.rasterline=0xb0;
+  VIC.imr=0x1; // enable raster interrupt
 
   Title_Sprite_Setup();
   mode_text();
   VIC.spr_ena=0xff;
   
 
-  printf("\n\n\n\n\n\n\n               presents\n");
-  printf("\n\n\n\n\n\n\n");
-  printf("A Commodore 64 tribute to Studio Ghibli\n");
-  printf("Copyright (c) 2021 Gabriele Gorla\n\n");
+  memcpy((unsigned char *)(0x400+40*6+15),"presents",8);
+  memcpy((unsigned char *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
+  
+  //  printf("\n\n\n\n\n\n\n               presents\n\n\n\n\n\n\n\n");
+  //  printf("A Commodore 64 tribute to Studio Ghibli\n");
+  // printf("Copyright (c) 2021 Gabriele Gorla\n\n");
   /*  printf("This program is free software: you can\n");
   printf("redistribute it and/or modify it under\n");
   printf("the terms of the GNU General Public\n");
@@ -679,11 +727,58 @@ int main()
   printf("color2 at 0x%04X\n",0xd800);
 #endif
   inflatemem (COLOR_BASE, color1_data);
+  //     printf("v1addr %04x\n",v1addr);
+  //  printf("\n\n\nv1addr %04x\n",v1addr);
+  //    printf("v1addr %04x\n",v1addr);
 
+  #if 0
+
+  for(flag=0;flag<32;flag++) {
+    switch(flag&3) {
+    case 0:
+      VIC.spr_pos[4].y=120;
+      VIC.spr_pos[5].y=120+21;
+      VIC.spr_pos[6].y=120+21;
+      VIC.spr_exp_y=0x10;
+      break;
+    case 1:
+      VIC.spr_pos[4].y=120+21;
+      VIC.spr_pos[5].y=120;
+      VIC.spr_pos[6].y=120+21;
+      VIC.spr_exp_y=0x20;
+      break;
+    case 2:
+      VIC.spr_pos[4].y=120+21;
+      VIC.spr_pos[5].y=120+21;
+      VIC.spr_pos[6].y=120;
+      VIC.spr_exp_y=0x40;
+      break;
+    case 3:
+      VIC.spr_pos[4].y=120+21;
+      VIC.spr_pos[5].y=120+21;
+      VIC.spr_pos[6].y=120+21;
+      VIC.spr_exp_y=0x00;
+      break;
+    }
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+    waitvsync();
+  }
+#endif
+  
   cgetc();
+
   inflatemem ((unsigned char *)0xd800, color2_data);
   //#endif
-  
+  //    cgetc();
   // setup the NMI vector
   //  *((unsigned int *)0x0318)=(unsigned int)NMI;
   
@@ -698,12 +793,10 @@ int main()
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 
-
-  
-
     do {
 
     // stage init
+      vpb=8;
     gstate.time=0;
     gstate.frame=0;
     gstate.stage_idx=(gstate.stage<(sizeof(stage)/sizeof(struct stage_t)))?(gstate.stage-1):((sizeof(stage)/sizeof(struct stage_t)))-1;
@@ -728,6 +821,8 @@ int main()
       if(gstate.acorns==0) {
 	flag=1;
 	CLR_TOP();
+	next_loop1=rand()&0xe;
+	//	vpb=7+(rand()&1);
 	sprintf(STR_BUF,"STAGE CLEAR");
 	convert_big();
 	printbigat(8,0);
