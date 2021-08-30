@@ -22,7 +22,9 @@
 ;;  ZP_2 range 0xF7-0xFE
 _line_addr:
 	.res 2
-_itmp:
+_t1addr:
+	.res 2
+_t2addr:
 	.res 2
 _c1:
 	.res 1
@@ -31,21 +33,15 @@ _ctmp:
 
 
 .exportzp       _line_addr
-.exportzp       _itmp
+.exportzp       _t1addr
+.exportzp       _t2addr
 .exportzp       _c1
 .exportzp       _ctmp
-	
-;_SRC_LINE=$D1 			; two bytes	
-;_ROW=$D6
-;_COL=$D3
-;.exportzp _ROW	
-;exportzp _COL
-;exportzp _SRC_LINE	
 
 _VIC_BASE   = $4000
 _SCR_BASE   = _VIC_BASE + $2000
 _COLOR_BASE = _SCR_BASE-$400
-_SPR_PTR    = _COLOR_BASE+$3f8 	
+_SPR_PTR    = _COLOR_BASE+$3f8
 _SPR_DATA   = _VIC_BASE
 
 _STR_BUF    = $C780
