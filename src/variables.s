@@ -39,9 +39,9 @@ _ctmp:
 .exportzp       _ctmp
 
 _VIC_BASE   = $4000
-_SCR_BASE   = _VIC_BASE + $2000
-_COLOR_BASE = _SCR_BASE-$400
-_SPR_PTR    = _COLOR_BASE+$3f8
+_SCR_BASE   = _VIC_BASE   + $2000
+_COLOR_BASE = _SCR_BASE   - $400
+_SPR_PTR    = _COLOR_BASE + $3f8
 _SPR_DATA   = _VIC_BASE
 
 _STR_BUF    = $C780

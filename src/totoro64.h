@@ -21,6 +21,8 @@
 #ifndef TOTORO64_H
 #define TOTORO64_H
 
+#include <stdint.h>
+
 enum t_state {
 	      IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
 };
@@ -32,51 +34,52 @@ enum g_mode {
 #define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
 
 struct game_state_t {
-  unsigned char stage;
-  unsigned char stage_idx;
-  int time;
-  unsigned int score;
-  unsigned int acorns;
-  unsigned char frame;
+  uint8_t  stage;
+  uint8_t  stage_idx;
+  int16_t  time;
+  uint16_t score;
+  uint16_t acorns;
+  uint8_t  frame;
   enum g_mode mode;
+  uint16_t hi_score;
 };
 
 struct acorn_t {
-  unsigned char en;
-  unsigned int ypos;
-  unsigned int yv;
+  uint8_t  en;
+  uint16_t ypos;
+  uint16_t yv;
 };
 
 struct player_t {
-  int xpos;
-  int ypos;
-  signed char xv;
-  signed char yv;
-  unsigned char idx;
-  unsigned char blink;
+  int16_t xpos;
+  int16_t ypos;
+  int8_t  xv;
+  int8_t  yv;
+  uint8_t idx;
+  uint8_t blink;
   enum t_state  state;
   //  enum t_dir    dir;
 };
 
 struct stage_t {
-  unsigned char time;
-  unsigned char acorns;
-  unsigned char speed;
-  unsigned char flags;
+  uint8_t time;
+  uint8_t acorns;
+  uint8_t speed;
+  uint8_t flags;
 };
 
 // ASM function prototypes
-void NMI(void);
+void IRQ(void);
 
 void __fastcall__ ClrScr(void);
-void __fastcall__ SetColor(unsigned char c);
-void __fastcall__ ClrLine(unsigned char l);
+void __fastcall__ SetColor(uint8_t c);
+void __fastcall__ ClrLine(uint8_t l);
 
 void __fastcall__ PutLine(void);
 void __fastcall__ PutCharHR(void);
-void __fastcall__ printat(unsigned char x, unsigned char y);
+void __fastcall__ printat(uint8_t x, uint8_t y);
 void __fastcall__ convert_big(void);
-void __fastcall__ printbigat(unsigned char x, unsigned char y);
+void __fastcall__ printbigat(uint8_t x, uint8_t y);
 
 // totoro actions
 void __fastcall__ totoro_init(void);
@@ -87,42 +90,48 @@ void __fastcall__ totoro_set_pos(void);
 void __fastcall__ acorn_init(void);
 void __fastcall__ acorn_update(void);
 void __fastcall__ acorn_set_pos(void);
-unsigned char __fastcall__ acorn_find(void);
+uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
 
-// variables from ASM
+// zp variables from ASM
 extern unsigned int itmp;
 #pragma zpsym("itmp")
 extern unsigned char * line_addr;
 #pragma zpsym("line_addr")
-extern unsigned char get,put;
-#pragma zpsym("get")
-#pragma zpsym("put")
 extern unsigned char c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")
 
 
 // global variables
+extern const uint8_t charset[];
+extern const uint8_t sprite_src_data[];
+extern const uint8_t bitmap_data[];
+extern const uint8_t color1_data[];
+extern const uint8_t color2_data[];
 
-extern const unsigned char charset[];
-extern const unsigned char sprite_src_data[];
-extern const unsigned char bitmap_data[];
-extern const unsigned char color1_data[];
-extern const unsigned char color2_data[];
+// base pointers for screen data
+extern uint8_t SCR_BASE[];   // screen base
+extern uint8_t COLOR_BASE[]; // color base
+extern uint8_t SPR_DATA[];   // sprite data
+extern uint8_t SPR_PTR[];    // sprite pointers
 
-extern unsigned char SCR_BASE[];   // screen base
-extern unsigned char COLOR_BASE[]; // color base
-extern unsigned char SPR_DATA[];   // sprite data
-extern unsigned char SPR_PTR[];    // sprite pointers
-
-
-extern unsigned char * const line[];      // precomputed line address
-
-extern unsigned char STR_BUF[];
+extern uint8_t STR_BUF[];
 
 
+// irq player interface
+extern uint8_t track1[];
+extern uint8_t instr1;
+extern uint8_t time1;
+extern uint8_t loop1;
+extern uint8_t next_loop1;
+extern uint8_t vpb;
+
+extern const uint8_t *t1addr;
+extern const uint8_t *t2addr;
+#pragma zpsym("t1addr")
+#pragma zpsym("t2addr")
 
 
 #define memset8(addr, v, c) \
@@ -131,5 +140,4 @@ extern unsigned char STR_BUF[];
   __asm__("l%v: sta %v-1,x",addr,addr);   \
   __asm__("dex"); \
   __asm__("bne l%v",addr);
-
 #endif

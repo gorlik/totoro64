@@ -59,9 +59,7 @@
 #define DEBUG_BORDER_INC()
 #endif
 
-void IRQ(void);
-
-const unsigned char run_seq[] =
+const uint8_t run_seq[] =
   {
    8,4,9,
    10,5,11,
@@ -86,22 +84,11 @@ const struct stage_t stage[] =
    { STAGE_TIME, 60, 20, 0 },
 };
 
+#define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
+
 struct game_state_t gstate;
 struct player_t totoro;
 struct acorn_t acorn[4];
-
-
-extern unsigned char track1[];
-extern unsigned char instr1;
-extern unsigned char time1;
-extern unsigned char loop1;
-extern unsigned char next_loop1;
-extern unsigned char vpb;
-
-extern const unsigned char *t1addr;
-extern const unsigned char *t2addr;
-#pragma zpsym("t1addr")
-#pragma zpsym("t2addr")
 
 void __fastcall__ setup_sid(void)
 {
@@ -121,7 +108,7 @@ void __fastcall__ totoro_set_pos(void)
   VIC.spr0_x   = totoro.xpos;
   VIC.spr1_x   = totoro.xpos;
   VIC.spr2_x   = totoro.xpos;
-  
+
   if(totoro.xpos>255)   VIC.spr_hi_x |=0x07;
   else VIC.spr_hi_x &= 0xf8;
 
@@ -179,7 +166,7 @@ void __fastcall__ totoro_set_pos(void)
 
 void __fastcall__ acorn_set_pos(void)
 {
-  static unsigned char enmask;
+  static uint8_t enmask;
 
   enmask=0;
 
@@ -201,13 +188,11 @@ void __fastcall__ acorn_set_pos(void)
   }
   
   VIC.spr_ena=(VIC.spr_ena&0x0f)|enmask;
-  //enmask=VIC.spr_coll; //reset sprite collision 
 }
-
 
 void __fastcall__ totoro_update(void)
 {
-  static unsigned int r;
+  static uint16_t r;
   
   totoro.xpos+=(totoro.xv>>2);
 
@@ -350,7 +335,7 @@ void __fastcall__ acorn_add(void)
 void __fastcall__ mode_bitmap(void)
 {
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
-  //CIA2.pra=0x03;  // selects VIC page 0xC000-0xFFFF
+  //CIA2.pra=0x03;  // selects VIC page 0x0000-0x3FFF
   
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
   //CIA2.pra=(CIA2.pra&0xfc)|0x1;  // selects VIC page 0x8000-0xBFFF
@@ -386,8 +371,8 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_color[7]=COLOR_RED;
 
   VIC.spr_mcolor=0x00; // all no multicolor
-  VIC.spr_exp_x=0xf0;  // all exp x
-  VIC.spr_exp_y=0xf0;  // all exp y
+  VIC.spr_exp_x=0xf0;  // totoro64 exp x
+  VIC.spr_exp_y=0xf0;  // totoro64 exp y
 
   // GGLABS
   POKE(0x7f8+0,248);
@@ -461,8 +446,10 @@ void __fastcall__ update_top_bar(void)
       printat(18,0);
       break;
     case 2:
-      sprintf(STR_BUF,"ST:%d  ML:%d  SP:%d", gstate.stage,
-	      loop1, stage[gstate.stage_idx].speed);
+      //      sprintf(STR_BUF,"ST:%d  ML:%d  SP:%d", gstate.stage,
+      //	      loop1, stage[gstate.stage_idx].speed);
+      sprintf(STR_BUF,"ST:%d  IDX:%d  SP:%d", gstate.stage,
+	      gstate.stage_idx, stage[gstate.stage_idx].speed);
       break;
     case 3:
       printat(18,1);
@@ -682,11 +669,11 @@ void __fastcall__ game_loop(void)
 
 int main()
 {
-  static unsigned char flag;
-  static unsigned int bonus;
+  static uint8_t flag;
+  static uint16_t bonus;
 
   inflatemem (SPR_DATA, sprite_src_data);
-  memcpy((unsigned char *)(0x4000-64*8),SPR_DATA+35*64,64*8);
+  memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
   setup_sid();
 
   //    printf("v1addr %04x\n",v1addr);
@@ -700,8 +687,8 @@ int main()
   VIC.spr_ena=0xff;
   
 
-  memcpy((unsigned char *)(0x400+40*6+15),"presents",8);
-  memcpy((unsigned char *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
+  memcpy((uint8_t *)(0x400+40*6+15),"presents",8);
+  memcpy((uint8_t *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
   
   //  printf("\n\n\n\n\n\n\n               presents\n\n\n\n\n\n\n\n");
   //  printf("A Commodore 64 tribute to Studio Ghibli\n");
@@ -731,8 +718,7 @@ int main()
   //  printf("\n\n\nv1addr %04x\n",v1addr);
   //    printf("v1addr %04x\n",v1addr);
 
-  #if 0
-
+#if 0
   for(flag=0;flag<32;flag++) {
     switch(flag&3) {
     case 0:
@@ -760,49 +746,35 @@ int main()
       VIC.spr_exp_y=0x00;
       break;
     }
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
-    waitvsync();
+    delay(15);
   }
 #endif
   
   cgetc();
-
-  inflatemem ((unsigned char *)0xd800, color2_data);
-  //#endif
-  //    cgetc();
-  // setup the NMI vector
-  //  *((unsigned int *)0x0318)=(unsigned int)NMI;
   
+  inflatemem ((uint8_t *)0xd800, color2_data);
+  //    cgetc();
   mode_bitmap();
     
   for(;;) { // main loop
-    //    cgetc();
     while(PEEK(197)!=60);
-
+    
     // game init
     gstate.score=0;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
-
+    
     do {
-
-    // stage init
+      // stage init
       vpb=8;
-    gstate.time=0;
-    gstate.frame=0;
-    gstate.stage_idx=(gstate.stage<(sizeof(stage)/sizeof(struct stage_t)))?(gstate.stage-1):((sizeof(stage)/sizeof(struct stage_t)))-1;
+      gstate.time=0;
+      gstate.frame=0;
 
-    gstate.time=stage[gstate.stage_idx].time;
-    gstate.acorns=stage[gstate.stage_idx].acorns;
+      gstate.stage_idx=(gstate.stage_idx<LAST_STAGE_IDX()) ?
+	(gstate.stage-1) : LAST_STAGE_IDX();
+      
+      gstate.time=stage[gstate.stage_idx].time;
+      gstate.acorns=stage[gstate.stage_idx].acorns;
       
       game_sprite_setup();
       totoro_init();
