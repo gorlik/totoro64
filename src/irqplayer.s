@@ -6,6 +6,8 @@
 .importzp _t2addr
 .import   _track1
 
+.define SIDRestart  0
+.define IPDebug     0
 
 	.segment "BSS"
 tmp:
@@ -19,6 +21,8 @@ _instr1:
 _loop1:
 	.res 1
 _vpb:
+	.res 1
+ctmp:
 	.res 1
 
 
@@ -48,18 +52,31 @@ FTablePalHi:
 
 ;; ****************** IRQ Interrupt *********************
 .proc _IRQ: near
-	lda $d019
-	bpl not_vic
-	sta $d019
-
+	lda $d019		
+	bpl not_vic	; check if IRQ from VIC
+	sta $d019	; clear VIC IRQ flag
+.if IPDebug =1
+	lda $d020
+	sta ctmp
+	lda #1
+	sta $d020
+.endif
 	lda _time1
-	bne inc_end
+	bne inc_end		; timer not expired
 next:
 	ldy #0
 	lda (_t1addr),y
 	sta tmp
 	and #$f0
 	bne parse_cmd
+	;; new note
+.if SIDRestart = 1
+	lda #$80
+	sta SID_AD1
+	lda #$F6
+	sta SID_SUR1
+	lda #$00
+.endif	
 	clc
 	ldx _vpb
 add_more:
@@ -101,28 +118,39 @@ inc_addr:
 inc_end:
 	dec _time1
 	lda _time1
-	cmp #3
-	bpl end
+	cmp #2
+	bne end
+.IF SIDRestart = 1
+	lda #0
+	sta SID_AD1
+	sta SID_SUR1
+.ENDIF
 	lda _instr1
 	sta SID_Ctl1
 end:
+.if IPDebug =1
+	lda ctmp
+	sta $d020
+.endif
 	jmp $EA81
 not_vic:
 	jmp $EA31
 
 
-	;; cmd is in A and tmp, Y=0
+	;; cmd is in tmp, Y=0
 parse_cmd:
+	lda tmp
 	cmp #$ff
-;	bne cmd_fe
-	lda #<_track1
-	sta _t1addr		;
-	lda #>_track1
-	sta _t1addr+1
-	lda _next_loop1
-	sta _loop1
+	beq cmd_ff
 	jmp next
-cmd_fe:
+	
+cmd_ff:	 			; end of stream
+	lda #<_track1
+	sta _t1addr		
+	lda #>_track1
+	sta _t1addr+1		; point to the beginning of the stream
+	lda _next_loop1
+	sta _loop1		; set the new offset
 	jmp next
 .endproc
 
