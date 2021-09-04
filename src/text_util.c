@@ -63,6 +63,12 @@ void __fastcall__ printat(unsigned char x, unsigned char y)
   PutLine();
 }
 
+void __fastcall__ convprint_big(unsigned char x)
+{
+  convert_big();
+  printbigat(x,0);
+}
+
 void __fastcall__ convert_big(void)
 {
    static unsigned char j,idx;
