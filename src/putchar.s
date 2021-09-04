@@ -22,6 +22,7 @@
 .import _charset
 
 .export _PutLine
+.export _CLR_TOP
 
 .segment "BSS"
 t1:
@@ -69,4 +70,18 @@ start:	iny
 	jmp start
 end:
  	rts
+	.endproc
+
+; ****************** clr top *********************
+;  Clear top 2 lines of screen
+.proc _CLR_TOP: near
+	ldx #160
+	lda #0
+@loop:  sta _SCR_BASE-1,x
+	sta _SCR_BASE+160-1,x
+	sta _SCR_BASE+320-1,x
+	sta _SCR_BASE+480-1,x
+	dex
+	bne @loop
+	rts
 .endproc
