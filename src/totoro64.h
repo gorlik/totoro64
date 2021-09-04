@@ -78,6 +78,7 @@ void __fastcall__ ClrLine(uint8_t l);
 void __fastcall__ PutLine(void);
 void __fastcall__ PutCharHR(void);
 void __fastcall__ printat(uint8_t x, uint8_t y);
+void __fastcall__ convprint_big(uint8_t x);
 void __fastcall__ convert_big(void);
 void __fastcall__ printbigat(uint8_t x, uint8_t y);
 
