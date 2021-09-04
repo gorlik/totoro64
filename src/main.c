@@ -29,7 +29,7 @@
 
 //#define DEBUG
 
-#define VERSION "0.10"
+#define VERSION "0.11"
 
 #define HFREQ 50
 
@@ -37,9 +37,11 @@
 
 #define EOF_LINE 0x80
 
+// sprite max speed
 #define MAX_XV 16
 #define MAX_YV 10
 
+// sprite position constants/limits
 #define GROUND_Y 220
 #define PGROUND_Y (GROUND_Y-21)
 
@@ -49,7 +51,22 @@
 #define MAX_X 312
 #define MAX_PX (MAX_X-24)
 
-#define CLR_TOP() memset(SCR_BASE,0x0,640)
+// title bar positions
+#define TIMETXT_X 0
+#define TIMEVAL_X 9
+
+#define ACORNTXT_X 22
+#define ACORNVAL_X 35
+
+#define SCORETXT_X 15
+#define SCOREVAL_X 15
+
+// debug location
+#define DEBUG_TXT_LEN 12
+#define DEBUG_TXT_X   (40-DEBUG_TXT_LEN)
+
+
+void __fastcall__ CLR_TOP(void);
 
 #ifdef DEBUG
 #define DEBUG_BORDER(a) VIC.bordercolor=a
@@ -58,6 +75,26 @@
 #define DEBUG_BORDER(a)
 #define DEBUG_BORDER_INC()
 #endif
+
+const unsigned char txt_score[] = "SCORE";
+const unsigned char txt_time[] = "TIME";
+const unsigned char txt_bonus[] = "BONUS";
+const unsigned char txt_acorns[] = "ACORNS";
+const unsigned char txt_ready[] = "READY";
+const unsigned char txt_set[] = " SET ";
+const unsigned char txt_go[] = " GO ";
+const unsigned char txt_clear[] = "STAGE CLEAR";
+const unsigned char txt_game_over[] = "GAME OVER";
+extern const unsigned char present_txt[];
+extern const unsigned char intro_txt[];
+extern const unsigned char license_txt[];
+
+#define strcpy8(dst,src)       \
+  __asm__("ldx #$FF");         \
+  __asm__("ls%v: inx",src);    \
+  __asm__("lda %v,x",src);     \
+  __asm__("sta %v,x",dst);     \
+  __asm__("bne ls%v",src);
 
 const uint8_t run_seq[] =
   {
@@ -196,7 +233,6 @@ void __fastcall__ totoro_update(void)
   
   totoro.xpos+=(totoro.xv>>2);
 
-
   if(totoro.xpos<MIN_X) {
     totoro.xpos=MIN_X;
     totoro.xv=-1;
@@ -297,14 +333,15 @@ void __fastcall__ acorn_add(void)
 {
   static unsigned int oldr=0;
   static unsigned int r;
-  
+  static unsigned char na;
+	
   if(MODE_PLAY_DEMO() && (gstate.frame==10 || gstate.frame==27 || gstate.frame==44 ) )  {
       //  if((frame&0xf)==1)  {
       r=rand();
       
       //    if(r<RAND_MAX/2) {
-      if(1) {
-	unsigned char na;
+      //      if(1) {
+
 	// new acorn
 	do {
 	  r=rand();
@@ -327,7 +364,7 @@ void __fastcall__ acorn_add(void)
 	    else VIC.spr_hi_x&=~(1<<(na+4));
 	  }
 	}
-      }
+	//   }
     }
     
 }
@@ -411,62 +448,95 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[7].y=120;
 }
 
+void __fastcall__ wait_past_score(void)
+{
+  while(VIC.rasterline<=60) {};
+}
+
+void __fastcall__ setup_top_bar(uint8_t flag)
+{
+  CLR_TOP();
+
+  strcpy8(STR_BUF,txt_time);
+  convprint_big(TIMETXT_X);
+
+  if(flag==0) {
+    strcpy8(STR_BUF,txt_acorns);
+  } else {
+    strcpy8(STR_BUF,txt_bonus);
+  }
+  convprint_big(ACORNTXT_X);
+
+  strcpy8(STR_BUF,txt_score);
+  printat(SCORETXT_X,0);
+}
+
 void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
-#if 0
-  switch(gstate.frame&0x07) {
-  case 0:
-    sprintf(STR_BUF,"SCORE %d",gstate.score);
-    break;
-  case 1:
-      convert_big();
-      break;
-  case 2:
-      printbigat(20,0);
-      break;
-  case 3:
-    sprintf(STR_BUF,"TIME %d  ",gstate.time);
-    break;
-  case 4:
-    convert_big();
-    break;
-  case 5:
-    printbigat(0,0);
-    break;
-  }
-#else
   if(MODE_PLAY_DEMO()) {
-    switch(gstate.frame&0x07) {
+    switch(gstate.frame&0x0F) {
     case 0:
-      sprintf(STR_BUF,"ACORN: %2d  SCORE %d",
-	      gstate.acorns, gstate.score);
+      DEBUG_BORDER_INC();
+      sprintf(STR_BUF,"%2d", gstate.acorns);
       break;
     case 1:
-      printat(18,0);
-      break;
-    case 2:
-      //      sprintf(STR_BUF,"ST:%d  ML:%d  SP:%d", gstate.stage,
-      //	      loop1, stage[gstate.stage_idx].speed);
-      sprintf(STR_BUF,"ST:%d  IDX:%d  SP:%d", gstate.stage,
-	      gstate.stage_idx, stage[gstate.stage_idx].speed);
-      break;
-    case 3:
-      printat(18,1);
-      break;
-      
-    case 5:
-      sprintf(STR_BUF,"TIME %d  ",gstate.time);
-      break;
-    case 6:
+      DEBUG_BORDER_INC();
       convert_big();
       break;
+    case 2:
+      wait_past_score();
+      DEBUG_BORDER_INC();
+      printbigat(ACORNVAL_X,0);
+      break;
+    case 4:
+      DEBUG_BORDER_INC();
+      sprintf(STR_BUF,"%2d", gstate.time-1);
+      break;
+    case 5:
+      DEBUG_BORDER_INC();
+      convert_big();
+      break;
+    case 6:
+      wait_past_score();
+      DEBUG_BORDER_INC();
+      printbigat(TIMEVAL_X,0);
+      break;
     case 7:
-      printbigat(0,0);
+      DEBUG_BORDER_INC();
+      sprintf(STR_BUF,"%5d",
+	      gstate.score);
+      break;
+    case 8:
+      wait_past_score();
+      DEBUG_BORDER_INC();
+      printat(SCOREVAL_X,1);
+      break;
+#ifdef DEBUG
+    case 10:
+      DEBUG_BORDER_INC();
+      sprintf(STR_BUF,"ST:%2d IDX:%2d", gstate.stage, gstate.stage_idx);
+      break;
+    case 11:
+      wait_past_score();
+      DEBUG_BORDER_INC();
+      printat(DEBUG_TXT_X,2);
+      break;
+    case 12:
+      DEBUG_BORDER_INC();
+      sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, stage[gstate.stage_idx].speed);
+      break;
+    case 13:
+      wait_past_score();
+      DEBUG_BORDER_INC();
+      printat(DEBUG_TXT_X,3);
+      break;
+#endif
+    default:
+      DEBUG_BORDER_INC();
       break;
     }
   }
-#endif  
 }
   
 void __fastcall__ game_sprite_setup(void)
@@ -505,16 +575,6 @@ void __fastcall__ game_sprite_setup(void)
   SPR_PTR[6]=28;
   SPR_PTR[7]=28;
 }
-
-
-
-void __fastcall__ wait_past_score(void)
-{
-  //  while(VIC.rasterline==EOF_LINE) {};
-  //  while(VIC.rasterline!=EOF_LINE && VIC.rasterline!=(EOF_LINE+1) && VIC.rasterline!=(EOF_LINE+2) ) {};
-  while(VIC.rasterline<=60) {};
-}
-
 
 void __fastcall__ process_input(void)
 {
@@ -577,7 +637,7 @@ void __fastcall__ process_input(void)
     }	  \
 } while (0)
 
-void __fastcall__ delay(unsigned char f)
+void __fastcall__ delay(uint8_t f)
 {
   while(f--)
     waitvsync();
@@ -587,38 +647,30 @@ void __fastcall__ get_ready(void)
 {
   CLR_TOP();
   sprintf(STR_BUF,"STAGE %d",gstate.stage);
-  convert_big();
-  printbigat(14,0);
+  convprint_big(14);
   delay(50); 
-  //  CLR_TOP();
   sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
-  convert_big();
-  printbigat(4,0);
+  convprint_big(4);
   delay(50);
   
   CLR_TOP();
-  sprintf(STR_BUF,"READY");
-  convert_big();
-  printbigat(14,0);
+  strcpy8(STR_BUF,txt_ready);
+  convprint_big(14);
   delay(20);
-  sprintf(STR_BUF," SET ");
-  convert_big();
-  printbigat(14,0);
+  strcpy8(STR_BUF,txt_set);
+  convprint_big(14);
   delay(20);
-  sprintf(STR_BUF," GO  ");
-  convert_big();
-  printbigat(14,0);
+  strcpy8(STR_BUF,txt_go);
+  convprint_big(15);
   delay(20);
-  CLR_TOP();
 }
 
 void __fastcall__ game_loop(void)
 {
-  static unsigned char cr;
+  static uint8_t cr;
   
   waitvsync();
   DEBUG_BORDER(COLOR_WHITE);
-  //  VIC.bordercolor=COLOR_WHITE;
   
   // screen updates
   totoro_set_pos();
@@ -646,23 +698,22 @@ void __fastcall__ game_loop(void)
   check_collision_n(2);
   check_collision_n(3);
   cr=VIC.spr_coll;
-  
+
   // other screen updates
-  DEBUG_BORDER_INC();
-  wait_past_score();
   DEBUG_BORDER_INC();
   update_top_bar();
   
-    // time
+  // time
   gstate.frame++;    
   if(gstate.frame==50) {
     if(MODE_PLAY_DEMO()) gstate.time--;
     gstate.frame=0;
   }
 
+  // speed up music
   if(gstate.time==20) vpb=7;
   if(gstate.time==10) vpb=6;
-  
+ 
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK); 
 }
@@ -676,8 +727,6 @@ int main()
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
   setup_sid();
 
-  //    printf("v1addr %04x\n",v1addr);
-  
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
   VIC.rasterline=0xb0;
   VIC.imr=0x1; // enable raster interrupt
@@ -687,36 +736,15 @@ int main()
   VIC.spr_ena=0xff;
   
 
-  memcpy((uint8_t *)(0x400+40*6+15),"presents",8);
-  memcpy((uint8_t *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
+  //  memcpy((uint8_t *)(0x400+40*6+15),"presents",8);
+  //  memcpy((uint8_t *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
+
+  memcpy((uint8_t *)(0x400+40*6+15),present_txt,8);
+  memcpy((uint8_t *)(0x400+40*16),intro_txt,39);
+  memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
   
-  //  printf("\n\n\n\n\n\n\n               presents\n\n\n\n\n\n\n\n");
-  //  printf("A Commodore 64 tribute to Studio Ghibli\n");
-  // printf("Copyright (c) 2021 Gabriele Gorla\n\n");
-  /*  printf("This program is free software: you can\n");
-  printf("redistribute it and/or modify it under\n");
-  printf("the terms of the GNU General Public\n");
-  printf("License as published by the Free\n");
-  printf("Software Foundation either License\n");
-  printf("version 3 or (at your option) any later\nversion.\n\n");
-  */
-
-  //#ifdef DEBUG
-  // printf("STR_BUF at 0x%04X\n",STR_BUF);
-  // printf("sprite data at 0x%04X\n",SPR_DATA);
-#ifdef DEBUG
-  printf("bitmap at 0x%04X\n",SCR_BASE);
-#endif
   inflatemem (SCR_BASE, bitmap_data);
-
-#ifdef DEBUG
-  printf("color1 at 0x%04X\n",COLOR_BASE);
-  printf("color2 at 0x%04X\n",0xd800);
-#endif
   inflatemem (COLOR_BASE, color1_data);
-  //     printf("v1addr %04x\n",v1addr);
-  //  printf("\n\n\nv1addr %04x\n",v1addr);
-  //    printf("v1addr %04x\n",v1addr);
 
 #if 0
   for(flag=0;flag<32;flag++) {
@@ -755,7 +783,29 @@ int main()
   inflatemem ((uint8_t *)0xd800, color2_data);
   //    cgetc();
   mode_bitmap();
-    
+
+#ifdef DEBUG
+  memset(0xd800+40*2+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  memset(0xd800+40*3+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  memset(0xd800+40*4+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  memset(0xd800+40*5+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  memset(0xd800+40*6+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  memset(0xd800+40*7+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+
+  sprintf(STR_BUF,"Sprdat $%04X",SPR_DATA);
+  printat(DEBUG_TXT_X,2);
+  sprintf(STR_BUF,"Color1 $%04X",COLOR_BASE);
+  printat(DEBUG_TXT_X,3);
+  sprintf(STR_BUF,"Bitmap $%04X",SCR_BASE);
+  printat(DEBUG_TXT_X,4);
+  sprintf(STR_BUF,"STRBUF $%04X",STR_BUF);
+  printat(DEBUG_TXT_X,5);
+  sprintf(STR_BUF,"Color2 $%04X",0xd800);
+  printat(DEBUG_TXT_X,6);
+  sprintf(STR_BUF,"T1addr $%04X",t1addr);
+  printat(DEBUG_TXT_X,7);
+#endif
+  
   for(;;) { // main loop
     while(PEEK(197)!=60);
     
@@ -763,15 +813,15 @@ int main()
     gstate.score=0;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
-    
+
     do {
       // stage init
       vpb=8;
       gstate.time=0;
       gstate.frame=0;
 
-      gstate.stage_idx=(gstate.stage_idx<LAST_STAGE_IDX()) ?
-	(gstate.stage-1) : LAST_STAGE_IDX();
+      gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
+	LAST_STAGE_IDX() : gstate.stage-1 ;
       
       gstate.time=stage[gstate.stage_idx].time;
       gstate.acorns=stage[gstate.stage_idx].acorns;
@@ -784,7 +834,7 @@ int main()
       VIC.spr_ena=0x07;
       get_ready();
       gstate.mode=GMODE_PLAY;
-      
+      setup_top_bar(0);
 
       for(;gstate.time&&gstate.acorns;)
 	game_loop();
@@ -794,10 +844,8 @@ int main()
 	flag=1;
 	CLR_TOP();
 	next_loop1=rand()&0xe;
-	//	vpb=7+(rand()&1);
-	sprintf(STR_BUF,"STAGE CLEAR");
-	convert_big();
-	printbigat(8,0);
+	strcpy8(STR_BUF,txt_clear);
+	convprint_big(8);
       } else {
 	flag=0;
       }
@@ -809,29 +857,28 @@ int main()
       delay(25);
 
       if(flag) {
-	CLR_TOP();
 	bonus=0;
+	setup_top_bar(1);
 	do {
-	  sprintf(STR_BUF,"TIME %d ",gstate.time);
-	  convert_big();
-	  printbigat(0,0);
-	  sprintf(STR_BUF,"BONUS %d",bonus);
-	  convert_big();
-	  printbigat(20,0);
-	  delay(2);
+	  sprintf(STR_BUF,"%2d", gstate.time);
+	  convprint_big(TIMEVAL_X);
+	  sprintf(STR_BUF,"%d", bonus);
+	  convprint_big(ACORNVAL_X-2);
+	  sprintf(STR_BUF,"%5d", gstate.score);
+	  printat(SCOREVAL_X,1);
+	  delay(1);
 	  bonus+=5+gstate.stage;
+	  gstate.score+=5+gstate.stage;
 	} while (gstate.time--);
 	delay(25);
-	gstate.score+=bonus;
 	gstate.stage++;
       }
 
     } while(flag);
 
     // game over
-    sprintf(STR_BUF,"GAME OVER");
-    convert_big();
-    printbigat(0,0);
+    strcpy8(STR_BUF,txt_game_over);
+    convprint_big(0);
     delay(200);
   }
   
