@@ -98,8 +98,8 @@ void __fastcall__ acorn_add(void);
 // zp variables from ASM
 extern unsigned int itmp;
 #pragma zpsym("itmp")
-extern unsigned char * line_addr;
-#pragma zpsym("line_addr")
+extern unsigned char * line_ptr;
+#pragma zpsym("line_ptr")
 extern unsigned char c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")
@@ -129,10 +129,10 @@ extern uint8_t loop1;
 extern uint8_t next_loop1;
 extern uint8_t vpb;
 
-extern const uint8_t *t1addr;
-extern const uint8_t *t2addr;
-#pragma zpsym("t1addr")
-#pragma zpsym("t2addr")
+extern const uint8_t *t1ptr;
+extern const uint8_t *t2ptr;
+#pragma zpsym("t1ptr")
+#pragma zpsym("t2ptr")
 
 
 #define memset8(addr, v, c) \

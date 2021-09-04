@@ -59,7 +59,7 @@ static const unsigned char conv_table[] = {
 
 void __fastcall__ printat(unsigned char x, unsigned char y)
 {
-  line_addr=(line[y]+(x<<3));
+  line_ptr=(line[y]+(x<<3));
   PutLine();
 }
 

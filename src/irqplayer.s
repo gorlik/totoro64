@@ -2,7 +2,7 @@
 .export _IRQ
 .export _time1, _instr1, _loop1, _next_loop1, _vpb
 
-.importzp _t1addr
+.importzp _t1ptr
 .importzp _t2addr
 .import   _track1
 
@@ -65,7 +65,7 @@ FTablePalHi:
 	bne inc_end		; timer not expired
 next:
 	ldy #0
-	lda (_t1addr),y
+	lda (_t1ptr),y
 	sta tmp
 	and #$f0
 	bne parse_cmd
@@ -87,7 +87,7 @@ add_more:
 
 	iny
 	clc
-	lda (_t1addr),y
+	lda (_t1ptr),y
 	bne not_pause
 	lda _instr1
 	sta SID_Ctl1
@@ -105,15 +105,11 @@ not_pause:
 	sta SID_Ctl1
 inc_addr:
 	clc
-	lda _t1addr
+	lda _t1ptr
 	adc #2
-	sta _t1addr
+	sta _t1ptr
 	bcc inc_end
-	; this is shorter but only works when t1addr is 16-bit aligned
-	;  	inc _t1addr
-	;	inc _t1addr
-	; 	bne dec_end
-	inc _t1addr+1
+	inc _t1ptr+1
 
 inc_end:
 	dec _time1
@@ -146,9 +142,9 @@ parse_cmd:
 	
 cmd_ff:	 			; end of stream
 	lda #<_track1
-	sta _t1addr		
+	sta _t1ptr		
 	lda #>_track1
-	sta _t1addr+1		; point to the beginning of the stream
+	sta _t1ptr+1		; point to the beginning of the stream
 	lda _next_loop1
 	sta _loop1		; set the new offset
 	jmp next

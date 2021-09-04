@@ -20,11 +20,11 @@
 
 .segment "ZP_2" : zeropage
 ;;  ZP_2 range 0xF7-0xFE
-_line_addr:
+_line_ptr:
 	.res 2
-_t1addr:
+_t1ptr:
 	.res 2
-_t2addr:
+_t2ptr:
 	.res 2
 _c1:
 	.res 1
@@ -32,9 +32,9 @@ _ctmp:
 	.res 1
 
 
-.exportzp       _line_addr
-.exportzp       _t1addr
-.exportzp       _t2addr
+.exportzp       _line_ptr
+.exportzp       _t1ptr
+.exportzp       _t2ptr
 .exportzp       _c1
 .exportzp       _ctmp
 

@@ -27,7 +27,7 @@
 
 #include "totoro64.h"
 
-//#define DEBUG
+#define DEBUG
 
 #define VERSION "0.11"
 
@@ -134,7 +134,7 @@ void __fastcall__ setup_sid(void)
   SID.v1.ad = 0x80;
   SID.v1.sr = 0xf6;
   loop1=0;
-  t1addr=track1;
+  t1ptr=track1;
   instr1=0x10; // triangular
   time1 = 0;
   vpb=8;
@@ -741,7 +741,9 @@ int main()
 
   memcpy((uint8_t *)(0x400+40*6+15),present_txt,8);
   memcpy((uint8_t *)(0x400+40*16),intro_txt,39);
+#ifndef DEBUG
   memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
+#endif
   
   inflatemem (SCR_BASE, bitmap_data);
   inflatemem (COLOR_BASE, color1_data);
@@ -785,12 +787,16 @@ int main()
   mode_bitmap();
 
 #ifdef DEBUG
-  memset(0xd800+40*2+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
-  memset(0xd800+40*3+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
-  memset(0xd800+40*4+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
-  memset(0xd800+40*5+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
-  memset(0xd800+40*6+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
-  memset(0xd800+40*7+DEBUG_TXT_X,1,DEBUG_TXT_LEN);
+  for(ctmp=0;ctmp<DEBUG_TXT_LEN;ctmp++)
+    {
+      POKE(0xd800+40*2+DEBUG_TXT_X+ctmp,1);
+      POKE(0xd800+40*3+DEBUG_TXT_X+ctmp,1);
+      POKE(0xd800+40*4+DEBUG_TXT_X+ctmp,1);
+      POKE(0xd800+40*5+DEBUG_TXT_X+ctmp,1);
+      POKE(0xd800+40*6+DEBUG_TXT_X+ctmp,1);
+      POKE(0xd800+40*7+DEBUG_TXT_X+ctmp,1);
+      
+    }
 
   sprintf(STR_BUF,"Sprdat $%04X",SPR_DATA);
   printat(DEBUG_TXT_X,2);
@@ -800,10 +806,10 @@ int main()
   printat(DEBUG_TXT_X,4);
   sprintf(STR_BUF,"STRBUF $%04X",STR_BUF);
   printat(DEBUG_TXT_X,5);
-  sprintf(STR_BUF,"Color2 $%04X",0xd800);
+  /*sprintf(STR_BUF,"Color2 $%04X",0xd800);
   printat(DEBUG_TXT_X,6);
-  sprintf(STR_BUF,"T1addr $%04X",t1addr);
-  printat(DEBUG_TXT_X,7);
+   sprintf(STR_BUF,"T1addr $%04X",t1addr);
+     printat(DEBUG_TXT_X,7);*/
 #endif
   
   for(;;) { // main loop

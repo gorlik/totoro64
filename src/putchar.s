@@ -38,17 +38,17 @@ t1:
 	ldy #$00
 .repeat 8,cline
 	lda _charset+cline*256,x	;
-	sta (_line_addr),y
+	sta (_line_ptr),y
 	iny
 .endrepeat
 
-	lda _line_addr
+	lda _line_ptr
 	clc
 	adc #$08
 	bcc no_carry
-	inc _line_addr+1
+	inc _line_ptr+1
 no_carry:
-	sta _line_addr
+	sta _line_ptr
 	rts
 .endproc
 

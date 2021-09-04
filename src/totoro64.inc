@@ -24,11 +24,8 @@
 ; from C files
 ;.import         _charset	
 
-.importzp       _line_addr
+.importzp       _line_ptr
 .importzp       _c1
-;.importzp       _ct
-;.importzp 	_SRC_LINE
 
 .import _SCR_BASE
 .import _STR_BUF
-
