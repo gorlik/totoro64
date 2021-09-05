@@ -27,7 +27,7 @@
 
 #include "totoro64.h"
 
-#define DEBUG
+//#define DEBUG
 
 #define VERSION "0.11"
 
@@ -108,6 +108,14 @@ const uint8_t run_seq[] =
    22,17,23
   };
 
+const uint16_t sound_seq[] = {
+  0x22d0,
+  0x1f04,
+  0x2714,
+  0x2e79,
+  0x2714,
+};
+
 const struct stage_t stage[] =
   {
    { STAGE_TIME, 10, 4, 0 },
@@ -126,6 +134,7 @@ const struct stage_t stage[] =
 struct game_state_t gstate;
 struct player_t totoro;
 struct acorn_t acorn[4];
+struct sound_t sound;
 
 void __fastcall__ setup_sid(void)
 {
@@ -135,9 +144,14 @@ void __fastcall__ setup_sid(void)
   SID.v1.sr = 0xf6;
   loop1=0;
   t1ptr=track1;
-  instr1=0x10; // triangular
+  //  instr1=0x10; // triangular
+  instr1=0;
   time1 = 0;
   vpb=8;
+
+  //  SID.v3.ctrl= 0x20;
+  SID.v3.ad = 0x00;
+  SID.v3.sr = 0xa9;
 }
 
 void __fastcall__ totoro_set_pos(void)
@@ -283,6 +297,7 @@ void __fastcall__ totoro_init(void)
   totoro.yv=0;
   totoro.idx=0;
   totoro.state=IDLE;
+  totoro.blink=0;
 } 
 
 /*
@@ -623,11 +638,41 @@ void __fastcall__ process_input(void)
     }  
 }
 
+void __fastcall__ process_sound(void)
+{
+    if(sound.timer==0) {
+      SID.v3.ctrl=0x20;
+      return;
+    }
+    if(sound.index==0) {
+      SID.v3.freq=sound_seq[0];
+      SID.v3.ctrl=0x21;
+    }
+    sound.index++;
+    if(sound.index>=(sizeof(sound_seq)/2)) sound.index=1;
+    SID.v3.freq=sound_seq[sound.index];
+    sound.timer--;
+
+}
+
+#define stop_sound() \
+  do { SID.v3.ctrl=0x20; } while(0)
+  
+void __fastcall__ start_sound(void)
+{
+  SID.v3.ctrl=0x20;
+  if(MODE_PLAY_DEMO()) {
+    sound.timer=10;
+    sound.index=0;
+  }
+}
+
 #define check_collision_n(a) do {\
   if(cr&(0x10<<a)) {				\
     if(acorn[a].en && (acorn[a].ypos>>8)>120) {	\
       /*VIC.spr_color[a+4]=0;*/		    \
 	acorn[a].en=0;\
+	start_sound(); \
 	/*	  VIC.spr_ena&=~(0x10<<a) */		\
 	gstate.score+=10+(PGROUND_Y-totoro.ypos);			\
 	if(gstate.acorns) gstate.acorns--;			\
@@ -689,6 +734,8 @@ void __fastcall__ game_loop(void)
   acorn_update();
   DEBUG_BORDER_INC();
 
+  process_sound();
+
   acorn_add();
   
   // collision
@@ -713,7 +760,8 @@ void __fastcall__ game_loop(void)
   // speed up music
   if(gstate.time==20) vpb=7;
   if(gstate.time==10) vpb=6;
- 
+
+  
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK); 
 }
@@ -844,6 +892,8 @@ int main()
 
       for(;gstate.time&&gstate.acorns;)
 	game_loop();
+
+      //      stop_sound();
       
       gstate.mode=GMODE_CUT1;
       if(gstate.acorns==0) {

@@ -68,6 +68,11 @@ struct stage_t {
   uint8_t flags;
 };
 
+struct sound_t {
+  uint8_t timer;
+  uint8_t index;
+};
+
 // ASM function prototypes
 void IRQ(void);
 
