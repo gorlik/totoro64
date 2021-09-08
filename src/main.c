@@ -27,9 +27,9 @@
 
 #include "totoro64.h"
 
-//#define DEBUG
+#define DEBUG
 
-#define VERSION "0.11"
+#define VERSION "0.12"
 
 #define HFREQ 50
 
@@ -488,6 +488,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 
 void __fastcall__ update_top_bar(void)
 {
+  if(gstate.frame>=16*3) return;
   // interleave the updates to reduce frame time
   if(MODE_PLAY_DEMO()) {
     switch(gstate.frame&0x0F) {
@@ -593,10 +594,19 @@ void __fastcall__ game_sprite_setup(void)
 
 void __fastcall__ process_input(void)
 {
-  static unsigned char key;
+  static uint8_t key;
+  static uint8_t js;
   
-  if(gstate.mode==GMODE_PLAY) key=PEEK(197);
-  else key=18; // simulate 'D'
+  if(gstate.mode==GMODE_PLAY) {
+    key=PEEK(197);
+    js=joy2();
+    if(js) {
+      if(js&0x04) key = 10; // left
+      if(js&0x08) key = 18; // right
+      if(js&0x10) key = 60; // button
+      if(js&0x01) key = 60; // up?
+    }
+  } else key=18; // simulate 'D'
   
   if(totoro.state!=JUMP)
     switch(key) {
@@ -752,7 +762,7 @@ void __fastcall__ game_loop(void)
   
   // time
   gstate.frame++;    
-  if(gstate.frame==50) {
+  if(gstate.frame==HFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
     gstate.frame=0;
   }

@@ -99,6 +99,7 @@ void __fastcall__ acorn_set_pos(void);
 uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
+uint8_t __fastcall__ joy2(void);
 
 // zp variables from ASM
 extern unsigned int itmp;
