@@ -370,7 +370,7 @@ void __fastcall__ acorn_add(void)
   if(MODE_PLAY_DEMO() && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
       //  if((frame&0xf)==1)  {
       r=rand();
-      
+
       //    if(r<RAND_MAX/2) {
       //      if(1) {
 
@@ -380,7 +380,7 @@ void __fastcall__ acorn_add(void)
 	  r&=0x3f;
 	} while (abs(r-oldr)<8);
 	oldr=r;
-	
+
 	if(r<36) {
 	  r<<=3;
 	  r+=MIN_X;
@@ -403,15 +403,10 @@ void __fastcall__ acorn_add(void)
 
 void __fastcall__ mode_bitmap(void)
 {
-  VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
-  //CIA2.pra=0x03;  // selects VIC page 0x0000-0x3FFF
-
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
-  //CIA2.pra=(CIA2.pra&0xfc)|0x1;  // selects VIC page 0x8000-0xBFFF
-  //CIA2.pra=(CIA2.pra&0xfc)|0x0; // selects VIC page 0xC000-0xFFFF
 
-  VIC.addr=0x78;
-  //  VIC.addr=0x78;  // color ram at base +0x1c00, bitmap at base + 0x2000
+  VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
+  VIC.addr =0x78; // color ram at base +0x1c00, bitmap at base + 0x2000
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
   VIC.bgcolor[0]=COLOR_BLACK;
   VIC.spr_ena=0;
@@ -419,10 +414,10 @@ void __fastcall__ mode_bitmap(void)
 
 void __fastcall__ mode_text(void)
 {
-  VIC.ctrl1=0x1B; // disable bitmap, no extended color, no blank, 25 rows, ypos=3
-  CIA2.pra|=0x03;  // selects vic page 0x0000-0x3fff
-  VIC.addr=0x16;  // screen base at 0x0400, char def at $0x1400
+  CIA2.pra|=0x03; // selects vic page 0x0000-0x3fff
 
+  VIC.ctrl1=0x1B; // disable bitmap, no extended color, no blank, 25 rows, ypos=3
+  VIC.addr= 0x16; // screen base at 0x0400, char def at $0x1400
   VIC.bgcolor[0]=COLOR_WHITE;
 }
 
@@ -509,7 +504,7 @@ void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
   if(MODE_PLAY_DEMO()) {
-    
+
     switch(gstate.counter&0x0F) {
     case 0:
       DEBUG_BORDER_INC();
@@ -582,12 +577,12 @@ void __fastcall__ update_top_bar(void)
     */
   }
 }
-  
+
 void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_ena=0;
 
-  VIC.spr_color[0]=COLOR_LIGHTBLUE; 
+  VIC.spr_color[0]=COLOR_LIGHTBLUE;
   VIC.spr_color[1]=COLOR_BLACK;
   VIC.spr_color[2]=COLOR_WHITE;
   VIC.spr_color[3]=COLOR_BLACK;
@@ -602,14 +597,14 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[6]=COLOR_BLUE;
   VIC.spr_color[7]=COLOR_GREEN;
 #endif
-  
+
   VIC.spr_mcolor=0xF4; // leaf is undecided if mcolor
   VIC.spr_exp_x=0x07;
   VIC.spr_exp_y=0x07;
 
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
-    
+
   SPR_PTR[0]=0;
   SPR_PTR[1]=2;
   SPR_PTR[2]=3;
@@ -624,7 +619,7 @@ void __fastcall__ process_input(void)
 {
   static uint8_t key;
   static uint8_t js;
-  
+
   if(gstate.mode==GMODE_PLAY) {
     key=PEEK(197);
     js=joy2();
@@ -673,7 +668,7 @@ void __fastcall__ process_input(void)
 	totoro.state=IDLE;
       }
       break;
-    }  
+    }
 }
 
 void __fastcall__ process_sound(void)
@@ -816,7 +811,7 @@ int main()
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
   setup_sid();
 
-  // CIA1.icr=0x7f; // disable all CIA1 interrupts
+  CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
   VIC.rasterline=0xb0;
   VIC.imr=0x1; // enable raster interrupt

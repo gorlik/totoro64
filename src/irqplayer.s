@@ -108,9 +108,8 @@ end:
 	lda ctmp
 	sta $d020
 .endif
-        jmp $EA81
 not_vic:
-	jmp $EA31 		; chain the standard kernel IRQ
+	jmp $EA31 		; alway chain the standard kernel IRQ
 
 
 	;; cmd is in tmp, Y=0
