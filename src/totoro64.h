@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.                              *
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
- *  along with GTERM.  If not, see <http://www.gnu.org/licenses/>.            *
+ *  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
  *                                                                            *
  ******************************************************************************/
 
@@ -23,38 +23,50 @@
 
 #include <stdint.h>
 
+//#define DEBUG
+//#define NTSC
+
+#ifdef NTSC
+#define VPB 10
+#define VFREQ 60
+#else
+#define VPB 8
+#define VFREQ 50
+#endif
+
 enum t_state {
-	      IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
+  IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
 };
 
 enum g_mode {
-	     GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
+  GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
 };
 
 #define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
 
 struct game_state_t {
-  uint8_t  stage;
-  uint8_t  stage_idx;
-  int16_t  time;
+  uint8_t  stage;     // current stage
+  uint8_t  stage_idx; // index in the stage array
+  uint8_t  field;     // 0 to VFREQ
+  uint8_t  counter;   // free running
+  uint8_t  time;      // remaining stage time in secons
+  uint8_t  acorns;    // remaining acorns to catch
   uint16_t score;
-  uint16_t acorns;
-  uint8_t  frame;
-  enum g_mode mode;
   uint16_t hi_score;
+  enum g_mode mode;
 };
 
 struct acorn_t {
   uint8_t  en;
   uint16_t ypos;
-  uint16_t yv;
+  uint16_t yv;   // 8.8 format
 };
 
 struct player_t {
   int16_t xpos;
   int16_t ypos;
   int8_t  xv;
-  int8_t  yv;
+  int16_t yv;    // 8.8 format
   uint8_t idx;
   uint8_t blink;
   enum t_state  state;
@@ -110,7 +122,6 @@ extern unsigned char c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")
 
-
 // global variables
 extern const uint8_t charset[];
 extern const uint8_t sprite_src_data[];
@@ -125,7 +136,6 @@ extern uint8_t SPR_DATA[];   // sprite data
 extern uint8_t SPR_PTR[];    // sprite pointers
 
 extern uint8_t STR_BUF[];
-
 
 // irq player interface
 extern uint8_t track1[];
@@ -148,3 +158,4 @@ extern const uint8_t *t2ptr;
   __asm__("dex"); \
   __asm__("bne l%v",addr);
 #endif
+

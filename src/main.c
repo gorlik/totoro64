@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.                              *
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
- *  along with GTERM.  If not, see <http://www.gnu.org/licenses/>.            *
+ *  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
  *                                                                            *
  ******************************************************************************/
 #include <stdio.h>
@@ -27,19 +27,22 @@
 
 #include "totoro64.h"
 
-#define DEBUG
-
-#define VERSION "0.12"
-
-#define HFREQ 50
+#define VERSION "0.13"
 
 #define STAGE_TIME 60
 
 #define EOF_LINE 0x80
 
 // sprite max speed
+#ifdef NTSC
+#define MAX_XV 13
+// should be 8 with .66 acceleration
+// approximate to 9 and .75 acceleration
+#define JUMP_V 9
+#else
 #define MAX_XV 16
-#define MAX_YV 10
+#define JUMP_V 10
+#endif
 
 // sprite position constants/limits
 #define GROUND_Y 220
@@ -64,7 +67,6 @@
 // debug location
 #define DEBUG_TXT_LEN 12
 #define DEBUG_TXT_X   (40-DEBUG_TXT_LEN)
-
 
 void __fastcall__ CLR_TOP(void);
 
@@ -116,6 +118,20 @@ const uint16_t sound_seq[] = {
   0x2714,
 };
 
+#ifdef NTSC
+const struct stage_t stage[] =
+  {
+   { STAGE_TIME, 10, 3, 0 },
+   { STAGE_TIME, 15, 4, 0 },
+   { STAGE_TIME, 20, 6, 0 },
+   { STAGE_TIME, 25, 7, 0 },
+   { STAGE_TIME, 30, 8, 0 },
+   { STAGE_TIME, 35, 10, 0 },
+   { STAGE_TIME, 40, 11, 0 },
+   { STAGE_TIME, 50, 13, 0 },
+   { STAGE_TIME, 60, 15, 0 },
+};
+#else
 const struct stage_t stage[] =
   {
    { STAGE_TIME, 10, 4, 0 },
@@ -126,8 +142,9 @@ const struct stage_t stage[] =
    { STAGE_TIME, 35, 14, 0 },
    { STAGE_TIME, 40, 16, 0 },
    { STAGE_TIME, 50, 18, 0 },
-   { STAGE_TIME, 60, 20, 0 },
+   { STAGE_TIME, 60, 21, 0 },
 };
+#endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
 
@@ -142,12 +159,11 @@ void __fastcall__ setup_sid(void)
   SID.amp = 0x1f; // set volume to 15
   SID.v1.ad = 0x80;
   SID.v1.sr = 0xf6;
-  loop1=0;
+  loop1 = 0;
   t1ptr=track1;
-  //  instr1=0x10; // triangular
-  instr1=0;
-  time1 = 0;
-  vpb=8;
+  instr1 = 0; // instrument is now defined in the track
+  time1  = 0;
+  vpb = VPB;
 
   //  SID.v3.ctrl= 0x20;
   SID.v3.ad = 0x00;
@@ -276,13 +292,13 @@ void __fastcall__ totoro_update(void)
   if(totoro.blink)
     totoro.blink--;
   
-  totoro.idx=(gstate.frame&0xF)>>2;
+  totoro.idx=(gstate.counter&0xF)>>2;
   
-  if(gstate.frame==25) {
+  if(gstate.field==25) {
     if((totoro.state==IDLE) && (totoro.blink==0)) {
       r=rand();
       if((r&0x3)==0x3) {
-	totoro.blink=5;
+	totoro.blink=VFREQ/10;
       }
     } 
   }
@@ -349,8 +365,9 @@ void __fastcall__ acorn_add(void)
   static unsigned int oldr=0;
   static unsigned int r;
   static unsigned char na;
-	
-  if(MODE_PLAY_DEMO() && (gstate.frame==10 || gstate.frame==27 || gstate.frame==44 ) )  {
+
+  // maybe change to counter
+  if(MODE_PLAY_DEMO() && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
       //  if((frame&0xf)==1)  {
       r=rand();
       
@@ -381,19 +398,19 @@ void __fastcall__ acorn_add(void)
 	}
 	//   }
     }
-    
+
 }
 
 void __fastcall__ mode_bitmap(void)
 {
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
   //CIA2.pra=0x03;  // selects VIC page 0x0000-0x3FFF
-  
+
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
   //CIA2.pra=(CIA2.pra&0xfc)|0x1;  // selects VIC page 0x8000-0xBFFF
   //CIA2.pra=(CIA2.pra&0xfc)|0x0; // selects VIC page 0xC000-0xFFFF
-  
-  VIC.addr=0x78;  
+
+  VIC.addr=0x78;
   //  VIC.addr=0x78;  // color ram at base +0x1c00, bitmap at base + 0x2000
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
   VIC.bgcolor[0]=COLOR_BLACK;
@@ -412,8 +429,8 @@ void __fastcall__ mode_text(void)
 void __fastcall__ Title_Sprite_Setup(void)
 {
   VIC.spr_ena=0;
-  
-  VIC.spr_color[0]=COLOR_RED; 
+
+  VIC.spr_color[0]=COLOR_RED;
   VIC.spr_color[1]=COLOR_RED;
   VIC.spr_color[2]=COLOR_RED;
   VIC.spr_color[3]=COLOR_RED;
@@ -446,17 +463,17 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[1].x=128+24;
   VIC.spr_pos[2].x=128+24*2;
   VIC.spr_pos[3].x=128+24*3;
-  
+
   VIC.spr_pos[4].x=80;
   VIC.spr_pos[5].x=80+48;
   VIC.spr_pos[6].x=80+48*2;
   VIC.spr_pos[7].x=80+48*3;
-  
+
   VIC.spr_pos[0].y=60;
   VIC.spr_pos[1].y=60;
   VIC.spr_pos[2].y=60;
   VIC.spr_pos[3].y=60;
-  
+
   VIC.spr_pos[4].y=120;
   VIC.spr_pos[5].y=120;
   VIC.spr_pos[6].y=120;
@@ -465,7 +482,9 @@ void __fastcall__ Title_Sprite_Setup(void)
 
 void __fastcall__ wait_past_score(void)
 {
+  //  VIC.bordercolor=COLOR_WHITE;
   while(VIC.rasterline<=60) {};
+  //  VIC.bordercolor=COLOR_BLACK;
 }
 
 void __fastcall__ setup_top_bar(uint8_t flag)
@@ -488,10 +507,10 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 
 void __fastcall__ update_top_bar(void)
 {
-  if(gstate.frame>=16*3) return;
   // interleave the updates to reduce frame time
   if(MODE_PLAY_DEMO()) {
-    switch(gstate.frame&0x0F) {
+    
+    switch(gstate.counter&0x0F) {
     case 0:
       DEBUG_BORDER_INC();
       sprintf(STR_BUF,"%2d", gstate.acorns);
@@ -551,7 +570,16 @@ void __fastcall__ update_top_bar(void)
     default:
       DEBUG_BORDER_INC();
       break;
-    }
+      }
+      /*
+    STR_BUF[1]=hexdigit[(gstate.counter&0x0f)];
+    STR_BUF[0]=hexdigit[(gstate.counter>>4)&0x0f];
+    STR_BUF[2]=' ';
+    STR_BUF[3]=' ';
+    STR_BUF[5]=hexdigit[(gstate.field&0x0f)];
+    STR_BUF[4]=hexdigit[(gstate.field>>4)&0x0f];
+    printat(DEBUG_TXT_X,6);
+    */
   }
 }
   
@@ -607,8 +635,8 @@ void __fastcall__ process_input(void)
       if(js&0x01) key = 60; // up?
     }
   } else key=18; // simulate 'D'
-  
-  if(totoro.state!=JUMP)
+
+   if(totoro.state!=JUMP)
     switch(key) {
     case 10: // A
       if(totoro.xv>-MAX_XV) {
@@ -631,7 +659,7 @@ void __fastcall__ process_input(void)
       }
       break;
     case 60: // space
-      totoro.yv=-MAX_YV;
+      totoro.yv=-JUMP_V;
       totoro.state=JUMP;
       break;
     default:
@@ -703,28 +731,30 @@ void __fastcall__ get_ready(void)
   CLR_TOP();
   sprintf(STR_BUF,"STAGE %d",gstate.stage);
   convprint_big(14);
-  delay(50); 
+  delay(VFREQ); 
   sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
   convprint_big(4);
-  delay(50);
+  delay(VFREQ);
   
   CLR_TOP();
   strcpy8(STR_BUF,txt_ready);
   convprint_big(14);
-  delay(20);
+  delay(VFREQ/3);
   strcpy8(STR_BUF,txt_set);
   convprint_big(14);
-  delay(20);
+  delay(VFREQ/3);
   strcpy8(STR_BUF,txt_go);
   convprint_big(15);
-  delay(20);
+  delay(VFREQ/3);
 }
 
 void __fastcall__ game_loop(void)
 {
   static uint8_t cr;
-  
+
+  //  VIC.bordercolor=COLOR_RED;
   waitvsync();
+  //  VIC.bordercolor=COLOR_BLACK;
   DEBUG_BORDER(COLOR_WHITE);
   
   // screen updates
@@ -761,19 +791,20 @@ void __fastcall__ game_loop(void)
   update_top_bar();
   
   // time
-  gstate.frame++;    
-  if(gstate.frame==HFREQ) {
+  gstate.counter++;
+  gstate.field++;    
+  if(gstate.field==VFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
-    gstate.frame=0;
+    gstate.field=0;
   }
 
   // speed up music
-  if(gstate.time==20) vpb=7;
-  if(gstate.time==10) vpb=6;
+  if(gstate.time==20) vpb=VPB-1;
+  if(gstate.time==10) vpb=VPB-2;
 
-  
+
   // black background for idle time
-  DEBUG_BORDER(COLOR_BLACK); 
+  DEBUG_BORDER(COLOR_BLACK);
 }
 
 int main()
@@ -785,6 +816,7 @@ int main()
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
   setup_sid();
 
+  // CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
   VIC.rasterline=0xb0;
   VIC.imr=0x1; // enable raster interrupt
@@ -792,7 +824,7 @@ int main()
   Title_Sprite_Setup();
   mode_text();
   VIC.spr_ena=0xff;
-  
+
 
   //  memcpy((uint8_t *)(0x400+40*6+15),"presents",8);
   //  memcpy((uint8_t *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
@@ -802,7 +834,7 @@ int main()
 #ifndef DEBUG
   memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
 #endif
-  
+
   inflatemem (SCR_BASE, bitmap_data);
   inflatemem (COLOR_BASE, color1_data);
 
@@ -880,9 +912,10 @@ int main()
 
     do {
       // stage init
-      vpb=8;
+      vpb=VPB;
       gstate.time=0;
-      gstate.frame=0;
+      gstate.field=0;
+      gstate.counter=0;
 
       gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
 	LAST_STAGE_IDX() : gstate.stage-1 ;
@@ -920,7 +953,7 @@ int main()
       for(;totoro.xpos<350;)
 	game_loop();
 
-      delay(25);
+      delay(VFREQ/2);
 
       if(flag) {
 	bonus=0;
@@ -936,7 +969,7 @@ int main()
 	  bonus+=5+gstate.stage;
 	  gstate.score+=5+gstate.stage;
 	} while (gstate.time--);
-	delay(25);
+	delay(VFREQ/2);
 	gstate.stage++;
       }
 
@@ -945,7 +978,7 @@ int main()
     // game over
     strcpy8(STR_BUF,txt_game_over);
     convprint_big(0);
-    delay(200);
+    delay(VFREQ*3);
   }
   
   return 0;
