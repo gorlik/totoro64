@@ -1,15 +1,17 @@
 .include "c64.inc"
-.export _IRQ
-.export _time1, _instr1, _loop1, _next_loop1, _vpb
+.export   _IRQ
+.export   _time1, _instr1, _loop1, _next_loop1, _vpb
 
 .importzp _t1ptr
 .importzp _t2addr
 .import   _track1
+.import   _FTableLo
+.import   _FTableHi
 
 .define SIDRestart  0
 .define IPDebug     0
 
-	.segment "BSS"
+.segment 	"BSS"
 tmp:
 	.res 1
 _next_loop1:
@@ -29,32 +31,10 @@ _l_offset:
 
 
 .segment	"CODE"
-FTablePalLo:
-	        ;      C   C#  D   D#  E   F   F#  G   G#  A   A#  B
-                .byte $17,$27,$39,$4b,$5f,$74,$8a,$a1,$ba,$d4,$f0,$0e  ; 1
-                .byte $2d,$4e,$71,$96,$be,$e8,$14,$43,$74,$a9,$e1,$1c  ; 2
-                .byte $5a,$9c,$e2,$2d,$7c,$cf,$28,$85,$e8,$52,$c1,$37  ; 3
-                .byte $b4,$39,$c5,$5a,$f7,$9e,$4f,$0a,$d1,$a3,$82,$6e  ; 4
-                .byte $68,$71,$8a,$b3,$ee,$3c,$9e,$15,$a2,$46,$04,$dc  ; 5
-                .byte $d0,$e2,$14,$67,$dd,$79,$3c,$29,$44,$8d,$08,$b8  ; 6
-                .byte $a1,$c5,$28,$cd,$ba,$f1,$78,$53,$87,$1a,$10,$71  ; 7
-                .byte $42,$89,$4f,$9b,$74,$e2,$f0,$a6,$0e,$33,$20,$ff  ; 8
-
-FTablePalHi:
-		;      C   C#  D   D#  E   F   F#  G   G#  A   A#  B
-                .byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02  ; 1
-                .byte $02,$02,$02,$02,$02,$02,$03,$03,$03,$03,$03,$04  ; 2
-                .byte $04,$04,$04,$05,$05,$05,$06,$06,$06,$07,$07,$08  ; 3
-                .byte $08,$09,$09,$0a,$0a,$0b,$0c,$0d,$0d,$0e,$0f,$10  ; 4
-                .byte $11,$12,$13,$14,$15,$17,$18,$1a,$1b,$1d,$1f,$20  ; 5
-                .byte $22,$24,$27,$29,$2b,$2e,$31,$34,$37,$3a,$3e,$41  ; 6
-                .byte $45,$49,$4e,$52,$57,$5c,$62,$68,$6e,$75,$7c,$83  ; 7
-                .byte $8b,$93,$9c,$a5,$af,$b9,$c4,$d0,$dd,$ea,$f8,$ff  ; 8
-
 
 ;; ****************** IRQ Interrupt *********************
 .proc _IRQ: near
-	lda $d019		
+	lda $d019
 	bpl not_vic	; check if IRQ from VIC
 	sta $d019	; clear VIC IRQ flag
 .if IPDebug =1
@@ -62,7 +42,7 @@ FTablePalHi:
 	sta ctmp
 	lda _instr1
 	lsr a
-	lsr a			
+	lsr a
 	lsr a
 	lsr a
 	sta $d020
@@ -83,7 +63,7 @@ next:
 	lda #$F6
 	sta SID_SUR1
 	lda #$00
-.endif	
+.endif
 	clc
 	ldx _vpb
 add_more:
@@ -102,9 +82,9 @@ not_pause:
 	adc _loop1
 	adc _l_offset
 	tax
-	lda FTablePalHi,x
+	lda _FTableHi,x
 	sta SID_S1Hi
-	lda FTablePalLo,x
+	lda _FTableLo,x
 	sta SID_S1Lo
 	lda _instr1
 	ora #1
@@ -128,9 +108,9 @@ end:
 	lda ctmp
 	sta $d020
 .endif
-	jmp $EA81
+        jmp $EA81
 not_vic:
-	jmp $EA31
+	jmp $EA31 		; chain the standard kernel IRQ
 
 
 	;; cmd is in tmp, Y=0
@@ -143,10 +123,10 @@ parse_cmd:
 	cmp #$fd
 	beq cmd_fd
 	jmp next
-	
+
 cmd_ff:	 			; end of stream
 	lda #<_track1
-	sta _t1ptr		
+	sta _t1ptr
 	lda #>_track1
 	sta _t1ptr+1		; point to the beginning of the stream
 	lda _next_loop1
@@ -163,7 +143,6 @@ cmd_fd:	 			; change offset
 	sta _l_offset
 	jsr inc_t1ptr
 	jmp next
-	
 
 inc_t1ptr:
 	inc _t1ptr
@@ -172,6 +151,3 @@ inc_t1ptr:
 t1inc_end:
 	rts
 .endproc
-
-	
-
