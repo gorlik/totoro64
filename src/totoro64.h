@@ -23,7 +23,16 @@
 
 #include <stdint.h>
 
-//#define DEBUG
+#define DEBUG_TIMING 0x01
+#define DEBUG_INFO   0x02
+#define DEBUG_ACORNS 0x04
+
+//#define DEBUG (DEBUG_TIMING)
+
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 //#define NTSC
 
 #ifdef NTSC
@@ -43,6 +52,7 @@ enum g_mode {
 };
 
 #define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
+
 
 struct game_state_t {
   uint8_t  stage;     // current stage

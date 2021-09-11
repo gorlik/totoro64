@@ -20,6 +20,13 @@
 
 #include "totoro64.h"
 
+#if (DEBUG)
+const uint8_t hexdigit[] = {
+  '0', '1', '2', '3', '4', '5', '6', '7',
+  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+};
+#endif
+
 static unsigned char * const line[] = {
 	        SCR_BASE+0,
 			SCR_BASE+320*1,

@@ -79,7 +79,7 @@
 const unsigned char present_txt[] = "Presents";
 const unsigned char intro_txt[] = "A Commodore 64 tribute to Studio Ghibli";
 
-#ifndef DEBUG
+#if (DEBUG==0)
 const unsigned char license_txt[] =
   "Copyright (c) 2021 Gabriele Gorla       "
   "This program is free software: you can  "

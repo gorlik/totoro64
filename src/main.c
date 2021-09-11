@@ -70,7 +70,7 @@
 
 void __fastcall__ CLR_TOP(void);
 
-#ifdef DEBUG
+#if (DEBUG & DEBUG_TIMING)
 #define DEBUG_BORDER(a) VIC.bordercolor=a
 #define DEBUG_BORDER_INC() VIC.bordercolor++
 #else
@@ -96,6 +96,13 @@ extern const unsigned char license_txt[];
   __asm__("ls%v: inx",src);    \
   __asm__("lda %v,x",src);     \
   __asm__("sta %v,x",dst);     \
+  __asm__("bne ls%v",src);
+
+#define strcpy8v(dst,src)       \
+  __asm__("ldx #$FF");         \
+  __asm__("ls%v: inx",src);    \
+  __asm__("lda %v,x",src);     \
+  __asm__("sta %w,x",dst);     \
   __asm__("bne ls%v",src);
 
 const uint8_t run_seq[] =
@@ -542,7 +549,7 @@ void __fastcall__ update_top_bar(void)
       DEBUG_BORDER_INC();
       printat(SCOREVAL_X,1);
       break;
-#ifdef DEBUG
+#if (DEBUG&DEBUG_INFO)
     case 10:
       DEBUG_BORDER_INC();
       sprintf(STR_BUF,"ST:%2d IDX:%2d", gstate.stage, gstate.stage_idx);
@@ -586,16 +593,16 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[1]=COLOR_BLACK;
   VIC.spr_color[2]=COLOR_WHITE;
   VIC.spr_color[3]=COLOR_BLACK;
-#ifndef DEBUG
-  VIC.spr_color[4]=COLOR_ORANGE;
-  VIC.spr_color[5]=COLOR_ORANGE;
-  VIC.spr_color[6]=COLOR_ORANGE;
-  VIC.spr_color[7]=COLOR_ORANGE;
-#else
+#if (DEBUG&DEBUG_ACORNS)
   VIC.spr_color[4]=COLOR_BLACK;
   VIC.spr_color[5]=COLOR_YELLOW;
   VIC.spr_color[6]=COLOR_BLUE;
   VIC.spr_color[7]=COLOR_GREEN;
+#else
+  VIC.spr_color[4]=COLOR_ORANGE;
+  VIC.spr_color[5]=COLOR_ORANGE;
+  VIC.spr_color[6]=COLOR_ORANGE;
+  VIC.spr_color[7]=COLOR_ORANGE;
 #endif
 
   VIC.spr_mcolor=0xF4; // leaf is undecided if mcolor
@@ -797,7 +804,6 @@ void __fastcall__ game_loop(void)
   if(gstate.time==20) vpb=VPB-1;
   if(gstate.time==10) vpb=VPB-2;
 
-
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK);
 }
@@ -813,20 +819,18 @@ int main()
 
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
-  VIC.rasterline=0xb0;
+  VIC.rasterline=0x20;
   VIC.imr=0x1; // enable raster interrupt
 
   Title_Sprite_Setup();
   mode_text();
   VIC.spr_ena=0xff;
 
-
-  //  memcpy((uint8_t *)(0x400+40*6+15),"presents",8);
-  //  memcpy((uint8_t *)(0x400+40*16),"A Commodore 64 tribute to Studio Ghibli",39);
-
   memcpy((uint8_t *)(0x400+40*6+15),present_txt,8);
   memcpy((uint8_t *)(0x400+40*16),intro_txt,39);
-#ifndef DEBUG
+  //strcpy8v((0x400+40*6+15),present_txt);
+  //strcpy8v((0x400+40*16),intro_txt);
+#if (DEBUG==0)
   memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
 #endif
 
@@ -871,7 +875,7 @@ int main()
   //    cgetc();
   mode_bitmap();
 
-#ifdef DEBUG
+#if (DEBUG&DEBUG_INFO)
   for(ctmp=0;ctmp<DEBUG_TXT_LEN;ctmp++)
     {
       POKE(0xd800+40*2+DEBUG_TXT_X+ctmp,1);
