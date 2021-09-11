@@ -17,8 +17,11 @@ LIBS=
 all:    game64 game64.crt game64.bin
 
 
-game64: main.o $(OBJECTS)
-	ld65 $< $(OBJECTS) $(LIBS) -C $(SYS_INCLUDE)/c64zp.cfg --lib $(TARGET).lib -o $@
+#game64: main.o $(OBJECTS)
+#	ld65 $< $(OBJECTS) $(LIBS) -C $(SYS_INCLUDE)/c64zp.cfg --lib $(TARGET).lib -o $@
+
+game64: game64.bin
+	dd if=$< bs=1 skip=7 | cat ../src/prg_header.bin - >$@ 
 
 game64.o: main.c
 	cl65 $(CFLAGS) -c -o $@ $<
