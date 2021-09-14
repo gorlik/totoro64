@@ -3,7 +3,7 @@
 .export   _time1, _instr1, _loop1, _next_loop1, _vpb
 
 .importzp _t1ptr
-.importzp _t2addr
+.importzp _t2ptr
 .import   _track1
 .import   _FTableLo
 .import   _FTableHi
@@ -29,6 +29,27 @@ ctmp:
 _l_offset:
 	.res 1
 
+.if IPDebug =1
+.macro border_set col
+	lda $d020
+	sta ctmp
+	lda #col
+	sta $d020
+.endmacro
+
+.macro border_restore
+	lda ctmp
+	sta $d020
+.endmacro
+.else
+
+.macro border_set col
+.endmacro
+
+.macro border_restore
+.endmacro
+
+.endif
 
 .segment	"CODE"
 
@@ -37,16 +58,7 @@ _l_offset:
 	lda $d019
 	bpl not_vic	; check if IRQ from VIC
 	sta $d019	; clear VIC IRQ flag
-.if IPDebug =1
-	lda $d020
-	sta ctmp
-	lda _instr1
-	lsr a
-	lsr a
-	lsr a
-	lsr a
-	sta $d020
-.endif
+        border_set 1
 	lda _time1
 	bne time_inc_end		; timer not expired
 next:
@@ -104,10 +116,7 @@ time_inc_end:
 	lda _instr1
 	sta SID_Ctl1
 end:
-.if IPDebug =1
-	lda ctmp
-	sta $d020
-.endif
+	border_restore
 not_vic:
 	jmp $EA31 		; alway chain the standard kernel IRQ
 
