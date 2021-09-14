@@ -79,7 +79,7 @@ struct game_state_t {
 
 struct acorn_t {
   uint8_t en;
-  //  word_t xpos;
+  word_t  xpos;
   word_t  ypos;
   word_t  yv;   // 8.8 format
 };

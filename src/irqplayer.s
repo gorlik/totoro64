@@ -8,6 +8,10 @@
 .import   _FTableLo
 .import   _FTableHi
 
+.import   _spr_mux
+.import   _acorn
+ASIZE = 7
+
 .define SIDRestart  0
 .define IPDebug     0
 
@@ -51,6 +55,26 @@ _l_offset:
 
 .endif
 
+.macro spr_pos idx
+.local skip
+	lda _acorn+(ASIZE*idx)	; acorn[idx].enable
+	beq skip
+	txa
+	ora #(1<<(4+(idx&3)))	; set  SPR_EN bit
+	tax
+	lda _acorn+(ASIZE*idx)+4 ; acorn[idx].posy>>8
+	sta VIC_SPR4_Y+(idx&3)*2
+	lda _acorn+(ASIZE*idx)+1 ; acorn[idx].posx&0xff
+	sta VIC_SPR4_X+(idx&3)*2
+	lda _acorn+(ASIZE*idx)+2 ; acorn[idx].posx>>8
+	beq skip
+	tya
+	ora #(1<<(4+(idx&3))) 	; set SPR_HI_X bit
+	tay
+skip:
+.endmacro
+
+
 .segment	"CODE"
 
 ;; ****************** IRQ Interrupt *********************
@@ -59,6 +83,10 @@ _l_offset:
 	bpl not_vic	; check if IRQ from VIC
 	sta $d019	; clear VIC IRQ flag
         border_set 1
+        lda _spr_mux
+        beq no_mux
+        jsr acorn_set_pos
+no_mux:
 	lda _time1
 	bne time_inc_end		; timer not expired
 next:
@@ -157,5 +185,24 @@ inc_t1ptr:
 	bne t1inc_end
 	inc _t1ptr+1
 t1inc_end:
+	rts
+
+acorn_set_pos:
+	lda VIC_SPR_ENA
+	and #$0F
+	tax
+	lda VIC_SPR_HI_X
+	and #$0F
+	tay
+
+	spr_pos ( 0 )
+	spr_pos ( 1 )
+	spr_pos ( 2 )
+	spr_pos ( 3 )
+
+	txa
+	sta VIC_SPR_ENA
+	tya
+	sta VIC_SPR_HI_X
 	rts
 .endproc

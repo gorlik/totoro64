@@ -27,7 +27,7 @@
 
 #include "totoro64.h"
 
-#define VERSION "0.13"
+#define VERSION "0.14"
 
 #define STAGE_TIME 60
 
@@ -160,6 +160,8 @@ struct player_t totoro;
 struct acorn_t acorn[4];
 struct sound_t sound;
 
+uint8_t spr_mux;
+
 void __fastcall__ setup_sid(void)
 {
   memset(&SID,0,24);
@@ -237,7 +239,7 @@ void __fastcall__ totoro_set_pos(void)
     break;
   }
 }
-
+/*
 void __fastcall__ acorn_set_pos(void)
 {
   static uint8_t enmask;
@@ -262,7 +264,7 @@ void __fastcall__ acorn_set_pos(void)
   }
   
   VIC.spr_ena=(VIC.spr_ena&0x0f)|enmask;
-}
+  }*/
 
 void __fastcall__ totoro_update(void)
 {
@@ -377,10 +379,8 @@ void __fastcall__ acorn_add(void)
   if(MODE_PLAY_DEMO() && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
       //  if((frame&0xf)==1)  {
       r=rand();
-
       //    if(r<RAND_MAX/2) {
       //      if(1) {
-
 	// new acorn
 	do {
 	  r=rand();
@@ -396,16 +396,12 @@ void __fastcall__ acorn_add(void)
 	    acorn[na].en=1;
 	    acorn[na].ypos.val=ACORN_START_Y<<8;
 	    acorn[na].yv.val=0;
+	    acorn[na].xpos.val=r;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
-	    //r=(na<<5)+MIN_X;
-	    VIC.spr_pos[na+4].x  = r;
-	    if(r>255) VIC.spr_hi_x|=(1<<(na+4));
-	    else VIC.spr_hi_x&=~(1<<(na+4));
 	  }
 	}
 	//   }
     }
-
 }
 
 void __fastcall__ mode_bitmap(void)
@@ -761,7 +757,7 @@ void __fastcall__ game_loop(void)
   
   // screen updates
   totoro_set_pos();
-  acorn_set_pos();
+  //acorn_set_pos();
   DEBUG_BORDER_INC();
   
   // input processing
@@ -817,9 +813,10 @@ int main()
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
   setup_sid();
 
+  spr_mux=0;
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
-  VIC.rasterline=0x20;
+  VIC.rasterline=60;
   VIC.imr=0x1; // enable raster interrupt
 
   Title_Sprite_Setup();
@@ -925,6 +922,7 @@ int main()
       game_sprite_setup();
       totoro_init();
       acorn_init();
+      spr_mux=1;
       totoro_set_pos();
       
       VIC.spr_ena=0x07;
