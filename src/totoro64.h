@@ -51,6 +51,19 @@ enum g_mode {
   GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
 };
 
+
+union word {
+  uint16_t uval;
+  int16_t val;
+  struct {
+    uint8_t lo;
+    uint8_t hi;
+  };
+  //  struct hilo b;
+};
+
+typedef union word word_t;
+
 #define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
 
 
@@ -67,16 +80,17 @@ struct game_state_t {
 };
 
 struct acorn_t {
-  uint8_t  en;
-  uint16_t ypos;
-  uint16_t yv;   // 8.8 format
+  uint8_t en;
+  //  word_t xpos;
+  word_t  ypos;
+  word_t  yv;   // 8.8 format
 };
 
 struct player_t {
-  int16_t xpos;
-  int16_t ypos;
+  word_t  xpos;
+  word_t  ypos;
   int8_t  xv;
-  int16_t yv;    // 8.8 format
+  word_t  yv;    // 8.8 format
   uint8_t idx;
   uint8_t blink;
   enum t_state  state;

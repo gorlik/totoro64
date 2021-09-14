@@ -98,7 +98,7 @@ extern const unsigned char license_txt[];
   __asm__("sta %v,x",dst);     \
   __asm__("bne ls%v",src);
 
-#define strcpy8v(dst,src)       \
+#define strcpy8v(dst,src)      \
   __asm__("ldx #$FF");         \
   __asm__("ls%v: inx",src);    \
   __asm__("lda %v,x",src);     \
@@ -179,16 +179,16 @@ void __fastcall__ setup_sid(void)
 
 void __fastcall__ totoro_set_pos(void)
 {
-  VIC.spr0_x   = totoro.xpos;
-  VIC.spr1_x   = totoro.xpos;
-  VIC.spr2_x   = totoro.xpos;
+  VIC.spr0_x   = totoro.xpos.lo;
+  VIC.spr1_x   = totoro.xpos.lo;
+  VIC.spr2_x   = totoro.xpos.lo;
 
-  if(totoro.xpos>255)   VIC.spr_hi_x |=0x07;
+  if(totoro.xpos.hi)   VIC.spr_hi_x |=0x07;
   else VIC.spr_hi_x &= 0xf8;
 
-  VIC.spr0_y   = totoro.ypos;
-  VIC.spr1_y   = totoro.ypos;
-  VIC.spr2_y   = totoro.ypos;
+  VIC.spr0_y   = totoro.ypos.lo;
+  VIC.spr1_y   = totoro.ypos.lo;
+  VIC.spr2_y   = totoro.ypos.lo;
 
   switch(totoro.state) {
   case IDLE:
@@ -245,19 +245,19 @@ void __fastcall__ acorn_set_pos(void)
   enmask=0;
 
   if(acorn[0].en) {
-      VIC.spr_pos[4].y=acorn[0].ypos>>8;
+      VIC.spr_pos[4].y=acorn[0].ypos.hi;
       enmask|=0x10;
   }
   if(acorn[1].en) {
-      VIC.spr_pos[5].y=acorn[1].ypos>>8;
+      VIC.spr_pos[5].y=acorn[1].ypos.hi;
       enmask|=0x20;
   }
   if(acorn[2].en) {
-      VIC.spr_pos[6].y=acorn[2].ypos>>8;
+      VIC.spr_pos[6].y=acorn[2].ypos.hi;
       enmask|=0x40;
   }
   if(acorn[3].en) {
-      VIC.spr_pos[7].y=acorn[3].ypos>>8;
+      VIC.spr_pos[7].y=acorn[3].ypos.hi;
       enmask|=0x80;
   }
   
@@ -268,29 +268,29 @@ void __fastcall__ totoro_update(void)
 {
   static uint16_t r;
   
-  totoro.xpos+=(totoro.xv>>2);
+  totoro.xpos.val+=(totoro.xv>>2);
 
   if(totoro.xpos<MIN_X) {
-    totoro.xpos=MIN_X;
+    totoro.xpos.val=MIN_X;
     totoro.xv=-1;
   } else if(totoro.xpos>MAX_PX) {
     if(!(gstate.mode&0xfe)) {
-      totoro.xpos=MAX_PX;
+      totoro.xpos.val=MAX_PX;
       totoro.xv=1;
     }
   }
   
-  totoro.ypos+=totoro.yv;
+  totoro.ypos.val+=totoro.yv.val;
   
   if(totoro.state==JUMP) {
     totoro.yv++;
   }
   
   if(totoro.ypos>PGROUND_Y) {
-    totoro.ypos=PGROUND_Y;
+    totoro.ypos.val=PGROUND_Y;
     if(totoro.xv) totoro.state=RUN;
     else totoro.state=IDLE;
-    totoro.yv=0;
+    totoro.yv.val=0;
   }
   
   if((totoro.xv==0) && (totoro.state!=JUMP))
@@ -314,10 +314,10 @@ void __fastcall__ totoro_update(void)
 
 void __fastcall__ totoro_init(void)
 {
-  totoro.xpos=(MAX_PX-MIN_X)/2;
-  totoro.ypos=PGROUND_Y;
+  totoro.xpos.val=(MAX_PX-MIN_X)/2;
+  totoro.ypos.val=PGROUND_Y;
   totoro.xv=0;
-  totoro.yv=0;
+  totoro.yv.val=0;
   totoro.idx=0;
   totoro.state=IDLE;
   totoro.blink=0;
@@ -337,9 +337,9 @@ void __fastcall__ update_acorn_f(unsigned char a)
 
 #define acorn_update_m(a) do {\
     if(acorn[a].en) {\
-      acorn[a].yv+=stage[gstate.stage_idx].speed;\
-      acorn[a].ypos+=(acorn[a].yv);\
-      if((acorn[a].ypos>>8)>GROUND_Y)\
+      acorn[a].yv.val+=stage[gstate.stage_idx].speed;\
+      acorn[a].ypos.val+=(acorn[a].yv.val);\
+      if((acorn[a].ypos.hi)>GROUND_Y)\
 	acorn[a].en=0;\
     }\
 } while(0)
@@ -394,8 +394,8 @@ void __fastcall__ acorn_add(void)
 	  na=acorn_find();
 	  if(na!=0x80) {
 	    acorn[na].en=1;
-	    acorn[na].ypos=ACORN_START_Y<<8;
-	    acorn[na].yv=0;
+	    acorn[na].ypos.val=ACORN_START_Y<<8;
+	    acorn[na].yv.val=0;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
 	    //r=(na<<5)+MIN_X;
 	    VIC.spr_pos[na+4].x  = r;
@@ -661,7 +661,7 @@ void __fastcall__ process_input(void)
       }
       break;
     case 60: // space
-      totoro.yv=-JUMP_V;
+      totoro.yv.val=-JUMP_V;
       totoro.state=JUMP;
       break;
     default:
@@ -709,12 +709,12 @@ void __fastcall__ start_sound(void)
 
 #define check_collision_n(a) do {\
   if(cr&(0x10<<a)) {				\
-    if(acorn[a].en && (acorn[a].ypos>>8)>120) {	\
+    if(acorn[a].en && (acorn[a].ypos.hi)>120) {	\
       /*VIC.spr_color[a+4]=0;*/		    \
 	acorn[a].en=0;\
 	start_sound(); \
 	/*	  VIC.spr_ena&=~(0x10<<a) */		\
-	gstate.score+=10+(PGROUND_Y-totoro.ypos);			\
+	gstate.score+=10+(PGROUND_Y-totoro.ypos.val);			\
 	if(gstate.acorns) gstate.acorns--;			\
       }\
     } else { \
@@ -949,7 +949,7 @@ int main()
       }
 
       // make totoro walk away
-      for(;totoro.xpos<350;)
+      for(;totoro.xpos.uval<350;)
 	game_loop();
 
       delay(VFREQ/2);
