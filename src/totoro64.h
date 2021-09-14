@@ -51,7 +51,6 @@ enum g_mode {
   GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
 };
 
-
 union word {
   uint16_t uval;
   int16_t val;
@@ -59,7 +58,6 @@ union word {
     uint8_t lo;
     uint8_t hi;
   };
-  //  struct hilo b;
 };
 
 typedef union word word_t;
@@ -162,7 +160,7 @@ extern uint8_t SPR_PTR[];    // sprite pointers
 extern uint8_t STR_BUF[];
 
 // irq player interface
-extern uint8_t track1[];
+extern const uint8_t track1[];
 extern uint8_t instr1;
 extern uint8_t time1;
 extern uint8_t loop1;
@@ -174,7 +172,6 @@ extern const uint8_t *t2ptr;
 #pragma zpsym("t1ptr")
 #pragma zpsym("t2ptr")
 
-
 #define memset8(addr, v, c) \
   __asm__("ldx #%b",c);	    \
   __asm__("lda #%b",v);		      \
@@ -182,4 +179,3 @@ extern const uint8_t *t2ptr;
   __asm__("dex"); \
   __asm__("bne l%v",addr);
 #endif
-
