@@ -157,7 +157,7 @@ const struct stage_t stage[] =
 
 struct game_state_t gstate;
 struct player_t totoro;
-struct acorn_t acorn[4];
+struct acorn_t acorn[MAX_ACORNS];
 struct sound_t sound;
 
 uint8_t spr_mux;
@@ -240,37 +240,11 @@ void __fastcall__ totoro_set_pos(void)
     break;
   }
 }
-/*
-void __fastcall__ acorn_set_pos(void)
-{
-  static uint8_t enmask;
-
-  enmask=0;
-
-  if(acorn[0].en) {
-      VIC.spr_pos[4].y=acorn[0].ypos.hi;
-      enmask|=0x10;
-  }
-  if(acorn[1].en) {
-      VIC.spr_pos[5].y=acorn[1].ypos.hi;
-      enmask|=0x20;
-  }
-  if(acorn[2].en) {
-      VIC.spr_pos[6].y=acorn[2].ypos.hi;
-      enmask|=0x40;
-  }
-  if(acorn[3].en) {
-      VIC.spr_pos[7].y=acorn[3].ypos.hi;
-      enmask|=0x80;
-  }
-  
-  VIC.spr_ena=(VIC.spr_ena&0x0f)|enmask;
-  }*/
 
 void __fastcall__ totoro_update(void)
 {
   static uint16_t r;
-  
+ 
   totoro.xpos.val+=(totoro.xv>>2);
 
   if(totoro.xpos<MIN_X) {
@@ -282,28 +256,28 @@ void __fastcall__ totoro_update(void)
       totoro.xv=1;
     }
   }
-  
+
   totoro.ypos.val+=totoro.yv.val;
-  
+
   if(totoro.state==JUMP) {
     totoro.yv++;
   }
-  
+
   if(totoro.ypos>PGROUND_Y) {
     totoro.ypos.val=PGROUND_Y;
     if(totoro.xv) totoro.state=RUN;
     else totoro.state=IDLE;
     totoro.yv.val=0;
   }
-  
+
   if((totoro.xv==0) && (totoro.state!=JUMP))
     totoro.state=IDLE;
-  
+
   if(totoro.blink)
     totoro.blink--;
-  
+
   totoro.idx=(gstate.counter&0xF)>>2;
-  
+
   if(gstate.field==25) {
     if((totoro.state==IDLE) && (totoro.blink==0)) {
       r=rand();
@@ -326,42 +300,76 @@ void __fastcall__ totoro_init(void)
   totoro.blink=0;
 }
 
+#define acorn_update_m(a) do {		  	 \
+    if(acorn[a].ypos.val) {				 \
+      acorn[a].yv.val+=stage[gstate.stage_idx].speed;\
+      acorn[a].ypos.val+=(acorn[a].yv.val);\
+      if((acorn[a].ypos.hi)>GROUND_Y) {\
+      	acorn[a].en=0;				 \
+	acorn[a].ypos.val=0; \
+	} \
+    }						 \
+} while(0)
+
 void __fastcall__ acorn_update(void)
 {
-  for(ctmp=0;ctmp<4;ctmp++) {
-    if(acorn[ctmp].en) {
+  static uint8_t t;
+  t=PEEK(0xd020);
+  POKE(0xd020,9);
+  acorn_update_m(0);
+  acorn_update_m(1);
+  acorn_update_m(2);
+  acorn_update_m(3);
+  acorn_update_m(4);
+  acorn_update_m(5);
+  acorn_update_m(6);
+  acorn_update_m(7);
+/*
+  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
+    if(acorn[ctmp].ypos.val) {
+      acorn[ctmp].yv.val+=stage[gstate.stage_idx].speed;
+      acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
+      if((acorn[ctmp].ypos.hi)>GROUND_Y) {
+      	acorn[ctmp].en=0;
+	acorn[ctmp].ypos.val=0;
+	}
+    } */
+
+/*    if(acorn[ctmp].en) {
       acorn[ctmp].yv.val+=stage[gstate.stage_idx].speed;
       acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
       if((acorn[ctmp].ypos.hi)>GROUND_Y)
 	acorn[ctmp].en=0;
     }
-  }
+  }*/
+  POKE(0xd020,t);
 }
 
 void __fastcall__ acorn_init(void)
 {
   // init data
-  for(ctmp=0;ctmp<4;ctmp++)
-    acorn[ctmp].en=0;
+  memset8(acorn,0,sizeof(acorn));
 }
 
-unsigned char __fastcall__ acorn_find(void)
+unsigned char __fastcall__ acorn_free_slot(void)
 {
-  for(ctmp=0;ctmp<4;ctmp++)
-    if(acorn[ctmp].en==0) return ctmp;
-  return 0x80;
+  if( (acorn[MAX_ACORNS-1].en==0) &&
+      (acorn[0].ypos.hi)>(ACORN_START_Y+2) &&
+     ( (acorn[MUX_SLOTS-1].ypos.hi>ACORN_START_Y+23) || (acorn[MUX_SLOTS-1].ypos.val==0) /*|| (acorn[2].ypos.val==0)*/) ) return 1;
+  if(acorn[0].en==0) return 1;
+  return 0;
 }
 
 void __fastcall__ acorn_add(void)
 {
   static unsigned int oldr=0;
   static unsigned int r;
-  static unsigned char na;
 
   // maybe change to counter
-  if(MODE_PLAY_DEMO() && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
+  if(MODE_PLAY_DEMO() && 
+      (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
       //  if((frame&0xf)==1)  {
-      r=rand();
+    //    r=rand();
       //    if(r<RAND_MAX/2) {
       //      if(1) {
 	// new acorn
@@ -374,12 +382,19 @@ void __fastcall__ acorn_add(void)
 	if(r<36) {
 	  r<<=3;
 	  r+=MIN_X;
-	  na=acorn_find();
-	  if(na!=0x80) {
-	    acorn[na].en=1;
-	    acorn[na].xpos.val=r;
-	    acorn[na].ypos.val=ACORN_START_Y<<8;
-	    acorn[na].yv.val=0;
+      if(acorn_free_slot()) {
+
+	__asm__("ldx #(7*7+1)");
+	__asm__("loop1: lda _acorn-1,x");
+	__asm__("sta _acorn+7-1,x");
+	__asm__("dex");
+	__asm__("bne loop1");
+//	__asm__("lda $d01e");
+
+	acorn[0].en=1;
+	acorn[0].xpos.val=r;
+	acorn[0].ypos.val=ACORN_START_Y<<8;
+	acorn[0].yv.val=4;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
 	  }
 	}
@@ -490,7 +505,7 @@ void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
   if(MODE_PLAY_DEMO()) {
-
+#if 1
     switch(gstate.counter&0x0F) {
     case 0:
       DEBUG_BORDER_INC();
@@ -552,6 +567,14 @@ void __fastcall__ update_top_bar(void)
       DEBUG_BORDER_INC();
       break;
       }
+#else
+    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].ypos.hi, acorn[1].ypos.hi,
+	    acorn[2].ypos.hi, acorn[3].ypos.hi);
+    printat(DEBUG_TXT_X,2);
+    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[4].ypos.hi, acorn[5].ypos.hi,
+	    acorn[6].ypos.hi, acorn[7].ypos.hi);
+    printat(DEBUG_TXT_X,3);
+#endif
       /*
     STR_BUF[1]=hexdigit[(gstate.counter&0x0f)];
     STR_BUF[0]=hexdigit[(gstate.counter>>4)&0x0f];
@@ -676,7 +699,7 @@ void __fastcall__ process_sound(void)
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
-  
+
 void __fastcall__ start_sound(void)
 {
   SID.v3.ctrl=0x20;
@@ -690,8 +713,8 @@ void __fastcall__ check_collision(void)
 {
   //  static uint8_t color;
 
-  for(ctmp=0;ctmp<4;ctmp++) {
-    //    color=COLOR_ORANGE;    
+  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
+    //    color=COLOR_ORANGE;
     if(acorn[ctmp].en) {
       if((((acorn[ctmp].ypos.hi))>(totoro.ypos.uval-20)) &&
 	 (((acorn[ctmp].ypos.hi))<(totoro.ypos.uval+42)) ) {
@@ -699,14 +722,14 @@ void __fastcall__ check_collision(void)
 	if((totoro.xpos.val>(acorn[ctmp].xpos.val-36)) &&
 	   (totoro.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
 	  //	  color=COLOR_RED;
-	    if(cr&(0x10<<ctmp)){
+//	    if(cr&(0x10<<ctmp)){
 	      //color=COLOR_BLACK;
 	      acorn[ctmp].en=0;
 	      start_sound();
 	      /* VIC.spr_ena&=~(0x10<<a) */
 	      gstate.score+=10+(PGROUND_Y-totoro.ypos.val);
 	      if(gstate.acorns) gstate.acorns--;
-	    }
+//	    }
 	}
       }
     }
@@ -717,21 +740,6 @@ void __fastcall__ check_collision(void)
   //  }
 }
 
-#define check_collision_hw(a) do {				\
-    if(cr&(0x10<<a)) {						\
-      if(acorn[a].en && (acorn[a].ypos.hi)>120) {		\
-	/*VIC.spr_color[a+4]=0;*/				\
-	acorn[a].en=0;						\
-	start_sound();						\
-	/*	  VIC.spr_ena&=~(0x10<<a) */			\
-	gstate.score+=10+(PGROUND_Y-totoro.ypos.val);		\
-	if(gstate.acorns) gstate.acorns--;			\
-      }								\
-    } else {							\
-      /*	  VIC.spr_color[a+4]=COLOR_ORANGE; */		\
-    }								\
-  } while (0)
-
 void __fastcall__ delay(uint8_t f)
 {
   while(f--)
@@ -741,13 +749,13 @@ void __fastcall__ delay(uint8_t f)
 void __fastcall__ get_ready(void)
 {
   CLR_TOP();
-  sprintf(STR_BUF,"STAGE %d",gstate.stage);
-  convprint_big(14);
-  delay(VFREQ); 
-  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
-  convprint_big(4);
-  delay(VFREQ);
-  
+  //sprintf(STR_BUF,"STAGE %d",gstate.stage);
+  //convprint_big(14);
+  //delay(VFREQ);
+  //  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
+  // convprint_big(4);
+  // delay(VFREQ);
+
   CLR_TOP();
   strcpy8(STR_BUF,txt_ready);
   convprint_big(14);
@@ -766,7 +774,7 @@ void __fastcall__ game_loop(void)
   waitvsync();
   //  VIC.bordercolor=COLOR_BLACK;
   DEBUG_BORDER(COLOR_WHITE);
-  
+
   // screen updates
   totoro_set_pos();
 
@@ -774,17 +782,17 @@ void __fastcall__ game_loop(void)
   acorn_update();
   acorn_add();
   DEBUG_BORDER_INC();
-  
+
   // input processing
   process_input();
   DEBUG_BORDER_INC();
-  
+
   // calculate new totoro position
   totoro_update();
   DEBUG_BORDER_INC();
 
   process_sound();
- 
+
   // collision
   cr=VIC.spr_coll;
   check_collision();
@@ -793,10 +801,10 @@ void __fastcall__ game_loop(void)
   // other screen updates
   DEBUG_BORDER_INC();
   update_top_bar();
-  
+
   // time
   gstate.counter++;
-  gstate.field++;    
+  gstate.field++;
   if(gstate.field==VFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
     gstate.field=0;
@@ -871,9 +879,9 @@ int main()
     delay(15);
   }
 #endif
-  
+
   cgetc();
-  
+
   inflatemem ((uint8_t *)0xd800, color2_data);
   //    cgetc();
   mode_bitmap();
@@ -887,7 +895,6 @@ int main()
       POKE(0xd800+40*5+DEBUG_TXT_X+ctmp,1);
       POKE(0xd800+40*6+DEBUG_TXT_X+ctmp,1);
       POKE(0xd800+40*7+DEBUG_TXT_X+ctmp,1);
-      
     }
 
   sprintf(STR_BUF,"Sprdat $%04X",SPR_DATA);
@@ -903,10 +910,10 @@ int main()
    sprintf(STR_BUF,"T1addr $%04X",t1addr);
      printat(DEBUG_TXT_X,7);*/
 #endif
-  
+
   for(;;) { // main loop
     while(PEEK(197)!=60);
-    
+
     // game init
     gstate.score=0;
     gstate.stage=1;
@@ -921,16 +928,16 @@ int main()
 
       gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
 	LAST_STAGE_IDX() : gstate.stage-1 ;
-      
+
       gstate.time=stage[gstate.stage_idx].time;
       gstate.acorns=stage[gstate.stage_idx].acorns;
-      
+
       game_sprite_setup();
       totoro_init();
       acorn_init();
       spr_mux=1;
       totoro_set_pos();
-      
+
       VIC.spr_ena=0x07;
       get_ready();
       gstate.mode=GMODE_PLAY;
@@ -940,7 +947,7 @@ int main()
 	game_loop();
 
       //      stop_sound();
-      
+
       gstate.mode=GMODE_CUT1;
       if(gstate.acorns==0) {
 	flag=1;
@@ -983,6 +990,6 @@ int main()
     convprint_big(0);
     delay(VFREQ*3);
   }
-  
+
   return 0;
 }

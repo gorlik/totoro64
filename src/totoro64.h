@@ -43,6 +43,10 @@
 #define VFREQ 50
 #endif
 
+// the following need to be kept in sync with the assembly code
+#define MAX_ACORNS 8
+#define MUX_SLOTS  2
+
 enum t_state {
   IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
 };
