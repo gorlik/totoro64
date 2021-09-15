@@ -161,6 +161,7 @@ struct acorn_t acorn[4];
 struct sound_t sound;
 
 uint8_t spr_mux;
+uint8_t cr;
 
 void __fastcall__ setup_sid(void)
 {
@@ -309,7 +310,7 @@ void __fastcall__ totoro_update(void)
       if((r&0x3)==0x3) {
 	totoro.blink=VFREQ/10;
       }
-    } 
+    }
   }
 }
 
@@ -323,35 +324,18 @@ void __fastcall__ totoro_init(void)
   totoro.idx=0;
   totoro.state=IDLE;
   totoro.blink=0;
-} 
-
-/*
-void __fastcall__ update_acorn_f(unsigned char a)
-{						
-  if(acorn[a].en) {
-    acorn[a].yv+=3;
-    acorn[a].ypos+=(acorn[a].yv);
-    if((acorn[a].ypos>>8)>GROUND_Y)
-      acorn[a].en=0;
-  }
 }
-*/
-
-#define acorn_update_m(a) do {\
-    if(acorn[a].en) {\
-      acorn[a].yv.val+=stage[gstate.stage_idx].speed;\
-      acorn[a].ypos.val+=(acorn[a].yv.val);\
-      if((acorn[a].ypos.hi)>GROUND_Y)\
-	acorn[a].en=0;\
-    }\
-} while(0)
 
 void __fastcall__ acorn_update(void)
 {
-  acorn_update_m(0);
-  acorn_update_m(1);
-  acorn_update_m(2);
-  acorn_update_m(3);
+  for(ctmp=0;ctmp<4;ctmp++) {
+    if(acorn[ctmp].en) {
+      acorn[ctmp].yv.val+=stage[gstate.stage_idx].speed;
+      acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
+      if((acorn[ctmp].ypos.hi)>GROUND_Y)
+	acorn[ctmp].en=0;
+    }
+  }
 }
 
 void __fastcall__ acorn_init(void)
@@ -363,7 +347,6 @@ void __fastcall__ acorn_init(void)
 
 unsigned char __fastcall__ acorn_find(void)
 {
-  //  unsigned char c;
   for(ctmp=0;ctmp<4;ctmp++)
     if(acorn[ctmp].en==0) return ctmp;
   return 0x80;
@@ -394,9 +377,9 @@ void __fastcall__ acorn_add(void)
 	  na=acorn_find();
 	  if(na!=0x80) {
 	    acorn[na].en=1;
+	    acorn[na].xpos.val=r;
 	    acorn[na].ypos.val=ACORN_START_Y<<8;
 	    acorn[na].yv.val=0;
-	    acorn[na].xpos.val=r;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
 	  }
 	}
@@ -703,20 +686,51 @@ void __fastcall__ start_sound(void)
   }
 }
 
-#define check_collision_n(a) do {\
-  if(cr&(0x10<<a)) {				\
-    if(acorn[a].en && (acorn[a].ypos.hi)>120) {	\
-      /*VIC.spr_color[a+4]=0;*/		    \
-	acorn[a].en=0;\
-	start_sound(); \
-	/*	  VIC.spr_ena&=~(0x10<<a) */		\
-	gstate.score+=10+(PGROUND_Y-totoro.ypos.val);			\
+void __fastcall__ check_collision(void)
+{
+  //  static uint8_t color;
+
+  for(ctmp=0;ctmp<4;ctmp++) {
+    //    color=COLOR_ORANGE;    
+    if(acorn[ctmp].en) {
+      if((((acorn[ctmp].ypos.hi))>(totoro.ypos.uval-20)) &&
+	 (((acorn[ctmp].ypos.hi))<(totoro.ypos.uval+42)) ) {
+	//	color=COLOR_YELLOW;
+	if((totoro.xpos.val>(acorn[ctmp].xpos.val-36)) &&
+	   (totoro.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
+	  //	  color=COLOR_RED;
+	    if(cr&(0x10<<ctmp)){
+	      //color=COLOR_BLACK;
+	      acorn[ctmp].en=0;
+	      start_sound();
+	      /* VIC.spr_ena&=~(0x10<<a) */
+	      gstate.score+=10+(PGROUND_Y-totoro.ypos.val);
+	      if(gstate.acorns) gstate.acorns--;
+	    }
+	}
+      }
+    }
+    //    VIC.spr_color[(ctmp&3)+4]=color;
+  }
+  //  for(ctmp=0;ctmp<4;ctmp++) {
+  //    VIC.spr_color[(ctmp&3)+4]=(cr&(0x10<<ctmp))?COLOR_BLACK:COLOR_ORANGE;
+  //  }
+}
+
+#define check_collision_hw(a) do {				\
+    if(cr&(0x10<<a)) {						\
+      if(acorn[a].en && (acorn[a].ypos.hi)>120) {		\
+	/*VIC.spr_color[a+4]=0;*/				\
+	acorn[a].en=0;						\
+	start_sound();						\
+	/*	  VIC.spr_ena&=~(0x10<<a) */			\
+	gstate.score+=10+(PGROUND_Y-totoro.ypos.val);		\
 	if(gstate.acorns) gstate.acorns--;			\
-      }\
-    } else { \
-    /*	  VIC.spr_color[a+4]=COLOR_ORANGE; */	\
-    }	  \
-} while (0)
+      }								\
+    } else {							\
+      /*	  VIC.spr_color[a+4]=COLOR_ORANGE; */		\
+    }								\
+  } while (0)
 
 void __fastcall__ delay(uint8_t f)
 {
@@ -748,8 +762,6 @@ void __fastcall__ get_ready(void)
 
 void __fastcall__ game_loop(void)
 {
-  static uint8_t cr;
-
   //  VIC.bordercolor=COLOR_RED;
   waitvsync();
   //  VIC.bordercolor=COLOR_BLACK;
@@ -757,7 +769,10 @@ void __fastcall__ game_loop(void)
   
   // screen updates
   totoro_set_pos();
-  //acorn_set_pos();
+
+  // calculate new acorn positions
+  acorn_update();
+  acorn_add();
   DEBUG_BORDER_INC();
   
   // input processing
@@ -768,20 +783,11 @@ void __fastcall__ game_loop(void)
   totoro_update();
   DEBUG_BORDER_INC();
 
-  // calculate new acorn positions
-  acorn_update();
-  DEBUG_BORDER_INC();
-
   process_sound();
-
-  acorn_add();
-  
+ 
   // collision
   cr=VIC.spr_coll;
-  check_collision_n(0);
-  check_collision_n(1);
-  check_collision_n(2);
-  check_collision_n(3);
+  check_collision();
   cr=VIC.spr_coll;
 
   // other screen updates
