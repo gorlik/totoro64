@@ -1,14 +1,19 @@
 .include "c64.inc"
-	
+
 .define IPDebug     0
 .include "macros.inc"
 
 
 .export   _IRQ
+.export   color_save
 
 .import   _spr_mux
 .import   acorn_set_pos
 .import   play_track
+
+.segment 	"BSS"
+color_save:
+	.res 1
 
 .segment	"CODE"
 
@@ -25,4 +30,4 @@ no_mux:
 not_vic:
 	jmp $EA31 		; alway chain the standard kernel IRQ
 .endproc
-	
+
