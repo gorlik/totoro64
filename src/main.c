@@ -988,8 +988,21 @@ int main()
     } while(flag);
 
     // game over
-    strcpy8(STR_BUF,txt_game_over);
-    convprint_big(0);
+    
+    //  strcpy8(STR_BUF,txt_game_over);
+    //  convprint_big(0);
+    spr_mux=0;
+    SPR_PTR[0]=43;
+    SPR_PTR[1]=44;
+    VIC.spr_pos[0].x=136;
+    VIC.spr_pos[1].x=184;
+    VIC.spr_pos[0].y=120;
+    VIC.spr_pos[1].y=120;
+    VIC.spr_exp_x = 0x03;
+    VIC.spr_exp_y = 0x03;
+    VIC.spr_hi_x = 0;
+    VIC.spr_mcolor=0x03;
+    VIC.spr_ena=0x3;
     delay(VFREQ*3);
   }
 
