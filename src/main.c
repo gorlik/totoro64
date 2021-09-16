@@ -315,9 +315,9 @@ void __fastcall__ totoro_init(void)
 
 void __fastcall__ acorn_update(void)
 {
-  static uint8_t t;
-  t=PEEK(0xd020);
-  POKE(0xd020,9);
+  //  static uint8_t t;
+  //  t=PEEK(0xd020);
+  //  POKE(0xd020,9);
   acorn_update_m(0);
   acorn_update_m(1);
   acorn_update_m(2);
@@ -344,7 +344,7 @@ void __fastcall__ acorn_update(void)
 	acorn[ctmp].en=0;
     }
   }*/
-  POKE(0xd020,t);
+//  POKE(0xd020,t);
 }
 
 void __fastcall__ acorn_init(void)
@@ -397,6 +397,8 @@ void __fastcall__ acorn_add(void)
 	acorn[0].xpos.val=r;
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
+	acorn[0].spr_ptr=28;
+	//	acorn[0].spr_ptr=(r&0x08)?28:29;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
 	  }
 	}
@@ -451,12 +453,7 @@ void __fastcall__ Title_Sprite_Setup(void)
   POKE(0x7f8+5,253);
   POKE(0x7f8+6,254);
   POKE(0x7f8+7,255);
-  /*
-  VIC.spr_pos[0].x=80;
-  VIC.spr_pos[1].x=80+48;
-  VIC.spr_pos[2].x=80+48*2;
-  VIC.spr_pos[3].x=80+48*3;
-  */
+
   VIC.spr_pos[0].x=SPR_CENTER_X-48;
   VIC.spr_pos[1].x=SPR_CENTER_X-24;
   VIC.spr_pos[2].x=SPR_CENTER_X;
@@ -537,8 +534,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 7:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"%5d",
-	      gstate.score);
+      sprintf(STR_BUF,"%5d", gstate.score);
       break;
     case 8:
       wait_past_score();
@@ -570,12 +566,27 @@ void __fastcall__ update_top_bar(void)
       break;
       }
 #else
+    /*
     sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].ypos.hi, acorn[1].ypos.hi,
 	    acorn[2].ypos.hi, acorn[3].ypos.hi);
     printat(DEBUG_TXT_X,2);
     sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[4].ypos.hi, acorn[5].ypos.hi,
 	    acorn[6].ypos.hi, acorn[7].ypos.hi);
     printat(DEBUG_TXT_X,3);
+    */
+    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].en, acorn[0].spr_ptr,
+	    acorn[1].en, acorn[1].spr_ptr);
+    printat(DEBUG_TXT_X,2);
+    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[2].en, acorn[2].spr_ptr,
+	    acorn[3].en, acorn[3].spr_ptr);
+    printat(DEBUG_TXT_X,3);
+    /*    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].spr_ptr, acorn[1].spr_ptr,
+	    acorn[2].spr_ptr, acorn[3].spr_ptr);
+    printat(DEBUG_TXT_X,4);
+    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[4].spr_ptr, acorn[5].spr_ptr,
+	    acorn[6].spr_ptr, acorn[7].spr_ptr);
+    printat(DEBUG_TXT_X,5);
+    */
 #endif
       /*
     STR_BUF[1]=hexdigit[(gstate.counter&0x0f)];
@@ -620,10 +631,10 @@ void __fastcall__ game_sprite_setup(void)
   SPR_PTR[1]=2;
   SPR_PTR[2]=3;
   SPR_PTR[3]=2;
-  SPR_PTR[4]=28;
+  /*  SPR_PTR[4]=28;
   SPR_PTR[5]=28;
   SPR_PTR[6]=28;
-  SPR_PTR[7]=28;
+  SPR_PTR[7]=28;*/
 }
 
 void __fastcall__ process_input(void)

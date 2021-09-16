@@ -2,15 +2,17 @@
 
 .define IPDebug     0
 .include "macros.inc"
-	
+
 .import   _IRQ
+.import   _SPR_PTR
+.import   color_save
 
 .import   _spr_mux
 .import   _acorn
-ASIZE = 7
+ASIZE = 8
 
 .export acorn_set_pos
-	
+
 ;;  sprite mux setup
 .define LINES_EARLY  3
 .define MUX_SLOTS    2
@@ -26,9 +28,9 @@ en_tmp:
 	.res 1
 
 .macro setup_AXY idx
-	lda #(1<<((8-MUX_SLOTS)+(idx .mod MUX_SLOTS)))
-	ldx #(idx * ASIZE)	; index in the acorn array
-	ldy #((8-MUX_SLOTS)+(idx .mod MUX_SLOTS))*2 ; index in the SPR_POS register 
+	lda #(1<<((8-MUX_SLOTS)+(idx .mod MUX_SLOTS))) ; spr mask
+	ldx #(idx * ASIZE)	                       ; index in the acorn array
+	ldy #((8-MUX_SLOTS)+(idx .mod MUX_SLOTS))*2    ; index in the SPR_POS register 
 .endmacro
 
 
@@ -51,7 +53,6 @@ irq_table:
 	lda VIC_SPR_HI_X
 	and #($00FF>>MUX_SLOTS)
 	sta xpos_hi
-
 
 .repeat MUX_SLOTS, i
 	setup_AXY i
@@ -95,6 +96,13 @@ irq_table:
 	sta VIC_SPR0_Y,y
 	lda _acorn+1,x 	; acorn[idx].posx.lo
 	sta VIC_SPR0_X,y
+	tya
+	lsr
+	tay
+	lda _acorn+7,x
+	sta _SPR_PTR,y
+	;       lda _acorn+xxx,x   ; get ready to support muxing sprite colors as well
+	;	sta VIC_COL0,y
 	lda _acorn+2,x 	; acorn[idx].posx.hi
 	beq skip
 	lda xpos_hi
@@ -106,7 +114,7 @@ skip:
 
 .proc irq_body: near
 	sta mask
-	lda VIC_IRR		;irq ack
+	lda VIC_IRR		; irq ack
 	sta VIC_IRR
 	lda mask 		; setup en_tmp
 	eor #$ff
@@ -116,7 +124,7 @@ skip:
 	eor #$ff
 	and VIC_SPR_HI_X
 	sta xpos_hi
-	
+
 	jsr spr_pos		; expects en_tmp, mask, xpos_hi and index in X and Y
 
 	lda en_tmp		; write back en_tmp to VIC register
@@ -143,7 +151,7 @@ not_last:
 	border_restore
 	jmp $EA81
 .endproc
-	
+
 .macro IRQ_CODE idx
 	border_set_sprite (idx)
 	setup_AXY idx
