@@ -682,33 +682,34 @@ void __fastcall__ process_input(void)
     }
 }
 
-void __fastcall__ process_sound(void)
-{
-    if(sound.timer==0) {
-      SID.v3.ctrl=0x20;
-      return;
-    }
-    if(sound.index==0) {
-      SID.v3.freq=sound_seq[0];
-      SID.v3.ctrl=0x21;
-    }
-    sound.index++;
-    if(sound.index>=(sizeof(sound_seq)/2)) sound.index=1;
-    SID.v3.freq=sound_seq[sound.index];
-    sound.timer--;
-
-}
-
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
 
 void __fastcall__ start_sound(void)
 {
-  SID.v3.ctrl=0x20;
+  stop_sound();
   if(MODE_PLAY_DEMO()) {
     sound.timer=10;
     sound.index=0;
   }
+}
+
+void __fastcall__ process_sound(void)
+{
+    if(sound.timer==0) {
+      stop_sound();
+      return;
+    }
+    SID.v3.freq=sound_seq[sound.index];
+    
+    if(sound.index==0) {
+      SID.v3.ctrl=0x21;
+    }
+    //    VIC.bordercolor=sound.index+1;
+    // use index 0 only the first time
+    if(sound.index>=(sizeof(sound_seq)/2)) sound.index=0;
+    sound.index++;
+    sound.timer--;
 }
 
 void __fastcall__ check_collision(void)
