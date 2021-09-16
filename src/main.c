@@ -27,7 +27,7 @@
 
 #include "totoro64.h"
 
-#define VERSION "0.14"
+#define VERSION "0.15"
 
 #define STAGE_TIME 60
 
@@ -53,6 +53,8 @@
 #define MIN_X 32
 #define MAX_X 312
 #define MAX_PX (MAX_X-24)
+
+#define SPR_CENTER_X 184
 
 // title bar positions
 #define TIMETXT_X 0
@@ -455,15 +457,15 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[2].x=80+48*2;
   VIC.spr_pos[3].x=80+48*3;
   */
-  VIC.spr_pos[0].x=128;
-  VIC.spr_pos[1].x=128+24;
-  VIC.spr_pos[2].x=128+24*2;
-  VIC.spr_pos[3].x=128+24*3;
+  VIC.spr_pos[0].x=SPR_CENTER_X-48;
+  VIC.spr_pos[1].x=SPR_CENTER_X-24;
+  VIC.spr_pos[2].x=SPR_CENTER_X;
+  VIC.spr_pos[3].x=SPR_CENTER_X+24;
 
-  VIC.spr_pos[4].x=80;
-  VIC.spr_pos[5].x=80+48;
-  VIC.spr_pos[6].x=80+48*2;
-  VIC.spr_pos[7].x=80+48*3;
+  VIC.spr_pos[4].x=SPR_CENTER_X-96;
+  VIC.spr_pos[5].x=SPR_CENTER_X-48;
+  VIC.spr_pos[6].x=SPR_CENTER_X;
+  VIC.spr_pos[7].x=SPR_CENTER_X+48;
 
   VIC.spr_pos[0].y=60;
   VIC.spr_pos[1].y=60;
@@ -758,13 +760,13 @@ void __fastcall__ get_ready(void)
 
   CLR_TOP();
   strcpy8(STR_BUF,txt_ready);
-  convprint_big(14);
+  convprint_big(15);
   delay(VFREQ/3);
   strcpy8(STR_BUF,txt_set);
-  convprint_big(14);
+  convprint_big(15);
   delay(VFREQ/3);
   strcpy8(STR_BUF,txt_go);
-  convprint_big(15);
+  convprint_big(16);
   delay(VFREQ/3);
 }
 
@@ -837,7 +839,7 @@ int main()
   mode_text();
   VIC.spr_ena=0xff;
 
-  memcpy((uint8_t *)(0x400+40*6+15),present_txt,8);
+  memcpy((uint8_t *)(0x400+40*6+16),present_txt,8);
   memcpy((uint8_t *)(0x400+40*16),intro_txt,39);
   //strcpy8v((0x400+40*6+15),present_txt);
   //strcpy8v((0x400+40*16),intro_txt);
