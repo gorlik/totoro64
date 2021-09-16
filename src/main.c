@@ -384,7 +384,7 @@ void __fastcall__ acorn_add(void)
 	  r+=MIN_X;
       if(acorn_free_slot()) {
 
-	__asm__("ldx #(7*7+1)");
+	__asm__("ldx #(7*7)");
 	__asm__("loop1: lda _acorn-1,x");
 	__asm__("sta _acorn+7-1,x");
 	__asm__("dex");
