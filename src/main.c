@@ -385,10 +385,10 @@ void __fastcall__ acorn_add(void)
 	  r<<=3;
 	  r+=MIN_X;
       if(acorn_free_slot()) {
-
-	__asm__("ldx #(7*7)");
-	__asm__("loop1: lda _acorn-1,x");
-	__asm__("sta _acorn+7-1,x");
+	// shift acorn data 
+	__asm__("ldx #(%b*%b)",MAX_ACORNS-1,sizeof(struct acorn_t));
+	__asm__("loop1: lda %v-1,x",acorn);
+	__asm__("sta %v+%b-1,x",acorn,sizeof(struct acorn_t));
 	__asm__("dex");
 	__asm__("bne loop1");
 //	__asm__("lda $d01e");
