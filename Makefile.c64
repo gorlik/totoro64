@@ -8,7 +8,8 @@ SYS_INCLUDE=../src
 
 CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -O -t $(TARGET)
 
-OBJECTS=  variables.o sprites.o charset.o text_util.o irqplayer.o putchar.o util.o \
+OBJECTS=  variables.o sprites.o charset.o text_util.o \
+          irq.o irqplayer.o irqmux.o putchar.o util.o \
 	  bitmap.o color1.o color2.o music.o intro_text.o
 
 
@@ -23,7 +24,7 @@ all:    game64 game64.crt game64.bin
 game64: game64.bin
 	dd if=$< bs=1 skip=7 | cat ../src/prg_header.bin - >$@ 
 
-game64.o: main.c
+game64.o: main.c totoro64.h
 	cl65 $(CFLAGS) -c -o $@ $<
 
 %.crt: %.o cart64_16k.o $(OBJECTS)
