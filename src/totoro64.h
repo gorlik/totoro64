@@ -150,7 +150,8 @@ extern unsigned char c1,ctmp;
 #pragma zpsym("ctmp")
 
 // global variables
-extern const uint8_t charset[];
+extern uint8_t charset[];
+extern const uint8_t charset_data[];
 extern const uint8_t sprite_src_data[];
 extern const uint8_t bitmap_data[];
 extern const uint8_t color1_data[];
@@ -162,7 +163,7 @@ extern uint8_t COLOR_BASE[]; // color base
 extern uint8_t SPR_DATA[];   // sprite data
 extern uint8_t SPR_PTR[];    // sprite pointers
 
-extern uint8_t STR_BUF[];
+extern uint8_t STR_BUF[64];
 
 // irq player interface
 extern const uint8_t track1[];

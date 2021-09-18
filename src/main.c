@@ -162,6 +162,8 @@ struct player_t totoro;
 struct acorn_t acorn[MAX_ACORNS];
 struct sound_t sound;
 
+uint8_t STR_BUF[64];
+
 uint8_t spr_mux;
 uint8_t cr;
 
@@ -859,6 +861,7 @@ int main()
   memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
 #endif
 
+  inflatemem (charset, charset_data);
   inflatemem (SCR_BASE, bitmap_data);
   inflatemem (COLOR_BASE, color1_data);
 

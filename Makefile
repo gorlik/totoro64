@@ -23,14 +23,15 @@ artwork: charset sprites background
 
 charset: tools artwork/totoro-charset.bin
 	utils/make_font_table artwork/totoro-charset.bin >src/charset.bin
-	utils/bin_to_c src/charset.bin charset TABLES >src/charset.c
+	cd src; zopfli --i100 --deflate charset.bin
+	utils/bin_to_c src/charset.bin.deflate charset_data  >src/charset.c
 
-sprites: tools prg_studio_project/sprites.bin
+sprites: prg_studio_project/sprites.bin tools
 	cp prg_studio_project/sprites.bin src
 	cd src; zopfli --i100 --deflate sprites.bin
 	utils/bin_to_c src/sprites.bin.deflate sprite_src_data  >src/sprites.c
 
-background: tools artwork/background.s
+background: artwork/background.s tools
 	utils/asm_to_bin artwork/background.s 4 8000 >src/background-bitmap.bin
 	utils/asm_to_bin artwork/background.s 8004 1000 >src/background-color1.bin
 	utils/asm_to_bin artwork/background.s 9004 1000 >src/background-color2.bin

@@ -44,10 +44,10 @@ _COLOR_BASE = _SCR_BASE   - $400
 _SPR_PTR    = _COLOR_BASE + $3f8
 _SPR_DATA   = _VIC_BASE
 
-_STR_BUF    = $C780
+_charset    = $c000
 
-.export _STR_BUF
 .export _SCR_BASE
 .export _COLOR_BASE
 .export _SPR_DATA
 .export _SPR_PTR
+.export _charset
