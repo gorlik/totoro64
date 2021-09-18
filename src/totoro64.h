@@ -43,6 +43,15 @@
 #define VFREQ 50
 #endif
 
+// indexes in the sprite data
+#define SPR_ACORN_LG      28
+#define SPR_ACORN_SM      29
+#define SPR_GGLABS_1      35
+#define SPR_TITLE_BOLD_1  39
+#define SPR_64            42
+#define SPR_TXT_GAME_OVER 43
+#define SPR_TITLE_MOVIE_1 58
+
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2

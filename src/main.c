@@ -393,8 +393,7 @@ void __fastcall__ acorn_add(void)
 	acorn[0].xpos.val=r;
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
-	acorn[0].spr_ptr=28;
-	//	acorn[0].spr_ptr=(r&0x08)?28:29;
+	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
 	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
 	  }
 	}
