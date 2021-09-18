@@ -109,14 +109,8 @@ extern const unsigned char license_txt[];
 
 const uint8_t run_seq[] =
   {
-   8,4,9,
-   10,5,11,
-   12,6,13,
-   10,5,11,
-   20,16,21,
-   22,17,23,
-   24,18,25,
-   22,17,23
+    4,7,10,7, // run right
+    16,19,22,19, // run left
   };
 
 const uint16_t sound_seq[] = {
@@ -199,47 +193,47 @@ void __fastcall__ totoro_set_pos(void)
 
   switch(totoro.state) {
   case IDLE:
-    if(totoro.blink)   SPR_PTR[0]=1;
+    if(totoro.blink)   SPR_PTR[0]=3;
     else   SPR_PTR[0]=0;
-    SPR_PTR[1]=2;
-    SPR_PTR[2]=3;
+    SPR_PTR[1]=1;
+    SPR_PTR[2]=2;
     break;
   case RUN:
     if(totoro.xv>0) {
-      SPR_PTR[0]=run_seq[0+totoro.idx*3];
-      SPR_PTR[1]=run_seq[1+totoro.idx*3];
-      SPR_PTR[2]=run_seq[2+totoro.idx*3];
+      SPR_PTR[0]=run_seq[totoro.idx];
+      SPR_PTR[1]=run_seq[totoro.idx]+1;
+      SPR_PTR[2]=run_seq[totoro.idx]+2;
     } else {
-      SPR_PTR[0]=run_seq[12+totoro.idx*3];
-      SPR_PTR[1]=run_seq[13+totoro.idx*3];
-      SPR_PTR[2]=run_seq[14+totoro.idx*3];
+      SPR_PTR[0]=run_seq[totoro.idx+4];
+      SPR_PTR[1]=run_seq[totoro.idx+4]+1;
+      SPR_PTR[2]=run_seq[totoro.idx+4]+2;
     }
     break;
   case BRAKE:
     if(totoro.xv>0) {
-      SPR_PTR[0]=14;
-      SPR_PTR[1]=7;
+      SPR_PTR[0]=13;
+      SPR_PTR[1]=14;
       SPR_PTR[2]=15;
     } else {
-      SPR_PTR[0]=26;
-      SPR_PTR[1]=19;
+      SPR_PTR[0]=25;
+      SPR_PTR[1]=26;
       SPR_PTR[2]=27;
     }
     break;
   case JUMP:
     if(totoro.xv>0) {
       SPR_PTR[0]=run_seq[0];
-      SPR_PTR[1]=run_seq[1];
-      SPR_PTR[2]=run_seq[2];
+      SPR_PTR[1]=run_seq[0]+1;
+      SPR_PTR[2]=run_seq[0]+2;
     } else if (totoro.xv<0) {
-      SPR_PTR[0]=run_seq[12];
-      SPR_PTR[1]=run_seq[13];
-      SPR_PTR[2]=run_seq[14];
+      SPR_PTR[0]=run_seq[4];
+      SPR_PTR[1]=run_seq[4]+1;
+      SPR_PTR[2]=run_seq[4]+2;
     } else {
       // add eye movement based on up or down
       SPR_PTR[0]=0;
-      SPR_PTR[1]=2;
-      SPR_PTR[2]=3;
+      SPR_PTR[1]=1;
+      SPR_PTR[2]=2;
     }
     break;
   }
@@ -765,12 +759,12 @@ void __fastcall__ delay(uint8_t f)
 void __fastcall__ get_ready(void)
 {
   CLR_TOP();
-  //sprintf(STR_BUF,"STAGE %d",gstate.stage);
-  //convprint_big(14);
-  //delay(VFREQ);
-  //  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
-  // convprint_big(4);
-  // delay(VFREQ);
+  sprintf(STR_BUF,"STAGE %d",gstate.stage);
+  convprint_big(14);
+  delay(VFREQ);
+  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
+  convprint_big(4);
+  delay(VFREQ);
 
   CLR_TOP();
   strcpy8(STR_BUF,txt_ready);
@@ -841,6 +835,8 @@ int main()
 
   inflatemem (SPR_DATA, sprite_src_data);
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
+// movie style title
+//  memcpy((uint8_t *)(0x4000-64*4),SPR_DATA+58*64,64*3);
   setup_sid();
 
   spr_mux=0;
