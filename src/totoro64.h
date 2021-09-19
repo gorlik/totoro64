@@ -121,6 +121,17 @@ struct sound_t {
   uint8_t index;
 };
 
+struct track_t {
+  uint16_t ptr;       // ptr to next byte in track
+  uint8_t  timer;     // note timer
+  uint8_t  instr;     // instrument
+  uint8_t  track_offset;   // semitone offset from music data
+  uint8_t  global_offset;  // semitone offset from main code
+  uint8_t  voice_offset;   // SID register offset for the voice
+  uint8_t  next_offset; // next semitone offset
+  uint16_t restart_ptr;
+};
+
 // ASM function prototypes
 void IRQ(void);
 
@@ -175,17 +186,11 @@ extern uint8_t SPR_PTR[];    // sprite pointers
 extern uint8_t STR_BUF[64];
 
 // irq player interface
-extern const uint8_t track1[];
-extern uint8_t instr1;
-extern uint8_t time1;
-extern uint8_t loop1;
-extern uint8_t next_loop1;
+extern const uint8_t track0_data[];
+extern const uint8_t track1_data[];
+extern struct track_t track[2];
 extern uint8_t vpb;
 
-extern const uint8_t *t1ptr;
-extern const uint8_t *t2ptr;
-#pragma zpsym("t1ptr")
-#pragma zpsym("t2ptr")
 
 #define memset8(addr, v, c) \
   __asm__("ldx #%b",c);	    \

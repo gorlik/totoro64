@@ -31,6 +31,10 @@
 .import   acorn_set_pos
 .import   play_track
 
+; must be equal to sizeof(struct track_t)
+.define   TRACK_T_SIZE 10
+
+
 .segment 	"BSS"
 color_save:
 	.res 1
@@ -46,7 +50,10 @@ color_save:
         beq no_mux
         jsr acorn_set_pos
 no_mux:
-	jsr play_track
+	ldx #0*TRACK_T_SIZE
+	jsr play_track		; track[0]
+	ldx #1*TRACK_T_SIZE
+	jsr play_track		; track[1]
 not_vic:
 	jmp $EA31 		; alway chain the standard kernel IRQ
 .endproc

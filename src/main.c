@@ -27,7 +27,7 @@
 
 #include "totoro64.h"
 
-#define VERSION "0.15"
+#define VERSION "0.16"
 
 #define STAGE_TIME 60
 
@@ -156,6 +156,10 @@ struct player_t totoro;
 struct acorn_t acorn[MAX_ACORNS];
 struct sound_t sound;
 
+struct track_t track[2];
+uint8_t vpb;
+
+
 uint8_t STR_BUF[64];
 
 uint8_t spr_mux;
@@ -167,10 +171,24 @@ void __fastcall__ setup_sid(void)
   SID.amp = 0x1f; // set volume to 15
   SID.v1.ad = 0x80;
   SID.v1.sr = 0xf6;
-  loop1 = 0;
-  t1ptr=track1;
-  instr1 = 0; // instrument is now defined in the track
-  time1  = 0;
+  track[0].ptr=(uint16_t)track0_data;
+  track[0].restart_ptr=(uint16_t)track0_data;
+  track[0].track_offset=0;
+  track[0].global_offset=4;
+  track[0].next_offset=4;
+  track[0].timer=0;
+  track[0].voice_offset=0;
+
+  SID.v2.ad = 0x40;
+  SID.v2.sr = 0x56; 
+  track[1].ptr=(uint16_t)track1_data;
+  track[1].restart_ptr=(uint16_t)track1_data;
+  track[1].track_offset=0;
+  track[1].global_offset=0;
+  track[1].next_offset=0;
+  track[1].timer=0;
+  track[1].voice_offset=7;
+
   vpb = VPB;
 
   //  SID.v3.ctrl= 0x20;
@@ -561,6 +579,12 @@ void __fastcall__ update_top_bar(void)
       break;
       }
 #else
+    sprintf(STR_BUF,"%04x %02x %02x ", track[0].ptr, *(uint8_t *)(track[0].ptr),
+	    *(uint8_t *)(track[0].ptr+1));
+    printat(DEBUG_TXT_X,2);
+    //    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[4].ypos.hi, acorn[5].ypos.hi,
+    //	    acorn[6].ypos.hi, acorn[7].ypos.hi);
+    //    printat(DEBUG_TXT_X,3);
     /*
     sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].ypos.hi, acorn[1].ypos.hi,
 	    acorn[2].ypos.hi, acorn[3].ypos.hi);
@@ -569,12 +593,13 @@ void __fastcall__ update_top_bar(void)
 	    acorn[6].ypos.hi, acorn[7].ypos.hi);
     printat(DEBUG_TXT_X,3);
     */
-    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].en, acorn[0].spr_ptr,
+    /*    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].en, acorn[0].spr_ptr,
 	    acorn[1].en, acorn[1].spr_ptr);
     printat(DEBUG_TXT_X,2);
     sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[2].en, acorn[2].spr_ptr,
 	    acorn[3].en, acorn[3].spr_ptr);
-    printat(DEBUG_TXT_X,3);
+	    printat(DEBUG_TXT_X,3);*/
+
     /*    sprintf(STR_BUF,"%02x %02x %02x %02x ", acorn[0].spr_ptr, acorn[1].spr_ptr,
 	    acorn[2].spr_ptr, acorn[3].spr_ptr);
     printat(DEBUG_TXT_X,4);
@@ -625,11 +650,7 @@ void __fastcall__ game_sprite_setup(void)
   SPR_PTR[0]=0;
   SPR_PTR[1]=2;
   SPR_PTR[2]=3;
-  SPR_PTR[3]=2;
-  /*  SPR_PTR[4]=28;
-  SPR_PTR[5]=28;
-  SPR_PTR[6]=28;
-  SPR_PTR[7]=28;*/
+  //SPR_PTR[3]=2;
 }
 
 void __fastcall__ process_input(void)
@@ -958,13 +979,11 @@ int main()
       for(;gstate.time&&gstate.acorns;)
 	game_loop();
 
-      //      stop_sound();
-
       gstate.mode=GMODE_CUT1;
       if(gstate.acorns==0) {
 	flag=1;
+	track[0].next_offset=rand()&0xe;
 	CLR_TOP();
-	next_loop1=rand()&0xe;
 	strcpy8(STR_BUF,txt_clear);
 	convprint_big(8);
       } else {

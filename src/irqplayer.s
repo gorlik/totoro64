@@ -19,111 +19,170 @@
 ;******************************************************************************
 
 .include "c64.inc"
-	
+
 .define IPDebug     0
 .include "macros.inc"
 
 .export   play_track
-.export   _time1, _instr1, _loop1, _next_loop1, _vpb
 
-.importzp _t1ptr
-.importzp _t2ptr
-.import   _track1
+.importzp _track_ptr
+
+.import   _vpb
+.import   _track
+
 .import   _FTableLo
 .import   _FTableHi
 
-.import   acorn_set_pos
+.import color_save
 	
-.import   _spr_mux
-
 .define SIDRestart  0
 
+.define TRACK_T_SIZE 10
 
 .segment 	"BSS"
 tmp:
 	.res 1
-_next_loop1:
-	.res 1
-_time1:
-	.res 1
-_instr1:
-	.res 1
-_loop1:
-	.res 1
-_vpb:
-	.res 1
 ctmp:
 	.res 1
-_l_offset:
+trk_offset:
 	.res 1
+
+;;  offsets for the track_t structure
+.define TRACK_PTR0 0
+.define TRACK_PTR1 1
+.define TIMER      2
+.define INSTR      3
+.define TRACK_OFF  4
+.define GLB_OFF    5
+.define SID_OFF    6
+.define NEXT_OFF   7
+.define START_PTR0 8
+.define START_PTR1 9
+
+
+;; temporary storage that must be saved
+timer:
+	.res 1
+instr:
+	.res 1
+track_offset:
+	.res 1
+	;; additional temporary storage (not saved)
+global_offset:
+	.res 1			;
+SID_offset:
+	.res 1
+
+
+.macro load_track_state
+;.local loop
+	stx trk_offset
+	lda _track+TRACK_PTR0,x
+	sta _track_ptr
+	lda _track+TRACK_PTR1,x
+	sta _track_ptr+1
+
+	lda _track+TIMER,x
+	sta timer
+	lda _track+INSTR,x
+	sta instr
+	lda _track+TRACK_OFF,x
+	sta track_offset
+	lda _track+GLB_OFF,x
+	sta global_offset
+	lda _track+SID_OFF,x
+	sta SID_offset
+	tax
+.endmacro
+
+.macro save_track_state
+				;.local loop
+	ldx trk_offset
+	lda _track_ptr
+	sta _track+0,x
+	lda _track_ptr+1
+	sta _track+1,x
+
+	lda timer
+	sta _track+2,x
+
+	lda instr
+	sta _track+3,x
+.endmacro
 
 .segment	"CODE"
 
 ;; ****************** IRQ Interrupt *********************
 .proc play_track: near
         border_set 1
-	lda _time1
-	bne time_dec		; timer not expired
+	load_track_state
+	lda timer  		;
+	bne timer_dec		; timer not expired
 next:
 	ldy #0
-	lda (_t1ptr),y
+	lda (_track_ptr),y
 	sta tmp
-	jsr inc_t1ptr 		; _t1ptr point to the next byte
+	jsr inc_track_ptr 	; _track_ptr point to the next byte
 	and #$f0
 	bne parse_cmd
 	;; new note
 .if SIDRestart = 1
 	lda #$80
-	sta SID_AD1
+	sta SID_AD1,x
 	lda #$F6
-	sta SID_SUR1
+	sta SID_SUR1,x
 	lda #$00
 .endif
 	clc
 	ldx _vpb
 add_more:
-	adc tmp
+	adc tmp			; tmp contains the note lenght in beats
 	dex
 	bne add_more
-	sta _time1
+	sta timer    	; store timer
 
-	lda (_t1ptr),y
+	ldx SID_offset
+	ldy #0
+	lda (_track_ptr),y	; get the note
 	bne not_pause
-	lda _instr1
-	sta SID_Ctl1
+	lda instr      ; get the instrument
+	sta SID_Ctl1,x
 	jmp inc_ptr
 
-not_pause:
-	adc _loop1
-	adc _l_offset
-	tax
-	lda _FTableHi,x
-	sta SID_S1Hi
-	lda _FTableLo,x
-	sta SID_S1Lo
-	lda _instr1
+not_pause:			;note in A
+	clc
+	adc track_offset
+	adc global_offset
+	tay
+	lda _FTableHi,y
+	sta SID_S1Hi,x
+	lda _FTableLo,y
+	sta SID_S1Lo,x
+	lda instr
 	ora #1
-	sta SID_Ctl1
+	sta SID_Ctl1,x
 inc_ptr:
-	jsr inc_t1ptr
-time_dec:
-	dec _time1
-	lda _time1
+	jsr inc_track_ptr
+timer_dec:
+	dec timer
+	lda timer
 	cmp #2
 	bne end
 .if SIDRestart = 1
 	lda #0
-	sta SID_AD1
-	sta SID_SUR1
+	sta SID_AD1,x
+	sta SID_SUR1,x
 .endif
-	lda _instr1
-	sta SID_Ctl1
+	lda instr	; stop sound
+	sta SID_Ctl1,x
 end:
+	save_track_state
 	border_restore
 	rts
 
 	;; cmd is in tmp, Y=0
 parse_cmd:
+	ldx trk_offset
 	lda tmp
 	cmp #$ff
 	beq cmd_ff
@@ -133,30 +192,35 @@ parse_cmd:
 	beq cmd_fd
 	jmp next
 
-cmd_ff:	 			; end of stream
-	lda #<_track1
-	sta _t1ptr
-	lda #>_track1
-	sta _t1ptr+1		; point to the beginning of the stream
-	lda _next_loop1
-	sta _loop1		; set the new offset
+cmd_ff:	 				; end of stream
+	lda _track+START_PTR0,x		; restart_ptr
+	sta _track_ptr
+	lda _track+START_PTR1,x
+	sta _track_ptr+1		; point to the beginning of the stream
+	lda _track+NEXT_OFF,x		; next offset
+	sta _track+GLB_OFF,x	        ; set the new global offset
+	sta global_offset
 	jmp next
 
 cmd_fe:	 			; change instrument
-	lda (_t1ptr),y
-	sta _instr1
-	jsr inc_t1ptr
-	jmp next
-cmd_fd:	 			; change offset
-	lda (_t1ptr),y
-	sta _l_offset
-	jsr inc_t1ptr
+	lda (_track_ptr),y
+	sta instr
+	jsr inc_track_ptr
 	jmp next
 
-inc_t1ptr:
-	inc _t1ptr
-	bne t1inc_end
-	inc _t1ptr+1
-t1inc_end:
+cmd_fd:	 			; change track offset
+	lda (_track_ptr),y
+	sta _track+TRACK_OFF,x
+	sta track_offset
+	jsr inc_track_ptr
+	jmp next
+
+.endproc
+
+.proc inc_track_ptr: near
+	inc _track_ptr
+	bne inc_end
+	inc _track_ptr+1
+inc_end:
 	rts
 .endproc

@@ -22,7 +22,7 @@
 ;;  ZP_2 range 0xF7-0xFE
 _line_ptr:
 	.res 2
-_t1ptr:
+_track_ptr:
 	.res 2
 _t2ptr:
 	.res 2
@@ -33,7 +33,7 @@ _ctmp:
 
 
 .exportzp       _line_ptr
-.exportzp       _t1ptr
+.exportzp       _track_ptr
 .exportzp       _t2ptr
 .exportzp       _c1
 .exportzp       _ctmp
