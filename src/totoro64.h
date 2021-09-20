@@ -43,6 +43,17 @@
 #define VFREQ 50
 #endif
 
+// sprite max speed
+#ifdef NTSC
+#define MAX_XV 13
+// should be 8 with .66 acceleration
+// approximate to 9 and .75 acceleration
+#define JUMP_V 9
+#else
+#define MAX_XV 16
+#define JUMP_V 10
+#endif
+
 // indexes in the sprite data
 #define SPR_ACORN_LG      28
 #define SPR_ACORN_SM      29
@@ -56,6 +67,29 @@
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2
 
+
+// sprite position constants/limits
+#define GROUND_Y 220
+#define PGROUND_Y (GROUND_Y-21)
+
+#define ACORN_START_Y 68
+
+#define MIN_X 32
+#define MAX_X 312
+#define MAX_PX (MAX_X-24)
+
+#define SPR_CENTER_X 184
+
+
+#define CHU_TOTORO   0
+#define CHIBI_TOTORO sizeof(struct player_t)
+
+
+#define stop_sound() \
+  do { SID.v3.ctrl=0x20; } while(0)
+
+
+// types
 enum t_state {
   IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
 };
@@ -85,6 +119,7 @@ struct game_state_t {
   uint8_t  counter;   // free running
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
+  uint8_t  anim_idx;
   uint16_t score;
   uint16_t hi_score;
   enum g_mode mode;
@@ -103,7 +138,7 @@ struct player_t {
   word_t  ypos;
   int8_t  xv;
   word_t  yv;    // 8.8 format
-  uint8_t idx;
+  //  uint8_t idx;
   uint8_t blink;
   enum t_state  state;
   //  enum t_dir    dir;
@@ -122,13 +157,13 @@ struct sound_t {
 };
 
 struct track_t {
-  uint16_t ptr;       // ptr to next byte in track
-  uint8_t  timer;     // note timer
-  uint8_t  instr;     // instrument
-  uint8_t  track_offset;   // semitone offset from music data
-  uint8_t  global_offset;  // semitone offset from main code
-  uint8_t  voice_offset;   // SID register offset for the voice
-  uint8_t  next_offset; // next semitone offset
+  uint16_t ptr;           // ptr to next byte in track
+  uint8_t  timer;         // note timer
+  uint8_t  instr;         // instrument
+  uint8_t  track_offset;  // semitone offset from music data
+  uint8_t  global_offset; // semitone offset from main code
+  uint8_t  voice_offset;  // SID register offset for the voice
+  uint8_t  next_offset;   // next semitone offset
   uint16_t restart_ptr;
 };
 
@@ -147,9 +182,10 @@ void __fastcall__ convert_big(void);
 void __fastcall__ printbigat(uint8_t x, uint8_t y);
 
 // totoro actions
-void __fastcall__ totoro_init(void);
-void __fastcall__ totoro_update(void);
+void __fastcall__ totoro_init(uint8_t p);
+void __fastcall__ totoro_update(uint8_t p);
 void __fastcall__ totoro_set_pos(void);
+void __fastcall__ chibi_set_pos(void);
 
 // acorn actions
 void __fastcall__ acorn_init(void);
@@ -158,6 +194,7 @@ void __fastcall__ acorn_set_pos(void);
 uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
+void __fastcall__ start_sound(void);
 uint8_t __fastcall__ joy2(void);
 void __fastcall__ string_pad(int8_t pad);
 
@@ -172,8 +209,7 @@ extern unsigned char c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")
 
-// global variables
-extern uint8_t charset[];
+// compressed data
 extern const uint8_t charset_data[];
 extern const uint8_t sprite_src_data[];
 extern const uint8_t bitmap_data[];
@@ -181,17 +217,22 @@ extern const uint8_t color1_data[];
 extern const uint8_t color2_data[];
 
 // base pointers for screen data
+extern uint8_t charset[];    // uncompressed charset
 extern uint8_t SCR_BASE[];   // screen base
 extern uint8_t COLOR_BASE[]; // color base
 extern uint8_t SPR_DATA[];   // sprite data
 extern uint8_t SPR_PTR[];    // sprite pointers
 
+// global variables
 extern uint8_t STR_BUF[64];
+extern struct  game_state_t gstate;
+extern struct  player_t totoro[2];
+extern struct  acorn_t acorn[MAX_ACORNS];
 
 // irq player interface
-extern const uint8_t track0_data[];
-extern const uint8_t track1_data[];
-extern struct track_t track[2];
+extern const   uint8_t track0_data[];
+extern const   uint8_t track1_data[];
+extern struct  track_t track[2];
 extern uint8_t vpb;
 
 

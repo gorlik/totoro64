@@ -27,34 +27,11 @@
 
 #include "totoro64.h"
 
-#define VERSION "0.16"
+#define VERSION "0.17"
 
 #define STAGE_TIME 60
 
 #define EOF_LINE 0x80
-
-// sprite max speed
-#ifdef NTSC
-#define MAX_XV 13
-// should be 8 with .66 acceleration
-// approximate to 9 and .75 acceleration
-#define JUMP_V 9
-#else
-#define MAX_XV 16
-#define JUMP_V 10
-#endif
-
-// sprite position constants/limits
-#define GROUND_Y 220
-#define PGROUND_Y (GROUND_Y-21)
-
-#define ACORN_START_Y 68
-
-#define MIN_X 32
-#define MAX_X 312
-#define MAX_PX (MAX_X-24)
-
-#define SPR_CENTER_X 184
 
 // title bar positions
 #define TIMETXT_X 0
@@ -109,12 +86,6 @@ extern const unsigned char license_txt[];
   __asm__("sta %w,x",dst);     \
   __asm__("bne ls%v",src);
 
-const uint8_t run_seq[] =
-  {
-    4,7,10,7, // run right
-    16,19,22,19, // run left
-  };
-
 const uint16_t sound_seq[] = {
   0x22d0,
   0x1f04,
@@ -154,7 +125,7 @@ const struct stage_t stage[] =
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
 
 struct game_state_t gstate;
-struct player_t totoro;
+
 struct acorn_t acorn[MAX_ACORNS];
 struct sound_t sound;
 
@@ -213,126 +184,6 @@ void __fastcall__ setup_sid(void)
   //  SID.v3.ctrl= 0x20;
   SID.v3.ad = 0x00;
   SID.v3.sr = 0xa9;
-}
-
-void __fastcall__ totoro_set_pos(void)
-{
-  VIC.spr0_x   = totoro.xpos.lo;
-  VIC.spr1_x   = totoro.xpos.lo;
-  VIC.spr2_x   = totoro.xpos.lo;
-
-  if(totoro.xpos.hi)   VIC.spr_hi_x |=0x07;
-  else VIC.spr_hi_x &= 0xf8;
-
-  VIC.spr0_y   = totoro.ypos.lo;
-  VIC.spr1_y   = totoro.ypos.lo;
-  VIC.spr2_y   = totoro.ypos.lo;
-
-  switch(totoro.state) {
-  case IDLE:
-    if(totoro.blink)   SPR_PTR[0]=3;
-    else   SPR_PTR[0]=0;
-    SPR_PTR[1]=1;
-    SPR_PTR[2]=2;
-    break;
-  case RUN:
-    if(totoro.xv>0) {
-      SPR_PTR[0]=run_seq[totoro.idx];
-      SPR_PTR[1]=run_seq[totoro.idx]+1;
-      SPR_PTR[2]=run_seq[totoro.idx]+2;
-    } else {
-      SPR_PTR[0]=run_seq[totoro.idx+4];
-      SPR_PTR[1]=run_seq[totoro.idx+4]+1;
-      SPR_PTR[2]=run_seq[totoro.idx+4]+2;
-    }
-    break;
-  case BRAKE:
-    if(totoro.xv>0) {
-      SPR_PTR[0]=13;
-      SPR_PTR[1]=14;
-      SPR_PTR[2]=15;
-    } else {
-      SPR_PTR[0]=25;
-      SPR_PTR[1]=26;
-      SPR_PTR[2]=27;
-    }
-    break;
-  case JUMP:
-    if(totoro.xv>0) {
-      SPR_PTR[0]=run_seq[0];
-      SPR_PTR[1]=run_seq[0]+1;
-      SPR_PTR[2]=run_seq[0]+2;
-    } else if (totoro.xv<0) {
-      SPR_PTR[0]=run_seq[4];
-      SPR_PTR[1]=run_seq[4]+1;
-      SPR_PTR[2]=run_seq[4]+2;
-    } else {
-      // add eye movement based on up or down
-      SPR_PTR[0]=0;
-      SPR_PTR[1]=1;
-      SPR_PTR[2]=2;
-    }
-    break;
-  }
-}
-
-void __fastcall__ totoro_update(void)
-{
-  static uint16_t r;
- 
-  totoro.xpos.val+=(totoro.xv>>2);
-
-  if(totoro.xpos<MIN_X) {
-    totoro.xpos.val=MIN_X;
-    totoro.xv=-1;
-  } else if(totoro.xpos>MAX_PX) {
-    if(!(gstate.mode&0xfe)) {
-      totoro.xpos.val=MAX_PX;
-      totoro.xv=1;
-    }
-  }
-
-  totoro.ypos.val+=totoro.yv.val;
-
-  if(totoro.state==JUMP) {
-    totoro.yv++;
-  }
-
-  if(totoro.ypos>PGROUND_Y) {
-    totoro.ypos.val=PGROUND_Y;
-    if(totoro.xv) totoro.state=RUN;
-    else totoro.state=IDLE;
-    totoro.yv.val=0;
-  }
-
-  if((totoro.xv==0) && (totoro.state!=JUMP))
-    totoro.state=IDLE;
-
-  if(totoro.blink)
-    totoro.blink--;
-
-  totoro.idx=(gstate.counter&0xF)>>2;
-
-  if(gstate.field==25) {
-    if((totoro.state==IDLE) && (totoro.blink==0)) {
-      r=rand();
-      if((r&0x3)==0x3) {
-	totoro.blink=VFREQ/10;
-      }
-    }
-  }
-}
-
-
-void __fastcall__ totoro_init(void)
-{
-  totoro.xpos.val=(MAX_PX-MIN_X)/2;
-  totoro.ypos.val=PGROUND_Y;
-  totoro.xv=0;
-  totoro.yv.val=0;
-  totoro.idx=0;
-  totoro.state=IDLE;
-  totoro.blink=0;
 }
 
 #define acorn_update_m(a) do {		  	 \
@@ -475,24 +326,13 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_exp_x=0xf0;  // totoro64 exp x
   VIC.spr_exp_y=0xf0;  // totoro64 exp y
 
+  // setup sprite pointers for the title screen
+  //  for(i=0;i<8;i++) POKE(0x7f8+i,248+i);
   __asm__("ldx #248");
   __asm__("loopt: txa");
   __asm__("sta $7f8-248,x");
   __asm__("inx");
   __asm__("bne loopt");
-  
-  /*
-  // GGLABS
-  POKE(0x7f8+0,248);
-  POKE(0x7f8+1,249);
-  POKE(0x7f8+2,250);
-  POKE(0x7f8+3,251);
-  // totoro64 logo
-  POKE(0x7f8+4,252);
-  POKE(0x7f8+5,253);
-  POKE(0x7f8+6,254);
-  POKE(0x7f8+7,255);
-  */
   
   VIC.spr_pos[0].x=SPR_CENTER_X-48;
   VIC.spr_pos[1].x=SPR_CENTER_X-24;
@@ -666,89 +506,23 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[1]=COLOR_BLACK;
   VIC.spr_color[2]=COLOR_WHITE;
   VIC.spr_color[3]=COLOR_BLACK;
+  VIC.spr_color[4]=COLOR_WHITE;
+  
 #if (DEBUG&DEBUG_ACORNS)
-  VIC.spr_color[4]=COLOR_BLACK;
-  VIC.spr_color[5]=COLOR_YELLOW;
   VIC.spr_color[6]=COLOR_BLUE;
   VIC.spr_color[7]=COLOR_GREEN;
 #else
-  VIC.spr_color[4]=COLOR_ORANGE;
-  VIC.spr_color[5]=COLOR_ORANGE;
   VIC.spr_color[6]=COLOR_ORANGE;
   VIC.spr_color[7]=COLOR_ORANGE;
 #endif
 
-  VIC.spr_mcolor=0xF4; // leaf is undecided if mcolor
+  VIC.spr_mcolor=0xC4; // spr 5 is undecided if multicolor
   VIC.spr_exp_x=0x07;
   VIC.spr_exp_y=0x07;
 
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
-
-  SPR_PTR[0]=0;
-  SPR_PTR[1]=2;
-  SPR_PTR[2]=3;
-  //SPR_PTR[3]=2;
 }
-
-void __fastcall__ process_input(void)
-{
-  static uint8_t key;
-  static uint8_t js;
-
-  if(gstate.mode==GMODE_PLAY) {
-    key=PEEK(197);
-    js=joy2();
-    if(js) {
-      if(js&0x04) key = 10; // left
-      if(js&0x08) key = 18; // right
-      if(js&0x10) key = 60; // button
-      if(js&0x01) key = 60; // up?
-    }
-  } else key=18; // simulate 'D'
-
-   if(totoro.state!=JUMP)
-    switch(key) {
-    case 10: // A
-      if(totoro.xv>-MAX_XV) {
-	totoro.xv-=2;
-	if(totoro.xv>0) {
-	  totoro.state=BRAKE;
-	} else {
-	  totoro.state=RUN;
-	}
-      }
-      break;
-    case 18: // D
-      if(totoro.xv<MAX_XV) {
-	totoro.xv+=2;
-	if(totoro.xv<0) {
-	  totoro.state=BRAKE;
-	} else {
-	  totoro.state=RUN;
-	}
-      }
-      break;
-    case 60: // space
-      totoro.yv.val=-JUMP_V;
-      totoro.state=JUMP;
-      break;
-    default:
-      if(totoro.xv>0) {
-	totoro.xv--;
-	totoro.state=BRAKE;
-      } else if(totoro.xv<0) {
-	totoro.xv++;
-	totoro.state=BRAKE;
-      } else {
-	totoro.state=IDLE;
-      }
-      break;
-    }
-}
-
-#define stop_sound() \
-  do { SID.v3.ctrl=0x20; } while(0)
 
 void __fastcall__ start_sound(void)
 {
@@ -770,42 +544,11 @@ void __fastcall__ process_sound(void)
     if(sound.index==0) {
       SID.v3.ctrl=0x21;
     }
-    //    VIC.bordercolor=sound.index+1;
+    // VIC.bordercolor=sound.index+1;
     // use index 0 only the first time
     if(sound.index>=(sizeof(sound_seq)/2)) sound.index=0;
     sound.index++;
     sound.timer--;
-}
-
-void __fastcall__ check_collision(void)
-{
-  //  static uint8_t color;
-
-  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
-    //    color=COLOR_ORANGE;
-    if(acorn[ctmp].en) {
-      if((((acorn[ctmp].ypos.hi))>(totoro.ypos.uval-20)) &&
-	 (((acorn[ctmp].ypos.hi))<(totoro.ypos.uval+42)) ) {
-	//	color=COLOR_YELLOW;
-	if((totoro.xpos.val>(acorn[ctmp].xpos.val-36)) &&
-	   (totoro.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
-	  //	  color=COLOR_RED;
-//	    if(cr&(0x10<<ctmp)){
-	      //color=COLOR_BLACK;
-	      acorn[ctmp].en=0;
-	      start_sound();
-	      /* VIC.spr_ena&=~(0x10<<a) */
-	      gstate.score+=10+(PGROUND_Y-totoro.ypos.val);
-	      if(gstate.acorns) gstate.acorns--;
-//	    }
-	}
-      }
-    }
-    //    VIC.spr_color[(ctmp&3)+4]=color;
-  }
-  //  for(ctmp=0;ctmp<4;ctmp++) {
-  //    VIC.spr_color[(ctmp&3)+4]=(cr&(0x10<<ctmp))?COLOR_BLACK:COLOR_ORANGE;
-  //  }
 }
 
 void __fastcall__ delay(uint8_t f)
@@ -856,31 +599,24 @@ void __fastcall__ game_loop(void)
 {
   //  VIC.bordercolor=COLOR_RED;
   waitvsync();
-  //  VIC.bordercolor=COLOR_BLACK;
+  //  VIC.bordercolor=COLOR_WHITE;
   DEBUG_BORDER(COLOR_WHITE);
 
   // screen updates
   totoro_set_pos();
+  //  chibi_set_pos();
+
+  process_sound();
 
   // calculate new acorn positions
   acorn_update();
   acorn_add();
   DEBUG_BORDER_INC();
 
-  // input processing
-  process_input();
-  DEBUG_BORDER_INC();
-
   // calculate new totoro position
-  totoro_update();
+  totoro_update(CHU_TOTORO);
+  //  totoro_update(CHIBI_TOTORO);
   DEBUG_BORDER_INC();
-
-  process_sound();
-
-  // collision
-  cr=VIC.spr_coll;
-  check_collision();
-  cr=VIC.spr_coll;
 
   // other screen updates
   DEBUG_BORDER_INC();
@@ -888,6 +624,7 @@ void __fastcall__ game_loop(void)
 
   // time
   gstate.counter++;
+  gstate.anim_idx=(gstate.counter&0xF)>>2;
   gstate.field++;
   if(gstate.field==VFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
@@ -1012,6 +749,7 @@ int main()
       gstate.time=0;
       gstate.field=0;
       gstate.counter=0;
+      gstate.anim_idx=0;
 
       gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
 	LAST_STAGE_IDX() : gstate.stage-1 ;
@@ -1020,12 +758,16 @@ int main()
       gstate.acorns=stage[gstate.stage_idx].acorns;
 
       game_sprite_setup();
-      totoro_init();
+      totoro_init(CHU_TOTORO);
+      //      totoro_init(CHIBI_TOTORO);
       acorn_init();
       spr_mux=1;
       totoro_set_pos();
+      //      chibi_set_pos();
 
+      //      VIC.spr_ena=0x1F;
       VIC.spr_ena=0x07;
+      
       get_ready();
       gstate.mode=GMODE_PLAY;
       setup_top_bar(0);
@@ -1047,7 +789,7 @@ int main()
       }
 
       // make totoro walk away
-      for(;totoro.xpos.uval<350;)
+      for(;totoro[0].xpos.uval<350;)
 	game_loop();
 
       delay(VFREQ/2);
