@@ -24,7 +24,7 @@ _line_ptr:
 	.res 2
 _track_ptr:
 	.res 2
-_t2ptr:
+_temp_ptr:
 	.res 2
 _c1:
 	.res 1
@@ -34,7 +34,7 @@ _ctmp:
 
 .exportzp       _line_ptr
 .exportzp       _track_ptr
-.exportzp       _t2ptr
+.exportzp       _temp_ptr
 .exportzp       _c1
 .exportzp       _ctmp
 

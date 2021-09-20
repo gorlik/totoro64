@@ -159,12 +159,15 @@ uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
 uint8_t __fastcall__ joy2(void);
+void __fastcall__ string_pad(int8_t pad);
 
 // zp variables from ASM
 extern unsigned int itmp;
 #pragma zpsym("itmp")
 extern unsigned char * line_ptr;
 #pragma zpsym("line_ptr")
+extern unsigned char * temp_ptr;
+#pragma zpsym("temp_ptr")
 extern unsigned char c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")

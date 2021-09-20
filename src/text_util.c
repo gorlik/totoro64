@@ -17,8 +17,9 @@
  *  along with GTERM.  If not, see <http://www.gnu.org/licenses/>.            *
  *                                                                            *
  ******************************************************************************/
-
+#include <string.h>
 #include "totoro64.h"
+
 
 #if (DEBUG)
 const uint8_t hexdigit[] = {
@@ -36,7 +37,7 @@ static unsigned char * const line[] = {
 			SCR_BASE+320*5,
 			SCR_BASE+320*6,
 			SCR_BASE+320*7,
-			SCR_BASE+320*8,
+			/*			SCR_BASE+320*8,
 			SCR_BASE+320*9,
 			SCR_BASE+320*10,
 			SCR_BASE+320*11,
@@ -52,7 +53,7 @@ static unsigned char * const line[] = {
 			SCR_BASE+320*21,
 			SCR_BASE+320*22,
 			SCR_BASE+320*23,
-			SCR_BASE+320*24,
+			SCR_BASE+320*24,*/
 };
 
 static const unsigned char conv_table[] = {
@@ -107,7 +108,7 @@ void __fastcall__ printbigat(unsigned char x, unsigned char y)
   }
    STR_BUF[j+40]=0;
   */
-  
+
   for(k=0,j=41;STR_BUF[j];j++) {
     STR_BUF[k]=(STR_BUF[j])+0;
     k++;
@@ -125,5 +126,17 @@ void __fastcall__ printbigat(unsigned char x, unsigned char y)
   }
   STR_BUF[k]=0;
   printat(x,y+1);
-  
+
+}
+
+void __fastcall__ string_pad(int8_t pad)
+{
+  static int8_t delta, i;
+  delta=pad-strlen(STR_BUF);
+
+  if(delta==0) return;
+
+  for(i=pad;i>=0;i--)
+    if((i-delta)>=0) STR_BUF[i]=STR_BUF[i-delta];
+    else STR_BUF[i]=' ';
 }

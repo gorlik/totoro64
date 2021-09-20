@@ -84,10 +84,12 @@ const unsigned char txt_score[] = "SCORE";
 const unsigned char txt_time[] = "TIME";
 const unsigned char txt_bonus[] = "BONUS";
 const unsigned char txt_acorns[] = "ACORNS";
+const unsigned char txt_catch[] = "CATCH    ";
+const unsigned char txt_stage[] = "STAGE ";
 const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[] = " SET ";
 const unsigned char txt_go[] = " GO ";
-const unsigned char txt_clear[] = "STAGE CLEAR";
+const unsigned char txt_clear[] = "CLEAR";
 const unsigned char txt_game_over[] = "GAME OVER";
 extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
@@ -164,6 +166,23 @@ uint8_t STR_BUF[64];
 
 uint8_t spr_mux;
 uint8_t cr;
+
+
+int __fastcall__ utoa10 (uint16_t val);
+
+void __fastcall__ _strcpy8f (void)
+{
+  __asm__("ldy #$FF");
+  __asm__("strloop: iny");
+  __asm__("lda (_temp_ptr),y");
+  __asm__("sta _STR_BUF,y");
+  __asm__("bne strloop");
+}
+
+#define strcpy8f(a) do { \
+    temp_ptr=(unsigned char *)a;		\
+  _strcpy8f();\
+  } while (0)
 
 void __fastcall__ setup_sid(void)
 {
@@ -456,6 +475,13 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_exp_x=0xf0;  // totoro64 exp x
   VIC.spr_exp_y=0xf0;  // totoro64 exp y
 
+  __asm__("ldx #248");
+  __asm__("loopt: txa");
+  __asm__("sta $7f8-248,x");
+  __asm__("inx");
+  __asm__("bne loopt");
+  
+  /*
   // GGLABS
   POKE(0x7f8+0,248);
   POKE(0x7f8+1,249);
@@ -466,7 +492,8 @@ void __fastcall__ Title_Sprite_Setup(void)
   POKE(0x7f8+5,253);
   POKE(0x7f8+6,254);
   POKE(0x7f8+7,255);
-
+  */
+  
   VIC.spr_pos[0].x=SPR_CENTER_X-48;
   VIC.spr_pos[1].x=SPR_CENTER_X-24;
   VIC.spr_pos[2].x=SPR_CENTER_X;
@@ -482,10 +509,10 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[2].y=60;
   VIC.spr_pos[3].y=60;
 
-  VIC.spr_pos[4].y=120;
-  VIC.spr_pos[5].y=120;
-  VIC.spr_pos[6].y=120;
-  VIC.spr_pos[7].y=120;
+  VIC.spr_pos[4].y=105;
+  VIC.spr_pos[5].y=105;
+  VIC.spr_pos[6].y=105;
+  VIC.spr_pos[7].y=105;
 }
 
 void __fastcall__ wait_past_score(void)
@@ -499,17 +526,22 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 {
   CLR_TOP();
 
-  strcpy8(STR_BUF,txt_time);
+  //  strcpy8(STR_BUF,txt_time);
+  strcpy8f(txt_time);
   convprint_big(TIMETXT_X);
 
   if(flag==0) {
-    strcpy8(STR_BUF,txt_acorns);
+    //    strcpy8(STR_BUF,txt_acorns);
+    temp_ptr=(unsigned char *)txt_acorns;
   } else {
-    strcpy8(STR_BUF,txt_bonus);
+    //    strcpy8(STR_BUF,txt_bonus);
+    temp_ptr=(unsigned char *)txt_bonus;
   }
+  _strcpy8f();
   convprint_big(ACORNTXT_X);
 
-  strcpy8(STR_BUF,txt_score);
+  //strcpy8(STR_BUF,txt_score);
+  strcpy8f(txt_score);
   printat(SCORETXT_X,0);
 }
 
@@ -521,7 +553,9 @@ void __fastcall__ update_top_bar(void)
     switch(gstate.counter&0x0F) {
     case 0:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"%2d", gstate.acorns);
+      //      sprintf(STR_BUF,"%2d", gstate.acorns);
+      utoa10(gstate.acorns);
+      string_pad(2);
       break;
     case 1:
       DEBUG_BORDER_INC();
@@ -534,7 +568,9 @@ void __fastcall__ update_top_bar(void)
       break;
     case 4:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"%2d", gstate.time-1);
+      //      sprintf(STR_BUF,"%2d", gstate.time-1);
+      utoa10(gstate.time-1);
+      string_pad(2);
       break;
     case 5:
       DEBUG_BORDER_INC();
@@ -547,7 +583,9 @@ void __fastcall__ update_top_bar(void)
       break;
     case 7:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"%5d", gstate.score);
+      //      sprintf(STR_BUF,"%5d", gstate.score);
+      utoa10(gstate.score);
+      string_pad(5);
       break;
     case 8:
       wait_past_score();
@@ -779,11 +817,27 @@ void __fastcall__ delay(uint8_t f)
 void __fastcall__ get_ready(void)
 {
   CLR_TOP();
-  sprintf(STR_BUF,"STAGE %d",gstate.stage);
+  //  sprintf(STR_BUF,"STAGE %d",gstate.stage);
+  //  convprint_big(14);
+  //  strcpy8(STR_BUF,txt_stage);
+  strcpy8f(txt_stage);
   convprint_big(14);
+  utoa10(gstate.stage);
+  //  string_pad(2);
+  convprint_big(26);
+  
   delay(VFREQ);
-  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
-  convprint_big(4);
+  //  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
+  //  convprint_big(4);
+  strcpy8(STR_BUF,txt_catch);
+  convprint_big(6);
+  
+  utoa10(stage[gstate.stage_idx].acorns);
+  string_pad(2);
+  convprint_big(18);
+  strcpy8(STR_BUF,txt_acorns);
+  convprint_big(24);
+  
   delay(VFREQ);
 
   CLR_TOP();
@@ -869,12 +923,12 @@ int main()
   mode_text();
   VIC.spr_ena=0xff;
 
-  memcpy((uint8_t *)(0x400+40*6+16),present_txt,8);
-  memcpy((uint8_t *)(0x400+40*16),intro_txt,39);
+  memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
+  memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
   //strcpy8v((0x400+40*6+15),present_txt);
   //strcpy8v((0x400+40*16),intro_txt);
 #if (DEBUG==0)
-  memcpy((uint8_t *)(0x400+40*17),license_txt,7*40+8);
+  memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
 #endif
 
   inflatemem (charset, charset_data);
@@ -984,8 +1038,10 @@ int main()
 	flag=1;
 	track[0].next_offset=rand()&0xe;
 	CLR_TOP();
-	strcpy8(STR_BUF,txt_clear);
+	strcpy8(STR_BUF,txt_stage);
 	convprint_big(8);
+	strcpy8(STR_BUF,txt_clear);
+	convprint_big(20);
       } else {
 	flag=0;
       }
@@ -1000,11 +1056,17 @@ int main()
 	bonus=0;
 	setup_top_bar(1);
 	do {
-	  sprintf(STR_BUF,"%2d", gstate.time);
+	  //	  sprintf(STR_BUF,"%2d", gstate.time);
+	  utoa10(gstate.time);
+	  string_pad(2);
 	  convprint_big(TIMEVAL_X);
-	  sprintf(STR_BUF,"%d", bonus);
+	  //	  sprintf(STR_BUF,"%d", bonus);
+	  utoa10(bonus);
+	  //	  string_pad(4);
 	  convprint_big(ACORNVAL_X-2);
-	  sprintf(STR_BUF,"%5d", gstate.score);
+	  //	  sprintf(STR_BUF,"%5d", gstate.score);
+	  utoa10(gstate.score);
+	  string_pad(5);
 	  printat(SCOREVAL_X,1);
 	  delay(1);
 	  bonus+=5+gstate.stage;
@@ -1021,17 +1083,17 @@ int main()
     //  strcpy8(STR_BUF,txt_game_over);
     //  convprint_big(0);
     spr_mux=0;
-    SPR_PTR[0]=43;
-    SPR_PTR[1]=44;
-    VIC.spr_pos[0].x=136;
-    VIC.spr_pos[1].x=184;
-    VIC.spr_pos[0].y=120;
-    VIC.spr_pos[1].y=120;
-    VIC.spr_exp_x = 0x03;
-    VIC.spr_exp_y = 0x03;
-    VIC.spr_hi_x = 0;
-    VIC.spr_mcolor=0x03;
-    VIC.spr_ena=0x3;
+    SPR_PTR[6]=43;
+    SPR_PTR[7]=44;
+    VIC.spr_pos[6].x=136;
+    VIC.spr_pos[7].x=184;
+    VIC.spr_pos[6].y=120;
+    VIC.spr_pos[7].y=120;
+    VIC.spr_exp_x |= 0xc0;
+    VIC.spr_exp_y |= 0xc0;
+    VIC.spr_hi_x &= 0x3f;
+    VIC.spr_mcolor |= 0xc0;
+    VIC.spr_ena |= 0xc0;
     delay(VFREQ*3);
   }
 
