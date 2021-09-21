@@ -11,7 +11,7 @@
 .import   _acorn
 ASIZE = 8
 
-.export acorn_set_pos
+.export spr_mux_irq
 
 ;;  sprite mux setup
 .define LINES_EARLY  3
@@ -45,7 +45,7 @@ irq_table:
 	.word IRQ6
 	.word IRQ7
 
-.proc acorn_set_pos: near
+.proc spr_mux_irq: near
         border_set 4
 	lda VIC_SPR_ENA
 	and #($00FF>>MUX_SLOTS)

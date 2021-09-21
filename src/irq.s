@@ -28,7 +28,7 @@
 .export   color_save
 
 .import   _spr_mux
-.import   acorn_set_pos
+.import   spr_mux_irq
 .import   play_track
 
 ; must be equal to sizeof(struct track_t)
@@ -48,7 +48,7 @@ color_save:
 	sta VIC_IRR	; clear VIC IRQ flag
         lda _spr_mux
         beq no_mux
-        jsr acorn_set_pos
+        jsr spr_mux_irq
 no_mux:
 	ldx #0*TRACK_T_SIZE
 	jsr play_track		; track[0]
