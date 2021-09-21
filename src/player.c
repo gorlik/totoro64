@@ -154,16 +154,16 @@ void __fastcall__ totoro_update(uint8_t p)
 
 void __fastcall__ totoro_set_pos(void)
 {
-  VIC.spr0_x   = totoro[0].xpos.lo;
-  VIC.spr1_x   = totoro[0].xpos.lo;
-  VIC.spr2_x   = totoro[0].xpos.lo;
+  VIC.spr_pos[0].x   = totoro[0].xpos.lo;
+  VIC.spr_pos[1].x   = totoro[0].xpos.lo;
+  VIC.spr_pos[2].x   = totoro[0].xpos.lo;
 
   if(totoro[0].xpos.hi)   VIC.spr_hi_x |=0x07;
   else VIC.spr_hi_x &= 0xf8;
 
-  VIC.spr0_y   = totoro[0].ypos.lo;
-  VIC.spr1_y   = totoro[0].ypos.lo;
-  VIC.spr2_y   = totoro[0].ypos.lo;
+  VIC.spr_pos[0].y   = totoro[0].ypos.lo;
+  VIC.spr_pos[1].y   = totoro[0].ypos.lo;
+  VIC.spr_pos[2].y   = totoro[0].ypos.lo;
 
   switch(totoro[0].state) {
   case IDLE:
@@ -216,14 +216,14 @@ void __fastcall__ totoro_set_pos(void)
 
 void __fastcall__ chibi_set_pos(void)
 {
-  VIC.spr3_x   = totoro[1].xpos.lo;
-  VIC.spr4_x   = totoro[1].xpos.lo;
+  VIC.spr_pos[3].x   = totoro[1].xpos.lo;
+  VIC.spr_pos[4].x   = totoro[1].xpos.lo;
 
   if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x18;
   else VIC.spr_hi_x &= 0xe7;
 
-  VIC.spr3_y   = totoro[1].ypos.lo;
-  VIC.spr4_y   = totoro[1].ypos.lo;
+  VIC.spr_pos[3].y   = totoro[1].ypos.lo;
+  VIC.spr_pos[4].y   = totoro[1].ypos.lo;
 
   switch(totoro[1].state) {
   case IDLE:
