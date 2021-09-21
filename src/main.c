@@ -501,11 +501,11 @@ void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_ena=0;
 
-  VIC.spr_color[0]=COLOR_LIGHTBLUE;
-  VIC.spr_color[1]=COLOR_BLACK;
-  VIC.spr_color[2]=COLOR_WHITE;
+  VIC.spr_color[2]=COLOR_LIGHTBLUE;
   VIC.spr_color[3]=COLOR_BLACK;
   VIC.spr_color[4]=COLOR_WHITE;
+  VIC.spr_color[0]=COLOR_BLACK;
+  VIC.spr_color[1]=COLOR_WHITE;
   
 #if (DEBUG&DEBUG_ACORNS)
   VIC.spr_color[6]=COLOR_BLUE;
@@ -515,9 +515,9 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[7]=COLOR_ORANGE;
 #endif
 
-  VIC.spr_mcolor=0xC4; // spr 5 is undecided if multicolor
-  VIC.spr_exp_x=0x07;
-  VIC.spr_exp_y=0x07;
+  VIC.spr_mcolor=0xD0; // spr 5 is undecided if multicolor
+  VIC.spr_exp_x=0x1C;
+  VIC.spr_exp_y=0x1C;
 
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
@@ -766,7 +766,7 @@ int main()
       //      chibi_set_pos();
 
       //      VIC.spr_ena=0x1F;
-      VIC.spr_ena=0x07;
+      VIC.spr_ena=0x1C;
       
       get_ready();
       gstate.mode=GMODE_PLAY;
