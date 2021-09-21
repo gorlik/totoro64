@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#define VERSION "v0.17"
+
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
 #define DEBUG_ACORNS 0x04

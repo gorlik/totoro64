@@ -76,6 +76,7 @@
 #pragma charmap(89,89)
 #pragma charmap(90,90)
 
+const unsigned char version_txt[] = VERSION;
 const unsigned char present_txt[] = "Presents";
 const unsigned char intro_txt[] = "A Commodore 64 tribute to Studio Ghibli";
 

@@ -27,8 +27,6 @@
 
 #include "totoro64.h"
 
-#define VERSION "0.17"
-
 #define STAGE_TIME 60
 
 #define EOF_LINE 0x80
@@ -70,6 +68,7 @@ const unsigned char txt_clear[] = "CLEAR";
 const unsigned char txt_game_over[] = "GAME OVER";
 extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
+extern const unsigned char version_txt[];
 extern const unsigned char license_txt[];
 
 #define strcpy8(dst,src)       \
@@ -661,6 +660,7 @@ int main()
   VIC.spr_ena=0xff;
 
   memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
+  memcpy((uint8_t *)(0x400+40*11+33),version_txt,5);
   memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
   //strcpy8v((0x400+40*6+15),present_txt);
   //strcpy8v((0x400+40*16),intro_txt);
