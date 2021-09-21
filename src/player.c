@@ -263,9 +263,12 @@ void __fastcall__ chibi_set_pos(void)
       //      SPR_PTR[4]=run_seq[gstate.anim_idx]+1;
       SPR_PTR[0]=65;
       SPR_PTR[1]=66;
-    } else {
+    } else if (totoro[1].xv<0) {
       SPR_PTR[0]=63;
       SPR_PTR[1]=64;
+    } else {
+      SPR_PTR[0]=61;
+      SPR_PTR[1]=62;
     }
     break;
     /*
