@@ -242,6 +242,9 @@ void __fastcall__ chibi_set_pos(void)
   case RUN:
   case BRAKE:
   case JUMP:
+    VIC.spr_color[0]=COLOR_BLACK;
+    VIC.spr_color[1]=COLOR_WHITE;
+    
     if(totoro[1].xv>0) {
       //      SPR_PTR[3]=run_seq[gstate.anim_idx];
       //      SPR_PTR[4]=run_seq[gstate.anim_idx]+1;
