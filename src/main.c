@@ -501,12 +501,6 @@ void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_ena=0;
 
-  VIC.spr_color[2]=COLOR_LIGHTBLUE;
-  VIC.spr_color[3]=COLOR_BLACK;
-  VIC.spr_color[4]=COLOR_WHITE;
-  VIC.spr_color[0]=COLOR_BLACK;
-  VIC.spr_color[1]=COLOR_WHITE;
-  
 #if (DEBUG&DEBUG_ACORNS)
   VIC.spr_color[6]=COLOR_BLUE;
   VIC.spr_color[7]=COLOR_GREEN;

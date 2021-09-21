@@ -76,9 +76,14 @@ void __fastcall__ totoro_init(uint8_t p)
   if(p) {
     tcache.ypos.val=GROUND_Y-1;
     tcache.xpos.val=(MAX_PX-MIN_X)/2+50;
+    VIC.spr_color[0]=COLOR_BLACK;
+    VIC.spr_color[1]=COLOR_WHITE;
   } else {
     tcache.ypos.val=PGROUND_Y;
     tcache.xpos.val=(MAX_PX-MIN_X)/2;
+    VIC.spr_color[2]=COLOR_LIGHTBLUE;
+    VIC.spr_color[3]=COLOR_BLACK;
+    VIC.spr_color[4]=COLOR_WHITE;
   }
   
   tcache_save();
@@ -303,7 +308,8 @@ void __fastcall__ totoro_update(uint8_t p)
 
 void __fastcall__ totoro_move()
 {
-  static uint16_t r;
+  static uint8_t r;
+  static uint8_t  ground;
  
   tcache.xpos.val+=(tcache.xv>>2);
 
@@ -323,9 +329,10 @@ void __fastcall__ totoro_move()
     tcache.yv++;
   }
 
-  if(tcache.ypos>PGROUND_Y) {
-    if(p_idx) tcache.ypos.val=GROUND_Y-1;
-    else tcache.ypos.val=PGROUND_Y;
+  ground=(p_idx)?GROUND_Y+2:PGROUND_Y;
+  
+  if(tcache.ypos>ground) {
+    tcache.ypos.val=ground;
     if(tcache.xv) tcache.state=RUN;
     else tcache.state=IDLE;
     tcache.yv.val=0;
