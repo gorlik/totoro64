@@ -91,6 +91,8 @@ void __fastcall__ totoro_init(uint8_t p)
   tcache_save();
 }
 
+#define same_direction(a,b) (!((a^b)&0x80))
+
 //#define ttotoro ((struct player_t *)temp_ptr)
 /*
 #pragma register-vars (on)
@@ -212,12 +214,6 @@ void __fastcall__ totoro_set_pos(void)
       SPR_PTR[4]=run_seq[4]+2;
     } else {
       // add eye movement based on up or down
-/*      __asm__("ldx #0");
-      __asm__("stx %v+2",SPR_PTR);
-      __asm__("inx");
-      __asm__("stx %v+3",SPR_PTR);
-      __asm__("inx");
-      __asm__("stx %v+4",SPR_PTR);*/
       SPR_PTR[2]=0;
       SPR_PTR[3]=1;
       SPR_PTR[4]=2;
@@ -229,6 +225,9 @@ void __fastcall__ totoro_set_pos(void)
 
 void __fastcall__ chibi_set_pos(void)
 {
+  static uint8_t run_offset;
+
+  run_offset=0;
   VIC.spr_pos[0].x   = totoro[1].xpos.lo;
   VIC.spr_pos[1].x   = totoro[1].xpos.lo;
 
@@ -253,52 +252,23 @@ void __fastcall__ chibi_set_pos(void)
     }
     break;
   case RUN:
+    run_offset=gstate.anim_idx&1;
+    // fallthrough
   case BRAKE:
   case JUMP:
     VIC.spr_color[0]=COLOR_BLACK;
     VIC.spr_color[1]=COLOR_WHITE;
-    
     if(totoro[1].xv>0) {
-      //      SPR_PTR[3]=run_seq[gstate.anim_idx];
-      //      SPR_PTR[4]=run_seq[gstate.anim_idx]+1;
-      SPR_PTR[0]=65;
-      SPR_PTR[1]=66;
+      SPR_PTR[0]=66+run_offset;
+      SPR_PTR[1]=68;
     } else if (totoro[1].xv<0) {
-      SPR_PTR[0]=63;
-      SPR_PTR[1]=64;
+      SPR_PTR[0]=63+run_offset;
+      SPR_PTR[1]=65;
     } else {
       SPR_PTR[0]=61;
       SPR_PTR[1]=62;
     }
     break;
-    /*
-  case BRAKE:
-    if(totoro[1].xv>0) {
-      SPR_PTR[3]=13;
-      SPR_PTR[4]=14;
-      //      SPR_PTR[2]=15;
-    } else {
-      SPR_PTR[3]=25;
-      SPR_PTR[4]=26;
-      //      SPR_PTR[2]=27;
-    }
-    break;
-  case JUMP:
-    if(totoro[1].xv>0) {
-      SPR_PTR[3]=run_seq[0];
-      SPR_PTR[4]=run_seq[0]+1;
-      //      SPR_PTR[2]=run_seq[0]+2;    } else if (totoro[1].xv<0) {
-      SPR_PTR[3]=run_seq[4];
-      SPR_PTR[4]=run_seq[4]+1;
-      //      SPR_PTR[2]=run_seq[4]+2;
-    } else {
-      // add eye movement based on up or down
-      SPR_PTR[3]=0;
-      SPR_PTR[4]=1;
-      //      SPR_PTR[2]=2;
-    }
-    break;
-    */
   }
 }
 
@@ -308,6 +278,12 @@ void __fastcall__ totoro_update(uint8_t p)
   process_input();
   totoro_move();
   check_collision();
+  // check collisions every other frame
+  /*  if(gstate.counter&1) {
+    if(p!=0) check_collision();
+  } else {
+    if(p==0) check_collision();
+  }*/
   tcache_save();
 }
 
@@ -316,7 +292,7 @@ void __fastcall__ totoro_move()
   static uint8_t r;
   static uint8_t ground;
   static uint16_t max_x; 
- 
+
   tcache.xpos.val+=(tcache.xv>>2);
 
   max_x=(p_idx)?MAX_X:MAX_PX;
@@ -368,14 +344,28 @@ void __fastcall__ process_input(void)
   static uint8_t js;
   
   if(gstate.mode==GMODE_PLAY) {
-    key=PEEK(197);
-    js=joy2();
-    if(js) {
-      if(js&0x04) key = 10; // left
-      if(js&0x08) key = 18; // right
-      if(js&0x10) key = 60; // button
+    if(p_idx==0) {
+      // chu totoro
+      key=PEEK(197);
+      js=joy2();
+      if(js) {
+	if(js&0x04) key = 10; // left
+	if(js&0x08) key = 18; // right
+	if(js&0x10) key = 60; // button
       
-      if(js&0x01) key = 60; // up?
+	if(js&0x01) key = 60; // up?
+      }
+    } else {
+      // chibi totoro
+      if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
+	 && same_direction(totoro[0].xv,totoro[1].xv) ) {
+	key=60;
+        tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
+      } else {
+	if((totoro[0].xpos.val-totoro[1].xpos.val)>50) key=18;
+	else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) key=10;
+	else key=0;
+      }
     }
   } else key=18; // simulate 'D'
   
@@ -402,7 +392,8 @@ void __fastcall__ process_input(void)
       }
       break;
     case 60: // space
-      tcache.yv.val=-JUMP_V;
+      // make chibi totoro jump higher
+      tcache.yv.val=(p_idx)?-(JUMP_V+1):-JUMP_V;
       tcache.state=JUMP;
       break;
     default:
@@ -419,33 +410,53 @@ void __fastcall__ process_input(void)
     }
 }
 
+#if 1
+#pragma register-vars (on)
 void __fastcall__ check_collision(void)
 {
+  register struct acorn_t *a;
   //  static uint8_t color;
-  
-  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
-    //    color=COLOR_ORANGE;
-    if(acorn[ctmp].en) {
-      if((((acorn[ctmp].ypos.hi))>(tcache.ypos.uval-20)) &&
-	 (((acorn[ctmp].ypos.hi))<(tcache.ypos.uval+42)) ) {
-	//	color=COLOR_YELLOW;
-	if((tcache.xpos.val>(acorn[ctmp].xpos.val-36)) &&
-	   (tcache.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
-	  //	  color=COLOR_RED;
-	  //	    if(cr&(0x10<<ctmp)){
-	  //color=COLOR_BLACK;
-	  acorn[ctmp].en=0;
+  //VIC.bordercolor=COLOR_YELLOW;
+  for(a=acorn;a!=acorn+8;a++) {
+    if(a->en) {
+      if((((a->ypos.hi))>(tcache.ypos.uval-20)) &&
+	 (((a->ypos.hi))<(tcache.ypos.uval+42)) ) {
+	if((tcache.xpos.val>(a->xpos.val-36)) &&
+	   (tcache.xpos.uval<(a->xpos.uval+15)) ) {
+	  a->en=0;
 	  start_sound();
 	  /* VIC.spr_ena&=~(0x10<<a) */
 	  gstate.score+=10+(PGROUND_Y-tcache.ypos.val);
 	  if(gstate.acorns) gstate.acorns--;
-	  //	    }
 	}
       }
     }
-    //    VIC.spr_color[(ctmp&3)+4]=color;
   }
-  //  for(ctmp=0;ctmp<4;ctmp++) {
-  //    VIC.spr_color[(ctmp&3)+4]=(cr&(0x10<<ctmp))?COLOR_BLACK:COLOR_ORANGE;
-  //  }
+  //VIC.bordercolor=COLOR_RED;
 }
+
+#else
+
+void __fastcall__ check_collision(void)
+{
+  //  static uint8_t color;
+  VIC.bordercolor=COLOR_CYAN;
+  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
+    if(acorn[ctmp].en) {
+      if((((acorn[ctmp].ypos.hi))>(tcache.ypos.uval-20)) &&
+	 (((acorn[ctmp].ypos.hi))<(tcache.ypos.uval+42)) ) {
+	if((tcache.xpos.val>(acorn[ctmp].xpos.val-36)) &&
+	   (tcache.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
+	  acorn[ctmp].en=0;
+	  start_sound();
+//	   VIC.spr_ena&=~(0x10<<a) 
+	  gstate.score+=10+(PGROUND_Y-tcache.ypos.val);
+	  if(gstate.acorns) gstate.acorns--;
+	}
+      }
+    }
+  }
+  VIC.bordercolor=COLOR_GREEN;
+}
+
+#endif

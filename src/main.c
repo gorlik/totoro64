@@ -187,7 +187,7 @@ void __fastcall__ setup_sid(void)
 
 #define acorn_update_m(a) do {		  	 \
     if(acorn[a].ypos.val) {				 \
-      acorn[a].yv.val+=stage[gstate.stage_idx].speed;\
+      acorn[a].yv.val+=gstate.accel;\
       acorn[a].ypos.val+=(acorn[a].yv.val);\
       if((acorn[a].ypos.hi)>GROUND_Y) {\
       	acorn[a].en=0;				 \
@@ -196,11 +196,23 @@ void __fastcall__ setup_sid(void)
     }						 \
 } while(0)
 
+#pragma register-vars (on)
+void acorn_update_f(uint8_t idx)
+{
+  register struct acorn_t *a=&acorn[idx];
+
+  if(a->ypos.val) {
+    a->yv.val+=gstate.accel;
+    a->ypos.val+=(a->yv.val);
+    if((a->ypos.hi)>GROUND_Y) {
+      a->en=0;
+      a->ypos.val=0;
+    }
+  }
+}
+
 void __fastcall__ acorn_update(void)
 {
-  //  static uint8_t t;
-  //  t=PEEK(0xd020);
-  //  POKE(0xd020,9);
   acorn_update_m(0);
   acorn_update_m(1);
   acorn_update_m(2);
@@ -209,6 +221,7 @@ void __fastcall__ acorn_update(void)
   acorn_update_m(5);
   acorn_update_m(6);
   acorn_update_m(7);
+
 /*
   for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
     if(acorn[ctmp].ypos.val) {
@@ -227,7 +240,6 @@ void __fastcall__ acorn_update(void)
 	acorn[ctmp].en=0;
     }
   }*/
-//  POKE(0xd020,t);
 }
 
 void __fastcall__ acorn_init(void)
@@ -251,8 +263,9 @@ void __fastcall__ acorn_add(void)
   static unsigned int r;
 
   // maybe change to counter
-  if(MODE_PLAY_DEMO() && 
-      (gstate.field==10 || gstate.field==27 || gstate.field==44 ) )  {
+  if(MODE_PLAY_DEMO()
+     && (gstate.field==10 || gstate.field==27 || gstate.field==44 )
+    )  {
       //  if((frame&0xf)==1)  {
     //    r=rand();
       //    if(r<RAND_MAX/2) {
@@ -281,7 +294,7 @@ void __fastcall__ acorn_add(void)
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-	    //	VIC.spr_color[na+4]=COLOR_ORANGE;
+	    //	VIC.spr_color[0]=COLOR_ORANGE;
 	  }
 	}
 	//   }
@@ -391,44 +404,33 @@ void __fastcall__ update_top_bar(void)
 #if 1
     switch(gstate.counter&0x0F) {
     case 0:
-      DEBUG_BORDER_INC();
-      //      sprintf(STR_BUF,"%2d", gstate.acorns);
       utoa10(gstate.acorns);
       string_pad(2);
       break;
     case 1:
-      DEBUG_BORDER_INC();
       convert_big();
       break;
     case 2:
       wait_past_score();
-      DEBUG_BORDER_INC();
       printbigat(ACORNVAL_X,0);
       break;
     case 4:
-      DEBUG_BORDER_INC();
-      //      sprintf(STR_BUF,"%2d", gstate.time-1);
       utoa10(gstate.time-1);
       string_pad(2);
       break;
     case 5:
-      DEBUG_BORDER_INC();
       convert_big();
       break;
     case 6:
       wait_past_score();
-      DEBUG_BORDER_INC();
       printbigat(TIMEVAL_X,0);
       break;
     case 7:
-      DEBUG_BORDER_INC();
-      //      sprintf(STR_BUF,"%5d", gstate.score);
       utoa10(gstate.score);
       string_pad(5);
       break;
     case 8:
       wait_past_score();
-      DEBUG_BORDER_INC();
       printat(SCOREVAL_X,1);
       break;
 #if (DEBUG&DEBUG_INFO)
@@ -443,7 +445,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 12:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, stage[gstate.stage_idx].speed);
+      sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, gstate.accel);
       break;
     case 13:
       wait_past_score();
@@ -508,10 +510,12 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[6]=COLOR_ORANGE;
   VIC.spr_color[7]=COLOR_ORANGE;
 #endif
+  VIC.spr_color[5]=COLOR_BLACK;
+  SPR_PTR[5]=70;
 
-  VIC.spr_mcolor=0xD0; // spr 5 is undecided if multicolor
-  VIC.spr_exp_x=0x1C;
-  VIC.spr_exp_y=0x1C;
+  VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
+  VIC.spr_exp_x=0x3C;
+  VIC.spr_exp_y=0x3C;
 
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
@@ -568,7 +572,7 @@ void __fastcall__ get_ready(void)
   strcpy8(STR_BUF,txt_catch);
   convprint_big(6);
   
-  utoa10(stage[gstate.stage_idx].acorns);
+  utoa10(gstate.acorns);
   string_pad(2);
   convprint_big(18);
   strcpy8(STR_BUF,txt_acorns);
@@ -597,22 +601,21 @@ void __fastcall__ game_loop(void)
 
   // screen updates
   totoro_set_pos();
-  //  chibi_set_pos();
+  chibi_set_pos();
 
   process_sound();
-
+  DEBUG_BORDER(COLOR_YELLOW);
   // calculate new acorn positions
   acorn_update();
   acorn_add();
-  DEBUG_BORDER_INC();
+  DEBUG_BORDER(COLOR_RED);
 
-  // calculate new totoro position
+  // process input, move player and perform collision detection
   totoro_update(CHU_TOTORO);
-  //  totoro_update(CHIBI_TOTORO);
-  DEBUG_BORDER_INC();
+  totoro_update(CHIBI_TOTORO);
+  DEBUG_BORDER(COLOR_GREEN);
 
   // other screen updates
-  DEBUG_BORDER_INC();
   update_top_bar();
 
   // time
@@ -651,9 +654,12 @@ int main()
 
   Title_Sprite_Setup();
   mode_text();
-  VIC.spr_ena=0xff;
+  VIC.spr_ena=0x0f;
 
   memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
+  inflatemem (charset, charset_data);
+  VIC.spr_ena=0xff;
+
   memcpy((uint8_t *)(0x400+40*11+33),version_txt,5);
   memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
   //strcpy8v((0x400+40*6+15),present_txt);
@@ -662,7 +668,6 @@ int main()
   memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
 #endif
 
-  inflatemem (charset, charset_data);
   inflatemem (SCR_BASE, bitmap_data);
   inflatemem (COLOR_BASE, color1_data);
 
@@ -750,17 +755,18 @@ int main()
 
       gstate.time=stage[gstate.stage_idx].time;
       gstate.acorns=stage[gstate.stage_idx].acorns;
+      gstate.accel=stage[gstate.stage_idx].accel;
 
       game_sprite_setup();
       totoro_init(CHU_TOTORO);
-      //      totoro_init(CHIBI_TOTORO);
+      totoro_init(CHIBI_TOTORO);
       acorn_init();
       spr_mux=1;
       totoro_set_pos();
-      //      chibi_set_pos();
+      chibi_set_pos();
 
-      //      VIC.spr_ena=0x1F;
-      VIC.spr_ena=0x1C;
+            VIC.spr_ena=0x1F;
+      //VIC.spr_ena=0x1C;
       
       get_ready();
       gstate.mode=GMODE_PLAY;

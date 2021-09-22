@@ -122,6 +122,7 @@ struct game_state_t {
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
   uint8_t  anim_idx;
+  uint8_t  accel;
   uint16_t score;
   uint16_t hi_score;
   enum g_mode mode;
@@ -149,7 +150,7 @@ struct player_t {
 struct stage_t {
   uint8_t time;
   uint8_t acorns;
-  uint8_t speed;
+  uint8_t accel;
   uint8_t flags;
 };
 
