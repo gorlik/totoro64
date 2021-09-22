@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.17"
+#define VERSION "v0.18"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -72,7 +72,7 @@
 
 // sprite position constants/limits
 #define GROUND_Y 220
-#define PGROUND_Y (GROUND_Y-21)
+#define PGROUND_Y (GROUND_Y-23)
 
 #define ACORN_START_Y 68
 

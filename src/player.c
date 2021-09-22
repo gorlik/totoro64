@@ -315,7 +315,7 @@ void __fastcall__ totoro_move()
 {
   static uint8_t r;
   static uint8_t ground;
-  static uint8_t max_x; 
+  static uint16_t max_x; 
  
   tcache.xpos.val+=(tcache.xv>>2);
 
