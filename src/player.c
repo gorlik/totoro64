@@ -22,6 +22,20 @@
 #include <peekpoke.h>
 #include "totoro64.h"
 
+// sprite max speed
+#ifdef NTSC
+#define MAX_XV 13
+// should be 8 with .66 acceleration
+// approximate to 9 and .75 acceleration
+#define JUMP_V 0x900
+#else
+#define MAX_XV 16
+#define JUMP_V 0xa00
+#endif
+
+#define PGROUND_Y (GROUND_Y-23)
+#define MAX_PX (MAX_X-24)
+
 struct player_t totoro[2];
 
 static struct player_t tcache;
@@ -75,13 +89,13 @@ void __fastcall__ totoro_init(uint8_t p)
 
   if(p) {
     // chibi
-    tcache.ypos.val=GROUND_Y;
+    tcache.ypos.val=GROUND_Y<<8;
     tcache.xpos.val=(MAX_X-MIN_X)/2+50;
     VIC.spr_color[0]=COLOR_BLACK;
     VIC.spr_color[1]=COLOR_WHITE;
   } else {
     // chu
-    tcache.ypos.val=PGROUND_Y;
+    tcache.ypos.val=PGROUND_Y<<8;
     tcache.xpos.val=(MAX_PX-MIN_X)/2;
     VIC.spr_color[2]=COLOR_LIGHTBLUE;
     VIC.spr_color[3]=COLOR_BLACK;
@@ -170,9 +184,9 @@ void __fastcall__ totoro_set_pos(void)
   if(totoro[0].xpos.hi)   VIC.spr_hi_x |=0x1C;
   else VIC.spr_hi_x &= 0xE3;
 
-  VIC.spr_pos[2].y   = totoro[0].ypos.lo;
-  VIC.spr_pos[3].y   = totoro[0].ypos.lo;
-  VIC.spr_pos[4].y   = totoro[0].ypos.lo;
+  VIC.spr_pos[2].y   = totoro[0].ypos.hi;
+  VIC.spr_pos[3].y   = totoro[0].ypos.hi;
+  VIC.spr_pos[4].y   = totoro[0].ypos.hi;
 
   switch(totoro[0].state) {
   case IDLE:
@@ -234,8 +248,8 @@ void __fastcall__ chibi_set_pos(void)
   if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x03;
   else VIC.spr_hi_x &= 0xFC;
 
-  VIC.spr_pos[0].y   = totoro[1].ypos.lo;
-  VIC.spr_pos[1].y   = totoro[1].ypos.lo;
+  VIC.spr_pos[0].y   = totoro[1].ypos.hi;
+  VIC.spr_pos[1].y   = totoro[1].ypos.hi;
 
   switch(totoro[1].state) {
   case IDLE:
@@ -310,13 +324,13 @@ void __fastcall__ totoro_move()
   tcache.ypos.val+=tcache.yv.val;
 
   if(tcache.state==JUMP) {
-    tcache.yv++;
+    tcache.yv.val+=200;
   }
 
   ground=(p_idx)?GROUND_Y+2:PGROUND_Y;
 
-  if(tcache.ypos>ground) {
-    tcache.ypos.val=ground;
+  if(tcache.ypos.hi>ground) {
+    tcache.ypos.val=(ground<<8);
     if(tcache.xv) tcache.state=RUN;
     else tcache.state=IDLE;
     tcache.yv.val=0;
@@ -393,7 +407,7 @@ void __fastcall__ process_input(void)
       break;
     case 60: // space
       // make chibi totoro jump higher
-      tcache.yv.val=(p_idx)?-(JUMP_V+1):-JUMP_V;
+      tcache.yv.val=(p_idx)?-(JUMP_V+200):-JUMP_V;
       tcache.state=JUMP;
       break;
     default:
@@ -419,14 +433,14 @@ void __fastcall__ check_collision(void)
   //VIC.bordercolor=COLOR_YELLOW;
   for(a=acorn;a!=acorn+8;a++) {
     if(a->en) {
-      if((((a->ypos.hi))>(tcache.ypos.uval-20)) &&
-	 (((a->ypos.hi))<(tcache.ypos.uval+42)) ) {
+      if((((a->ypos.hi))>(tcache.ypos.hi-20)) &&
+	 (((a->ypos.hi))<(tcache.ypos.hi+42)) ) {
 	if((tcache.xpos.val>(a->xpos.val-36)) &&
 	   (tcache.xpos.uval<(a->xpos.uval+15)) ) {
 	  a->en=0;
 	  start_sound();
 	  /* VIC.spr_ena&=~(0x10<<a) */
-	  gstate.score+=10+(PGROUND_Y-tcache.ypos.val);
+	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  if(gstate.acorns) gstate.acorns--;
 	}
       }
@@ -443,14 +457,14 @@ void __fastcall__ check_collision(void)
   VIC.bordercolor=COLOR_CYAN;
   for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
     if(acorn[ctmp].en) {
-      if((((acorn[ctmp].ypos.hi))>(tcache.ypos.uval-20)) &&
-	 (((acorn[ctmp].ypos.hi))<(tcache.ypos.uval+42)) ) {
+      if((((acorn[ctmp].ypos.hi))>(tcache.ypos.hi-20)) &&
+	 (((acorn[ctmp].ypos.hi))<(tcache.ypos.hi+42)) ) {
 	if((tcache.xpos.val>(acorn[ctmp].xpos.val-36)) &&
 	   (tcache.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
 	  acorn[ctmp].en=0;
 	  start_sound();
 //	   VIC.spr_ena&=~(0x10<<a) 
-	  gstate.score+=10+(PGROUND_Y-tcache.ypos.val);
+	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  if(gstate.acorns) gstate.acorns--;
 	}
       }

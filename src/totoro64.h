@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.18"
+#define VERSION "v0.19"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -45,17 +45,6 @@
 #define VFREQ 50
 #endif
 
-// sprite max speed
-#ifdef NTSC
-#define MAX_XV 13
-// should be 8 with .66 acceleration
-// approximate to 9 and .75 acceleration
-#define JUMP_V 9
-#else
-#define MAX_XV 16
-#define JUMP_V 10
-#endif
-
 // (SPR_DATA-VIC_BASE)/64
 #define SPR_DATA_OFFSET   16
 
@@ -67,41 +56,36 @@
 #define SPR_64            (42+SPR_DATA_OFFSET)
 #define SPR_TXT_GAME_OVER (43+SPR_DATA_OFFSET)
 #define SPR_TITLE_MOVIE_1 (58+SPR_DATA_OFFSET)
-#define SPR_CHU_IDLE     (0+SPR_DATA_OFFSET)
-#define SPR_CHU_BLINK    (3+SPR_DATA_OFFSET)
-#define SPR_CHU_RR1     (4+SPR_DATA_OFFSET)
-#define SPR_CHU_RR1     (4+SPR_DATA_OFFSET)
-#define SPR_CHU_RR2     (7+SPR_DATA_OFFSET)
-#define SPR_CHU_RR3     (10+SPR_DATA_OFFSET)
-#define SPR_CHU_RR4     (7+SPR_DATA_OFFSET)
-#define SPR_CHU_RL1     (16+SPR_DATA_OFFSET)
-#define SPR_CHU_RL2     (19+SPR_DATA_OFFSET)
-#define SPR_CHU_RL3     (22+SPR_DATA_OFFSET)
-#define SPR_CHU_RL4     (19+SPR_DATA_OFFSET)
-#define SPR_CHU_BR      (13+SPR_DATA_OFFSET)
-#define SPR_CHU_BL      (25+SPR_DATA_OFFSET)
-#define SPR_CHIBI_IDLE  (61+SPR_DATA_OFFSET)
-#define SPR_CHIBI_IDLE  (61+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RR    (66+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RL    (63+SPR_DATA_OFFSET)
+#define SPR_CHU_IDLE      (0+SPR_DATA_OFFSET)
+#define SPR_CHU_BLINK     (3+SPR_DATA_OFFSET)
+#define SPR_CHU_RR1       (4+SPR_DATA_OFFSET)
+#define SPR_CHU_RR1       (4+SPR_DATA_OFFSET)
+#define SPR_CHU_RR2       (7+SPR_DATA_OFFSET)
+#define SPR_CHU_RR3       (10+SPR_DATA_OFFSET)
+#define SPR_CHU_RR4       (7+SPR_DATA_OFFSET)
+#define SPR_CHU_RL1       (16+SPR_DATA_OFFSET)
+#define SPR_CHU_RL2       (19+SPR_DATA_OFFSET)
+#define SPR_CHU_RL3       (22+SPR_DATA_OFFSET)
+#define SPR_CHU_RL4       (19+SPR_DATA_OFFSET)
+#define SPR_CHU_BR        (13+SPR_DATA_OFFSET)
+#define SPR_CHU_BL        (25+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE    (61+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE    (61+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RR      (66+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RL      (63+SPR_DATA_OFFSET)
 
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2
 
-
 // sprite position constants/limits
 #define GROUND_Y 220
-#define PGROUND_Y (GROUND_Y-23)
-
 #define ACORN_START_Y 68
 
 #define MIN_X 32
 #define MAX_X 312
-#define MAX_PX (MAX_X-24)
 
 #define SPR_CENTER_X 184
-
 
 #define CHU_TOTORO   0
 #define CHIBI_TOTORO sizeof(struct player_t)
@@ -109,7 +93,6 @@
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
-
 
 // types
 enum t_state {
@@ -133,16 +116,27 @@ typedef union word word_t;
 
 #define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
 
+struct stage_t {
+  uint8_t time;
+  uint8_t acorns;
+  uint8_t accel;
+  uint8_t flags;
+};
 
 struct game_state_t {
   uint8_t  stage;     // current stage
   uint8_t  stage_idx; // index in the stage array
   uint8_t  field;     // 0 to VFREQ
   uint8_t  counter;   // free running
+  uint8_t  anim_idx;
+  //  struct stage_t st;
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
-  uint8_t  anim_idx;
   uint8_t  accel;
+  uint8_t  flags;
+  uint8_t  wind_cnt;
+  int8_t   wind_sp;
+  int8_t   wind_dir;
   uint16_t score;
   uint16_t hi_score;
   enum g_mode mode;
@@ -162,17 +156,9 @@ struct player_t {
   word_t  ypos;
   int8_t  xv;
   word_t  yv;    // 8.8 format
-  //  uint8_t idx;
   uint8_t blink;
   enum t_state  state;
   //  enum t_dir    dir;
-};
-
-struct stage_t {
-  uint8_t time;
-  uint8_t acorns;
-  uint8_t accel;
-  uint8_t flags;
 };
 
 struct sound_t {

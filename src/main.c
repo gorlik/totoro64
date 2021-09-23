@@ -65,7 +65,7 @@ const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[] = " SET ";
 const unsigned char txt_go[] = " GO ";
 const unsigned char txt_clear[] = "CLEAR";
-const unsigned char txt_game_over[] = "GAME OVER";
+//const unsigned char txt_game_over[] = "GAME OVER";
 extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
@@ -194,6 +194,7 @@ void __fastcall__ setup_sid(void)
 	acorn[a].ypos.val=0; \
 	} \
     }						 \
+    if(gstate.wind_cnt==0) acorn[a].xpos.val+=gstate.wind_dir;	\
 } while(0)
 
 #pragma register-vars (on)
@@ -264,7 +265,7 @@ void __fastcall__ acorn_add(void)
 
   // maybe change to counter
   if(MODE_PLAY_DEMO()
-     && (gstate.field==10 || gstate.field==27 || gstate.field==44 )
+     && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
     )  {
       //  if((frame&0xf)==1)  {
     //    r=rand();
@@ -294,8 +295,6 @@ void __fastcall__ acorn_add(void)
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-	acorn[0].spr_color=COLOR_ORANGE;
-	//	acorn[0].spr_color=COLOR_ORANGE+((r>>3)&0x3);
 	  }
 	}
 	//   }
@@ -707,19 +706,19 @@ int main()
 
   cgetc();
 
-  inflatemem ((uint8_t *)0xd800, color2_data);
+  inflatemem (COLOR_RAM, color2_data);
   //    cgetc();
   mode_bitmap();
 
 #if (DEBUG&DEBUG_INFO)
   for(ctmp=0;ctmp<DEBUG_TXT_LEN;ctmp++)
     {
-      POKE(0xd800+40*2+DEBUG_TXT_X+ctmp,1);
-      POKE(0xd800+40*3+DEBUG_TXT_X+ctmp,1);
-      POKE(0xd800+40*4+DEBUG_TXT_X+ctmp,1);
-      POKE(0xd800+40*5+DEBUG_TXT_X+ctmp,1);
-      POKE(0xd800+40*6+DEBUG_TXT_X+ctmp,1);
-      POKE(0xd800+40*7+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM+40*2+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM*3+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM*4+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM*5+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM*6+DEBUG_TXT_X+ctmp,1);
+      POKE(COLOR_RAM*7+DEBUG_TXT_X+ctmp,1);
     }
 
   sprintf(STR_BUF,"Sprdat $%04X",SPR_DATA);
@@ -758,6 +757,8 @@ int main()
       gstate.time=stage[gstate.stage_idx].time;
       gstate.acorns=stage[gstate.stage_idx].acorns;
       gstate.accel=stage[gstate.stage_idx].accel;
+      gstate.flags=stage[gstate.stage_idx].flags;
+      gstate.wind_sp=0;
 
       game_sprite_setup();
       totoro_init(CHU_TOTORO);
@@ -767,7 +768,7 @@ int main()
       totoro_set_pos();
       chibi_set_pos();
 
-            VIC.spr_ena=0x1F;
+      VIC.spr_ena=0x1F;
       //VIC.spr_ena=0x1C;
       
       get_ready();
