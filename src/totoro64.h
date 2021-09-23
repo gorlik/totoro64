@@ -154,6 +154,7 @@ struct acorn_t {
   word_t  ypos; // 8.8 format
   word_t  yv;   // 8.8 format
   uint8_t spr_ptr;
+  uint8_t spr_color;
 };
 
 struct player_t {
@@ -222,13 +223,13 @@ uint8_t __fastcall__ joy2(void);
 void __fastcall__ string_pad(int8_t pad);
 
 // zp variables from ASM
-extern unsigned int itmp;
+extern uint16_t itmp;
 #pragma zpsym("itmp")
-extern unsigned char * line_ptr;
+extern uint8_t * line_ptr;
 #pragma zpsym("line_ptr")
-extern unsigned char * temp_ptr;
+extern uint8_t * temp_ptr;
 #pragma zpsym("temp_ptr")
-extern unsigned char c1,ctmp;
+extern uint8_t c1,ctmp;
 #pragma zpsym("c1")
 #pragma zpsym("ctmp")
 

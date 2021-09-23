@@ -9,7 +9,7 @@
 
 .import   _spr_mux
 .import   _acorn
-ASIZE = 8
+ASIZE = 9
 
 .export spr_mux_irq
 
@@ -101,8 +101,8 @@ irq_table:
 	tay
 	lda _acorn+7,x
 	sta _SPR_PTR,y
-	;       lda _acorn+xxx,x   ; get ready to support muxing sprite colors as well
-	;	sta VIC_COL0,y
+	lda _acorn+8,x  ; get ready to support muxing sprite colors as well
+	sta VIC_SPR0_COLOR,y
 	lda _acorn+2,x 	; acorn[idx].posx.hi
 	beq skip
 	lda xpos_hi

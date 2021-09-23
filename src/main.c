@@ -294,7 +294,8 @@ void __fastcall__ acorn_add(void)
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-	    //	VIC.spr_color[0]=COLOR_ORANGE;
+	acorn[0].spr_color=COLOR_ORANGE;
+	//	acorn[0].spr_color=COLOR_ORANGE+((r>>3)&0x3);
 	  }
 	}
 	//   }
@@ -723,7 +724,7 @@ int main()
 
   sprintf(STR_BUF,"Sprdat $%04X",SPR_DATA);
   printat(DEBUG_TXT_X,2);
-  sprintf(STR_BUF,"Color1 $%04X",COLOR_BASE);
+  sprintf(STR_BUF,"Color1 $%04X",SCREEN_BASE);
   printat(DEBUG_TXT_X,3);
   sprintf(STR_BUF,"Bitmap $%04X",BITMAP_BASE);
   printat(DEBUG_TXT_X,4);
@@ -826,8 +827,10 @@ int main()
     //  strcpy8(STR_BUF,txt_game_over);
     //  convprint_big(0);
     spr_mux=0;
-    SPR_PTR[6]=43;
-    SPR_PTR[7]=44;
+    SPR_PTR[6]=SPR_TXT_GAME_OVER;
+    SPR_PTR[7]=SPR_TXT_GAME_OVER+1;
+    VIC.spr_color[6]=COLOR_ORANGE;
+    VIC.spr_color[7]=COLOR_ORANGE;
     VIC.spr_pos[6].x=136;
     VIC.spr_pos[7].x=184;
     VIC.spr_pos[6].y=120;
