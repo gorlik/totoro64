@@ -38,16 +38,17 @@ _ctmp:
 .exportzp       _c1
 .exportzp       _ctmp
 
-_VIC_BASE   = $4000
-_SCR_BASE   = _VIC_BASE   + $2000
-_COLOR_BASE = _SCR_BASE   - $400
-_SPR_PTR    = _COLOR_BASE + $3f8
-_SPR_DATA   = _VIC_BASE
+_VIC_BASE    = $4000
+_BITMAP_BASE = _VIC_BASE   + $2000
+_SCREEN_BASE = _VIC_BASE
+_SPR_PTR     = _SCREEN_BASE + $3f8
+_SPR_DATA    = _VIC_BASE + $400
 
 _charset    = $c000
 
-.export _SCR_BASE
-.export _COLOR_BASE
+.export _VIC_BASE
+.export _BITMAP_BASE
+.export _SCREEN_BASE
 .export _SPR_DATA
 .export _SPR_PTR
 .export _charset

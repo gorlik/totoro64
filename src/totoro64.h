@@ -56,14 +56,34 @@
 #define JUMP_V 10
 #endif
 
+// (SPR_DATA-VIC_BASE)/64
+#define SPR_DATA_OFFSET   16
+
 // indexes in the sprite data
-#define SPR_ACORN_LG      28
-#define SPR_ACORN_SM      29
-#define SPR_GGLABS_1      35
-#define SPR_TITLE_BOLD_1  39
-#define SPR_64            42
-#define SPR_TXT_GAME_OVER 43
-#define SPR_TITLE_MOVIE_1 58
+#define SPR_ACORN_LG      (28+SPR_DATA_OFFSET)
+#define SPR_ACORN_SM      (29+SPR_DATA_OFFSET)
+#define SPR_GGLABS_1      (35+SPR_DATA_OFFSET)
+#define SPR_TITLE_BOLD_1  (29+SPR_DATA_OFFSET)
+#define SPR_64            (42+SPR_DATA_OFFSET)
+#define SPR_TXT_GAME_OVER (43+SPR_DATA_OFFSET)
+#define SPR_TITLE_MOVIE_1 (58+SPR_DATA_OFFSET)
+#define SPR_CHU_IDLE     (0+SPR_DATA_OFFSET)
+#define SPR_CHU_BLINK    (3+SPR_DATA_OFFSET)
+#define SPR_CHU_RR1     (4+SPR_DATA_OFFSET)
+#define SPR_CHU_RR1     (4+SPR_DATA_OFFSET)
+#define SPR_CHU_RR2     (7+SPR_DATA_OFFSET)
+#define SPR_CHU_RR3     (10+SPR_DATA_OFFSET)
+#define SPR_CHU_RR4     (7+SPR_DATA_OFFSET)
+#define SPR_CHU_RL1     (16+SPR_DATA_OFFSET)
+#define SPR_CHU_RL2     (19+SPR_DATA_OFFSET)
+#define SPR_CHU_RL3     (22+SPR_DATA_OFFSET)
+#define SPR_CHU_RL4     (19+SPR_DATA_OFFSET)
+#define SPR_CHU_BR      (13+SPR_DATA_OFFSET)
+#define SPR_CHU_BL      (25+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE  (61+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE  (61+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RR    (66+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RL    (63+SPR_DATA_OFFSET)
 
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8
@@ -221,10 +241,11 @@ extern const uint8_t color2_data[];
 
 // base pointers for screen data
 extern uint8_t charset[];    // uncompressed charset
-extern uint8_t SCR_BASE[];   // screen base
-extern uint8_t COLOR_BASE[]; // color base
+extern uint8_t BITMAP_BASE[];   // screen base
+extern uint8_t SCREEN_BASE[]; // color base
 extern uint8_t SPR_DATA[];   // sprite data
 extern uint8_t SPR_PTR[];    // sprite pointers
+//extern uint8_t VIC_BASE[];
 
 // global variables
 extern uint8_t STR_BUF[64];

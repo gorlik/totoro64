@@ -306,7 +306,8 @@ void __fastcall__ mode_bitmap(void)
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
 
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
-  VIC.addr =0x78; // color ram at base +0x1c00, bitmap at base + 0x2000
+  //  VIC.addr =0x78; // screen at base +0x1c00, bitmap at base + 0x2000
+  VIC.addr =0x08; // screen at base +0x0000, bitmap at base + 0x2000
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
   VIC.bgcolor[0]=COLOR_BLACK;
   VIC.spr_ena=0;
@@ -642,8 +643,8 @@ int main()
 
   inflatemem (SPR_DATA, sprite_src_data);
   memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
-// movie style title
-//  memcpy((uint8_t *)(0x4000-64*4),SPR_DATA+58*64,64*3);
+  // movie style title
+  // memcpy((uint8_t *)(0x4000-64*4),SPR_DATA+58*64,64*3);
   setup_sid();
 
   spr_mux=0;
@@ -668,8 +669,8 @@ int main()
   memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
 #endif
 
-  inflatemem (SCR_BASE, bitmap_data);
-  inflatemem (COLOR_BASE, color1_data);
+  inflatemem (BITMAP_BASE, bitmap_data);
+  inflatemem (SCREEN_BASE, color1_data);
 
 #if 0
   for(flag=0;flag<32;flag++) {
@@ -724,7 +725,7 @@ int main()
   printat(DEBUG_TXT_X,2);
   sprintf(STR_BUF,"Color1 $%04X",COLOR_BASE);
   printat(DEBUG_TXT_X,3);
-  sprintf(STR_BUF,"Bitmap $%04X",SCR_BASE);
+  sprintf(STR_BUF,"Bitmap $%04X",BITMAP_BASE);
   printat(DEBUG_TXT_X,4);
   sprintf(STR_BUF,"STRBUF $%04X",STR_BUF);
   printat(DEBUG_TXT_X,5);

@@ -29,8 +29,8 @@ static uint8_t p_idx;
 
 const uint8_t run_seq[] =
   {
-    4,7,10,7, // run right
-    16,19,22,19, // run left
+    SPR_CHU_RR1, SPR_CHU_RR2, SPR_CHU_RR3, SPR_CHU_RR4, // run right
+    SPR_CHU_RL1, SPR_CHU_RL2, SPR_CHU_RL3, SPR_CHU_RL4, // run left
   };
 
 void __fastcall__ process_input(void);
@@ -176,10 +176,10 @@ void __fastcall__ totoro_set_pos(void)
 
   switch(totoro[0].state) {
   case IDLE:
-    if(totoro[0].blink)   SPR_PTR[2]=3;
-    else   SPR_PTR[2]=0;
-    SPR_PTR[3]=1;
-    SPR_PTR[4]=2;
+    if(totoro[0].blink)   SPR_PTR[2]=SPR_CHU_BLINK;
+    else   SPR_PTR[2]=SPR_CHU_IDLE;
+    SPR_PTR[3]=SPR_CHU_IDLE+1;
+    SPR_PTR[4]=SPR_CHU_IDLE+2;
     break;
   case RUN:
     if(totoro[0].xv>0) {
@@ -194,13 +194,13 @@ void __fastcall__ totoro_set_pos(void)
     break;
   case BRAKE:
     if(totoro[0].xv>0) {
-      SPR_PTR[2]=13;
-      SPR_PTR[3]=14;
-      SPR_PTR[4]=15;
+      SPR_PTR[2]=SPR_CHU_BR;
+      SPR_PTR[3]=SPR_CHU_BR+1;
+      SPR_PTR[4]=SPR_CHU_BR+2;
     } else {
-      SPR_PTR[2]=25;
-      SPR_PTR[3]=26;
-      SPR_PTR[4]=27;
+      SPR_PTR[2]=SPR_CHU_BL;
+      SPR_PTR[3]=SPR_CHU_BL+1;
+      SPR_PTR[4]=SPR_CHU_BL+2;
     }
     break;
   case JUMP:
@@ -214,9 +214,9 @@ void __fastcall__ totoro_set_pos(void)
       SPR_PTR[4]=run_seq[4]+2;
     } else {
       // add eye movement based on up or down
-      SPR_PTR[2]=0;
-      SPR_PTR[3]=1;
-      SPR_PTR[4]=2;
+      SPR_PTR[2]=SPR_CHU_IDLE;
+      SPR_PTR[3]=SPR_CHU_IDLE+1;
+      SPR_PTR[4]=SPR_CHU_IDLE+2;
     }
     break;
   }
@@ -240,13 +240,13 @@ void __fastcall__ chibi_set_pos(void)
   switch(totoro[1].state) {
   case IDLE:
     if(totoro[1].blink) {
-      SPR_PTR[0]=62;
-      SPR_PTR[1]=61;
+      SPR_PTR[0]=SPR_CHIBI_IDLE+1;
+      SPR_PTR[1]=SPR_CHIBI_IDLE;
       VIC.spr_color[0]=COLOR_WHITE;
       VIC.spr_color[1]=COLOR_BLACK;
     } else {
-      SPR_PTR[0]=61;
-      SPR_PTR[1]=62;
+      SPR_PTR[0]=SPR_CHIBI_IDLE;
+      SPR_PTR[1]=SPR_CHIBI_IDLE+1;
       VIC.spr_color[0]=COLOR_BLACK;
       VIC.spr_color[1]=COLOR_WHITE;
     }
@@ -259,14 +259,14 @@ void __fastcall__ chibi_set_pos(void)
     VIC.spr_color[0]=COLOR_BLACK;
     VIC.spr_color[1]=COLOR_WHITE;
     if(totoro[1].xv>0) {
-      SPR_PTR[0]=66+run_offset;
-      SPR_PTR[1]=68;
+      SPR_PTR[0]=SPR_CHIBI_RR+run_offset;
+      SPR_PTR[1]=SPR_CHIBI_RR+2;
     } else if (totoro[1].xv<0) {
-      SPR_PTR[0]=63+run_offset;
-      SPR_PTR[1]=65;
+      SPR_PTR[0]=SPR_CHIBI_RL+run_offset;
+      SPR_PTR[1]=SPR_CHIBI_RL+2;
     } else {
-      SPR_PTR[0]=61;
-      SPR_PTR[1]=62;
+      SPR_PTR[0]=SPR_CHIBI_IDLE;
+      SPR_PTR[1]=SPR_CHIBI_IDLE+1;
     }
     break;
   }
