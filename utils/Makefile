@@ -7,4 +7,4 @@ bin_to_c: bin_to_c.c
 	gcc -o $@ $<
 
 clean:
-	rm -rf make_font_table bin_to_c
+	rm -rf make_font_table bin_to_c asm_to_bin
