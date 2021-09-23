@@ -45,6 +45,8 @@
 #define VFREQ 50
 #endif
 
+#define SPRITE_MESSAGES
+
 // (SPR_DATA-VIC_BASE)/64
 #define SPR_DATA_OFFSET   16
 
@@ -58,6 +60,7 @@
 #define SPR_TXT_READY     (45+SPR_DATA_OFFSET)
 #define SPR_TXT_SET       (47+SPR_DATA_OFFSET)
 #define SPR_TXT_GO        (49+SPR_DATA_OFFSET)
+#define SPR_TXT_STAGE_CLR (51+SPR_DATA_OFFSET)
 
 #define SPR_TITLE_MOVIE_1 (58+SPR_DATA_OFFSET)
 #define SPR_CHU_IDLE      (0+SPR_DATA_OFFSET)

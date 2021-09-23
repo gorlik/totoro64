@@ -29,8 +29,6 @@
 
 #define STAGE_TIME 60
 
-#define EOF_LINE 0x80
-
 // title bar positions
 #define TIMETXT_X 0
 #define TIMEVAL_X 9
@@ -55,21 +53,34 @@ void __fastcall__ CLR_TOP(void);
 #define DEBUG_BORDER_INC()
 #endif
 
-const unsigned char txt_score[] = "SCORE";
-const unsigned char txt_time[] = "TIME";
-const unsigned char txt_bonus[] = "BONUS";
-const unsigned char txt_acorns[] = "ACORNS";
-const unsigned char txt_catch[] = "CATCH    ";
-const unsigned char txt_stage[] = "STAGE ";
-const unsigned char txt_ready[] = "READY";
-const unsigned char txt_set[] = " SET ";
-const unsigned char txt_go[] = " GO ";
-const unsigned char txt_clear[] = "CLEAR";
-//const unsigned char txt_game_over[] = "GAME OVER";
 extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
 extern const unsigned char license_txt[];
+
+const unsigned char txt_score[]  = "SCORE";
+const unsigned char txt_time[]   = "TIME";
+const unsigned char txt_bonus[]  = "BONUS";
+const unsigned char txt_acorns[] = "ACORNS";
+const unsigned char txt_catch[]  = "CATCH    ";
+const unsigned char txt_stage[]  = "STAGE ";
+const unsigned char txt_clear[]  = "CLEAR";
+#ifdef SPRITE_MESSAGES
+#define MSG_READY     SPR_TXT_READY
+#define MSG_SET       SPR_TXT_SET
+#define MSG_GO        SPR_TXT_GO
+#define MSG_GAME_OVER SPR_TXT_GAME_OVER
+#define MSG_STAGE_CLR SPR_TXT_STAGE_CLR
+#else
+const unsigned char txt_ready[] = "READY";
+const unsigned char txt_set[]   = " SET ";
+const unsigned char txt_go[]    = " GO ";
+const unsigned char txt_game_over[] = "GAME OVER";
+#define MSG_READY     txt_ready
+#define MSG_SET       txt_set
+#define MSG_GO        txt_go
+#define MSG_GAME_OVER txt_game_over
+#endif
 
 #define strcpy8(dst,src)       \
   __asm__("ldx #$FF");         \
@@ -121,7 +132,19 @@ const struct stage_t stage[] =
 };
 #endif
 
+#ifdef SPRITE_MESSAGES
+#define MESSAGEP(p,m) sprite_message2p(m)
+#define MESSAGE(p,m) sprite_message2(m)
+#else
+#define MESSAGEP(p,m) do { strcpy8(STR_BUF,m); convprint_big(p); delay(VFREQ/3); } while (0)
+#define MESSAGE(p,m) do { strcpy8(STR_BUF,m); convprint_big(p); } while (0)
+#endif
+
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
+
+#define PRINT_STRING_AT(p,m)   do { strcpy8(STR_BUF,m); convprint_big(p); } while (0)
+#define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); convprint_big(p); } while (0)
+#define PRINT_NUMBER_AT(p,n)   do { utoa10(n); convprint_big(p); } while (0)
 
 struct game_state_t gstate;
 
@@ -136,7 +159,6 @@ uint8_t STR_BUF[64];
 
 uint8_t spr_mux;
 uint8_t cr;
-
 
 int __fastcall__ utoa10 (uint16_t val);
 
@@ -226,7 +248,7 @@ void __fastcall__ acorn_update(void)
 /*
   for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
     if(acorn[ctmp].ypos.val) {
-      acorn[ctmp].yv.val+=stage[gstate.stage_idx].speed;
+      acorn[ctmp].yv.val+=gstate.accel;
       acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
       if((acorn[ctmp].ypos.hi)>GROUND_Y) {
       	acorn[ctmp].en=0;
@@ -235,7 +257,7 @@ void __fastcall__ acorn_update(void)
     } */
 
 /*    if(acorn[ctmp].en) {
-      acorn[ctmp].yv.val+=stage[gstate.stage_idx].speed;
+      acorn[ctmp].yv.val+=gstate.accel;
       acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
       if((acorn[ctmp].ypos.hi)>GROUND_Y)
 	acorn[ctmp].en=0;
@@ -295,6 +317,7 @@ void __fastcall__ acorn_add(void)
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+        acorn[0].spr_color=COLOR_ORANGE;
 	  }
 	}
 	//   }
@@ -375,33 +398,10 @@ void __fastcall__ wait_past_score(void)
   //  VIC.bordercolor=COLOR_BLACK;
 }
 
-void __fastcall__ setup_top_bar(uint8_t flag)
-{
-  CLR_TOP();
-
-  //  strcpy8(STR_BUF,txt_time);
-  strcpy8f(txt_time);
-  convprint_big(TIMETXT_X);
-
-  if(flag==0) {
-    //    strcpy8(STR_BUF,txt_acorns);
-    temp_ptr=(unsigned char *)txt_acorns;
-  } else {
-    //    strcpy8(STR_BUF,txt_bonus);
-    temp_ptr=(unsigned char *)txt_bonus;
-  }
-  _strcpy8f();
-  convprint_big(ACORNTXT_X);
-
-  //strcpy8(STR_BUF,txt_score);
-  strcpy8f(txt_score);
-  printat(SCORETXT_X,0);
-}
-
 void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
-  if(MODE_PLAY_DEMO()) {
+  //  if(MODE_PLAY_DEMO()) {
 #if 1
     switch(gstate.counter&0x0F) {
     case 0:
@@ -488,16 +488,31 @@ void __fastcall__ update_top_bar(void)
     printat(DEBUG_TXT_X,5);
     */
 #endif
-      /*
-    STR_BUF[1]=hexdigit[(gstate.counter&0x0f)];
-    STR_BUF[0]=hexdigit[(gstate.counter>>4)&0x0f];
-    STR_BUF[2]=' ';
-    STR_BUF[3]=' ';
-    STR_BUF[5]=hexdigit[(gstate.field&0x0f)];
-    STR_BUF[4]=hexdigit[(gstate.field>>4)&0x0f];
-    printat(DEBUG_TXT_X,6);
-    */
+    //  }
+}
+
+void __fastcall__ setup_top_bar(uint8_t flag)
+{
+  CLR_TOP();
+
+  PRINT_STRING_AT(TIMETXT_X,txt_time);
+
+  if(flag==0) {
+    //    strcpy8(STR_BUF,txt_acorns);
+    temp_ptr=(unsigned char *)txt_acorns;
+  } else {
+    //    strcpy8(STR_BUF,txt_bonus);
+    temp_ptr=(unsigned char *)txt_bonus;
   }
+  _strcpy8f();
+  convprint_big(ACORNTXT_X);
+
+  strcpy8(STR_BUF,txt_score);
+  printat(SCORETXT_X,0);
+
+  for(gstate.counter=0;gstate.counter<9;gstate.counter++)
+    update_top_bar();
+  gstate.counter=0;
 }
 
 void __fastcall__ game_sprite_setup(void)
@@ -555,42 +570,58 @@ void __fastcall__ delay(uint8_t f)
     waitvsync();
 }
 
+#ifdef SPRITE_MESSAGES
+void __fastcall__ sprite_message2(uint8_t msg)
+{
+  spr_mux=0;
+  waitvsync();
+  
+  SPR_PTR[6]=msg;
+  SPR_PTR[7]=msg+1;
+  VIC.spr_color[6]=COLOR_ORANGE;
+  VIC.spr_color[7]=COLOR_ORANGE;
+  VIC.spr_pos[6].x=SPR_CENTER_X-48;
+  VIC.spr_pos[7].x=SPR_CENTER_X;
+  VIC.spr_pos[6].y=120;
+  VIC.spr_pos[7].y=120;
+  VIC.spr_exp_x |= 0xc0;
+  VIC.spr_exp_y |= 0xc0;
+  VIC.spr_hi_x  &= 0x3f;
+  VIC.spr_mcolor |= 0xc0;
+  VIC.spr_ena |= 0xc0;
+}
+
+void __fastcall__ sprite_message2p(uint8_t msg)
+{
+  sprite_message2(msg);
+  delay(VFREQ/3);
+}
+#endif
+
 void __fastcall__ get_ready(void)
 {
   CLR_TOP();
-  //  sprintf(STR_BUF,"STAGE %d",gstate.stage);
-  //  convprint_big(14);
-  //  strcpy8(STR_BUF,txt_stage);
-  strcpy8f(txt_stage);
-  convprint_big(14);
-  utoa10(gstate.stage);
-  //  string_pad(2);
-  convprint_big(26);
   
+  PRINT_STRING_AT(14,txt_stage);
+  PRINT_NUMBERP_AT(26,gstate.stage,2);
   delay(VFREQ);
+
   //  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
-  //  convprint_big(4);
-  strcpy8(STR_BUF,txt_catch);
-  convprint_big(6);
-  
-  utoa10(gstate.acorns);
-  string_pad(2);
-  convprint_big(18);
-  strcpy8(STR_BUF,txt_acorns);
-  convprint_big(24);
-  
+  PRINT_STRING_AT(6,txt_catch);
+  PRINT_NUMBER_AT(18,gstate.acorns);
+  PRINT_STRING_AT(24,txt_acorns);
   delay(VFREQ);
 
   CLR_TOP();
-  strcpy8(STR_BUF,txt_ready);
-  convprint_big(15);
-  delay(VFREQ/3);
-  strcpy8(STR_BUF,txt_set);
-  convprint_big(15);
-  delay(VFREQ/3);
-  strcpy8(STR_BUF,txt_go);
-  convprint_big(16);
-  delay(VFREQ/3);
+#ifdef SPRITE_MESSAGES
+  setup_top_bar(0);
+#endif
+  MESSAGEP(15,MSG_READY);
+  MESSAGEP(15,MSG_SET);
+  MESSAGEP(16,MSG_GO);
+#ifndef SPRITE_MESSAGES
+  setup_top_bar(0);
+#endif
 }
 
 void __fastcall__ game_loop(void)
@@ -764,7 +795,6 @@ int main()
       totoro_init(CHU_TOTORO);
       totoro_init(CHIBI_TOTORO);
       acorn_init();
-      spr_mux=1;
       totoro_set_pos();
       chibi_set_pos();
 
@@ -772,8 +802,13 @@ int main()
       //VIC.spr_ena=0x1C;
       
       get_ready();
+      
+      VIC.spr_ena=0x1F;
+      VIC.spr_exp_x=0x3C;
+      VIC.spr_exp_y=0x3C;
+      spr_mux=1;
+  
       gstate.mode=GMODE_PLAY;
-      setup_top_bar(0);
 
       for(;gstate.time&&gstate.acorns;)
 	game_loop();
@@ -782,11 +817,13 @@ int main()
       if(gstate.acorns==0) {
 	flag=1;
 	track[0].next_offset=rand()&0xe;
+#ifdef SPRITE_MESSAGES
+	MESSAGE(0,MSG_STAGE_CLR);
+#else
 	CLR_TOP();
-	strcpy8(STR_BUF,txt_stage);
-	convprint_big(8);
-	strcpy8(STR_BUF,txt_clear);
-	convprint_big(20);
+	PRINT_STRING_AT(8,txt_stage);
+	PRINT_STRING_AT(20,txt_clear);
+#endif
       } else {
 	flag=0;
       }
@@ -801,15 +838,8 @@ int main()
 	bonus=0;
 	setup_top_bar(1);
 	do {
-	  //	  sprintf(STR_BUF,"%2d", gstate.time);
-	  utoa10(gstate.time);
-	  string_pad(2);
-	  convprint_big(TIMEVAL_X);
-	  //	  sprintf(STR_BUF,"%d", bonus);
-	  utoa10(bonus);
-	  //	  string_pad(4);
-	  convprint_big(ACORNVAL_X-2);
-	  //	  sprintf(STR_BUF,"%5d", gstate.score);
+	  PRINT_NUMBERP_AT(TIMEVAL_X,gstate.time,2);
+	  PRINT_NUMBER_AT(ACORNVAL_X-2,bonus);
 	  utoa10(gstate.score);
 	  string_pad(5);
 	  printat(SCOREVAL_X,1);
@@ -824,23 +854,7 @@ int main()
     } while(flag);
 
     // game over
-    
-    //  strcpy8(STR_BUF,txt_game_over);
-    //  convprint_big(0);
-    spr_mux=0;
-    SPR_PTR[6]=SPR_TXT_GAME_OVER;
-    SPR_PTR[7]=SPR_TXT_GAME_OVER+1;
-    VIC.spr_color[6]=COLOR_ORANGE;
-    VIC.spr_color[7]=COLOR_ORANGE;
-    VIC.spr_pos[6].x=136;
-    VIC.spr_pos[7].x=184;
-    VIC.spr_pos[6].y=120;
-    VIC.spr_pos[7].y=120;
-    VIC.spr_exp_x |= 0xc0;
-    VIC.spr_exp_y |= 0xc0;
-    VIC.spr_hi_x &= 0x3f;
-    VIC.spr_mcolor |= 0xc0;
-    VIC.spr_ena |= 0xc0;
+    MESSAGE(0,MSG_GAME_OVER);
     delay(VFREQ*3);
   }
 
