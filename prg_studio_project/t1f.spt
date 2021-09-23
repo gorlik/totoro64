@@ -1632,8 +1632,8 @@
       <data>12841164</data>
       <data>3345612</data>
       <data>3345612</data>
-      <data>15928524</data>
-      <data>3345456</data>
+      <data>3345612</data>
+      <data>15928368</data>
       <data>3345456</data>
       <data>3345456</data>
       <data>3345456</data>
@@ -1734,17 +1734,52 @@
       <data>0</data>
       <data>0</data>
       <data>0</data>
-      <data>3936012</data>
-      <data>12792012</data>
-      <data>12595404</data>
-      <data>12595404</data>
-      <data>13578444</data>
-      <data>12792012</data>
-      <data>12792000</data>
-      <data>12792012</data>
-      <data>8347485</data>
-      <data>5576021</data>
-      <data>1312004</data>
+      <data>3843</data>
+      <data>12492</data>
+      <data>12300</data>
+      <data>12300</data>
+      <data>13260</data>
+      <data>12492</data>
+      <data>12492</data>
+      <data>12492</data>
+      <data>24535</data>
+      <data>5445</data>
+      <data>1281</data>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+    </sdata>
+   </sprite>
+  <sprite>
+    <description>go</description>
+    <links></links>
+    <include>True</include>
+    <multi>True</multi>
+    <spbkgnd>11</spbkgnd>
+    <spcolour>8</spcolour>
+    <mcolour1>9</mcolour1>
+    <mcolour2>7</mcolour2>
+    <expandx>False</expandx>
+    <expandy>False</expandy>
+    <sdata>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+      <data>0</data>
+      <data>12779520</data>
+      <data>3342336</data>
+      <data>3342336</data>
+      <data>3342336</data>
+      <data>3342336</data>
+      <data>3342336</data>
+      <data>3145728</data>
+      <data>3342336</data>
+      <data>14106624</data>
+      <data>5586944</data>
+      <data>4259840</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
@@ -1773,16 +1808,16 @@
       <data>2053981</data>
       <data>1394005</data>
       <data>329025</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
+      <data>3944463</data>
+      <data>12791820</data>
+      <data>12595212</data>
+      <data>12595212</data>
+      <data>12595215</data>
+      <data>12595212</data>
+      <data>12595212</data>
+      <data>12791820</data>
+      <data>8224735</data>
+      <data>1381701</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1806,18 +1841,18 @@
       <data>3345600</data>
       <data>3345600</data>
       <data>3538431</data>
-      <data>5592404</data>
+      <data>5592405</data>
       <data>5263444</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
+      <data>15790332</data>
+      <data>199875</data>
+      <data>199875</data>
+      <data>199875</data>
+      <data>12844284</data>
+      <data>199920</data>
+      <data>199884</data>
+      <data>199875</data>
+      <data>16211415</data>
+      <data>5330005</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1883,46 +1918,11 @@
       <data>199875</data>
       <data>199875</data>
       <data>12844284</data>
-      <data>199920</data>
-      <data>199884</data>
+      <data>199932</data>
+      <data>199875</data>
       <data>199875</data>
       <data>16211415</data>
       <data>5330005</data>
-    </sdata>
-   </sprite>
-  <sprite>
-    <description>catch1</description>
-    <links></links>
-    <include>True</include>
-    <multi>True</multi>
-    <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
-    <mcolour1>9</mcolour1>
-    <mcolour2>7</mcolour2>
-    <expandx>False</expandx>
-    <expandy>False</expandy>
-    <sdata>
-      <data>3936015</data>
-      <data>12792003</data>
-      <data>12595395</data>
-      <data>12595395</data>
-      <data>12599235</data>
-      <data>12595395</data>
-      <data>12595395</data>
-      <data>12792007</data>
-      <data>8222167</data>
-      <data>5576005</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
     </sdata>
    </sprite>
   <sprite>
