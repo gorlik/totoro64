@@ -43,6 +43,9 @@
 #define DEBUG_TXT_LEN 12
 #define DEBUG_TXT_X   (40-DEBUG_TXT_LEN)
 
+#define TXT_PTR 0x400
+#define AT(r,c) (TXT_PTR+40*r+c)
+
 void __fastcall__ CLR_TOP(void);
 
 #if (DEBUG & DEBUG_TIMING)
@@ -82,19 +85,14 @@ const unsigned char txt_game_over[] = "GAME OVER";
 #define MSG_GAME_OVER txt_game_over
 #endif
 
-#define strcpy8(dst,src)       \
-  __asm__("ldx #$FF");         \
-  __asm__("ls%v: inx",src);    \
-  __asm__("lda %v,x",src);     \
-  __asm__("sta %v,x",dst);     \
-  __asm__("bne ls%v",src);
-
-#define strcpy8v(dst,src)      \
-  __asm__("ldx #$FF");         \
-  __asm__("ls%v: inx",src);    \
-  __asm__("lda %v,x",src);     \
-  __asm__("sta %w,x",dst);     \
-  __asm__("bne ls%v",src);
+#define scr_strcpy8(dst,src)    \
+  __asm__("ldx #$FF");          \
+  __asm__("ls%v: inx",src);			\
+  __asm__("lda %v,x",src);			\
+  __asm__("beq fs%v",src);			\
+  __asm__("sta %w,x",dst);			\
+  __asm__("bne ls%v",src);			\
+  __asm__("fs%v:",src);     
 
 const uint16_t sound_seq[] = {
   0x22d0,
@@ -136,13 +134,13 @@ const struct stage_t stage[] =
 #define MESSAGEP(p,m) sprite_message2p(m)
 #define MESSAGE(p,m) sprite_message2(m)
 #else
-#define MESSAGEP(p,m) do { strcpy8(STR_BUF,m); convprint_big(p); delay(VFREQ/3); } while (0)
-#define MESSAGE(p,m) do { strcpy8(STR_BUF,m); convprint_big(p); } while (0)
+#define MESSAGEP(p,m) do { strcpy8f(m); convprint_big(p); delay(VFREQ/3); } while (0)
+#define MESSAGE(p,m) do { strcpy8f(m); convprint_big(p); } while (0)
 #endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
 
-#define PRINT_STRING_AT(p,m)   do { strcpy8(STR_BUF,m); convprint_big(p); } while (0)
+#define PRINT_STRING_AT(p,m)   do { strcpy8f(m); convprint_big(p); } while (0)
 #define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); convprint_big(p); } while (0)
 #define PRINT_NUMBER_AT(p,n)   do { utoa10(n); convprint_big(p); } while (0)
 
@@ -507,7 +505,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
   _strcpy8f();
   convprint_big(ACORNTXT_X);
 
-  strcpy8(STR_BUF,txt_score);
+  strcpy8f(txt_score);
   printat(SCORETXT_X,0);
 
   for(gstate.counter=0;gstate.counter<9;gstate.counter++)
@@ -688,14 +686,15 @@ int main()
   mode_text();
   VIC.spr_ena=0x0f;
 
-  memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
+  //memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
+  scr_strcpy8(AT(5,16),present_txt);
   inflatemem (charset, charset_data);
   VIC.spr_ena=0xff;
 
-  memcpy((uint8_t *)(0x400+40*11+33),version_txt,5);
-  memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
-  //strcpy8v((0x400+40*6+15),present_txt);
-  //strcpy8v((0x400+40*16),intro_txt);
+  //  memcpy((uint8_t *)(0x400+40*11+33),version_txt,5);
+  //  memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
+  scr_strcpy8(AT(11,33),version_txt);
+  scr_strcpy8(AT(14,0),intro_txt);
 #if (DEBUG==0)
   memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
 #endif
