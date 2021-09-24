@@ -28,9 +28,11 @@
 // should be 8 with .66 acceleration
 // approximate to 9 and .75 acceleration
 #define JUMP_V 0x900
+#define JUMP_A 200
 #else
 #define MAX_XV 16
 #define JUMP_V 0xa00
+#define JUMP_A 200
 #endif
 
 #define PGROUND_Y (GROUND_Y-23)
@@ -324,7 +326,7 @@ void __fastcall__ totoro_move()
   tcache.ypos.val+=tcache.yv.val;
 
   if(tcache.state==JUMP) {
-    tcache.yv.val+=200;
+    tcache.yv.val+=JUMP_A;
   }
 
   ground=(p_idx)?GROUND_Y+2:PGROUND_Y;
@@ -407,7 +409,7 @@ void __fastcall__ process_input(void)
       break;
     case 60: // space
       // make chibi totoro jump higher
-      tcache.yv.val=(p_idx)?-(JUMP_V+200):-JUMP_V;
+      tcache.yv.val=(p_idx)?-(JUMP_V+JUMP_A):-JUMP_V;
       tcache.state=JUMP;
       break;
     default:
