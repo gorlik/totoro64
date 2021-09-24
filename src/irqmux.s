@@ -6,6 +6,8 @@
 .import   _IRQ
 .import   _SPR_PTR
 .import   color_save
+.importzp itmp1, itmp2
+
 
 .import   _spr_mux
 .import   _acorn
@@ -14,18 +16,17 @@ ASIZE = 9
 .export spr_mux_irq
 
 ;;  sprite mux setup
-.define LINES_EARLY  3
+.define LINES_EARLY  4
 .define MUX_SLOTS    2
 
 
 .segment 	"BSS"
 	;; temp variables for sprite muxing
-mask:
-	.res 1
 xpos_hi:
 	.res 1
-en_tmp:
-	.res 1
+
+.define mask    itmp1
+.define en_tmp  itmp2
 
 .macro setup_AXY idx
 	lda #(1<<((8-MUX_SLOTS)+(idx .mod MUX_SLOTS))) ; spr mask
@@ -102,7 +103,9 @@ irq_table:
 	lda _acorn+7,x
 	sta _SPR_PTR,y
 	lda _acorn+8,x  ; get ready to support muxing sprite colors as well
+.if IPDebug = 0
 	sta VIC_SPR0_COLOR,y
+.endif
 	lda _acorn+2,x 	; acorn[idx].posx.hi
 	beq skip
 	lda xpos_hi
@@ -176,5 +179,5 @@ IRQ7:
 	jsr irq_body
 restore_irq:
 	ldx #0			; vector back to _IRQ
-	lda #56			; rasterline 56-LINES_EARLY
+	lda #40			; rasterline 56-LINES_EARLY
 	jmp set_next_raster
