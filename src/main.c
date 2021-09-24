@@ -105,9 +105,9 @@ const uint16_t sound_seq[] = {
 #ifdef NTSC
 const struct stage_t stage[] =
   {
-   { STAGE_TIME, 10, 3, 0 },
-   { STAGE_TIME, 15, 4, 0 },
-   { STAGE_TIME, 20, 6, 0 },
+   { STAGE_TIME, 10, 3, SF_PINECONES },
+   { STAGE_TIME, 15, 4, SF_WIND1 },
+   { STAGE_TIME, 20, 6, SF_ACORN1 },
    { STAGE_TIME, 25, 7, 0 },
    { STAGE_TIME, 30, 8, 0 },
    { STAGE_TIME, 35, 10, 0 },
@@ -118,9 +118,9 @@ const struct stage_t stage[] =
 #else
 const struct stage_t stage[] =
   {
-   { STAGE_TIME, 10, 4, 0 },
-   { STAGE_TIME, 15, 6, 0 },
-   { STAGE_TIME, 20, 8, 0 },
+   { STAGE_TIME, 10, 4, SF_PINECONES },
+   { STAGE_TIME, 15, 6, SF_WIND1 },
+   { STAGE_TIME, 20, 8, SF_ACORN1 },
    { STAGE_TIME, 25, 10, 0 },
    { STAGE_TIME, 30, 12, 0 },
    { STAGE_TIME, 35, 14, 0 },
@@ -171,9 +171,9 @@ void __fastcall__ _strcpy8f (void)
   __asm__("bne strloop");
 }
 
-#define strcpy8f(a) do { \
-    temp_ptr=(unsigned char *)a;		\
-  _strcpy8f();\
+#define strcpy8f(a) do {           \
+    temp_ptr=(unsigned char *)a;   \
+  _strcpy8f();                     \
   } while (0)
 
 void __fastcall__ setup_sid(void)
@@ -207,16 +207,19 @@ void __fastcall__ setup_sid(void)
   SID.v3.sr = 0xa9;
 }
 
-#define acorn_update_m(a) do {		  	 \
-    if(acorn[a].ypos.val) {				 \
-      acorn[a].yv.val+=gstate.accel;\
-      acorn[a].ypos.val+=(acorn[a].yv.val);\
-      if((acorn[a].ypos.hi)>GROUND_Y) {\
-      	acorn[a].en=0;				 \
-	acorn[a].ypos.val=0; \
-	} \
-    }						 \
-    if(gstate.wind_cnt==0) acorn[a].xpos.val+=gstate.wind_dir;	\
+#define acorn_update_m(a)                   \
+do {	                                    \
+    if(acorn[a].ypos.val) {		    \
+      acorn[a].yv.val+=gstate.accel;        \
+      acorn[a].ypos.val+=(acorn[a].yv.val); \
+      if((acorn[a].ypos.hi)>GROUND_Y) {     \
+      	acorn[a].en=0;			    \
+	acorn[a].ypos.val=0;                \
+      } else {                              \
+        if(gstate.wind_cnt==0)              \
+          acorn[a].xpos.val+=gstate.wind_dir;   \
+      }					    \
+   }   \
 } while(0)
 
 #pragma register-vars (on)
@@ -230,8 +233,11 @@ void acorn_update_f(uint8_t idx)
     if((a->ypos.hi)>GROUND_Y) {
       a->en=0;
       a->ypos.val=0;
-    }
+    } else {
+   if(gstate.wind_cnt==0)
+      a->xpos.val+=gstate.wind_dir;
   }
+}
 }
 
 void __fastcall__ acorn_update(void)
@@ -286,8 +292,8 @@ void __fastcall__ acorn_add(void)
   static unsigned int r;
 
   // maybe change to counter
-  if(MODE_PLAY_DEMO()
-     //   && ((gstate.counter&0x40)==0x40)
+  if(MODE_PLAY_DEMO() 
+     && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_ACORN1))
     // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
     )  {
 	// new acorn
@@ -311,9 +317,11 @@ void __fastcall__ acorn_add(void)
 	acorn[0].xpos.val=r;
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
-//	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
-        acorn[0].spr_color=COLOR_ORANGE;
+	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+//	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
+        if((gstate.flags&SF_PINECONES)&& (((last_rand>>8)&0x7)==3) ) {
+	  acorn[0].spr_color=COLOR_BLACK;
+	} else 	acorn[0].spr_color=COLOR_ORANGE;
 	acorn[0].en=1;
 	  }
 	//   }
@@ -622,6 +630,8 @@ void __fastcall__ get_ready(void)
 
 void __fastcall__ game_loop(void)
 {
+  static uint8_t tr;
+  
   waitvsync();
 //  cgetc();
   DEBUG_BORDER(COLOR_WHITE);
@@ -653,6 +663,17 @@ void __fastcall__ game_loop(void)
   if(gstate.field==VFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
     gstate.field=0;
+  }
+
+  if(gstate.flags&SF_WIND1) {
+    if(gstate.counter==187) {
+      tr=last_rand;
+      gstate.wind_sp=(tr&7)+1;
+      if(tr&0x80) gstate.wind_dir=1;
+      else gstate.wind_dir=-1;
+    }
+    if(gstate.wind_cnt==0) gstate.wind_cnt=gstate.wind_sp;
+    else gstate.wind_cnt--;
   }
 
   // speed up music
