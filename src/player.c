@@ -292,7 +292,9 @@ void __fastcall__ totoro_update(uint8_t p)
 {
   tcache_load(p);
   process_input();
+  //  VIC.bordercolor=COLOR_YELLOW;
   totoro_move();
+  //  VIC.bordercolor=COLOR_BLUE;
   check_collision();
   // check collisions every other frame
   /*  if(gstate.counter&1) {
@@ -431,14 +433,21 @@ void __fastcall__ process_input(void)
 void __fastcall__ check_collision(void)
 {
   register struct acorn_t *a;
-  //  static uint8_t color;
-  //VIC.bordercolor=COLOR_YELLOW;
+  static uint8_t ty1, ty2;
+  static int16_t tx1, tx2;
+
+  ty1=tcache.ypos.hi-20;
+  ty2=tcache.ypos.hi+42;
+  tx1=tcache.xpos.uval-15;
+  tx2=tcache.xpos.uval+36;
+
+//  VIC.bordercolor=COLOR_WHITE;
   for(a=acorn;a!=acorn+8;a++) {
     if(a->en) {
-      if((((a->ypos.hi))>(tcache.ypos.hi-20)) &&
-	 (((a->ypos.hi))<(tcache.ypos.hi+42)) ) {
-	if((tcache.xpos.val>(a->xpos.val-36)) &&
-	   (tcache.xpos.uval<(a->xpos.uval+15)) ) {
+      if( ((a->ypos.hi)>ty1)   &&
+	  ((a->ypos.hi)<ty2)   &&
+	  ((a->xpos.uval)>tx1) &&
+	  ((a->xpos.uval)<tx2) ) {
 	  a->en=0;
 	  start_sound();
 	  /* VIC.spr_ena&=~(0x10<<a) */
@@ -447,23 +456,31 @@ void __fastcall__ check_collision(void)
 	}
       }
     }
-  }
-  //VIC.bordercolor=COLOR_RED;
+//  VIC.bordercolor=COLOR_BLUE;
 }
 
 #else
 
 void __fastcall__ check_collision(void)
 {
+  static uint8_t ty1, ty2;
+  static int16_t tx1, tx2;
+  static uint8_t i;
+
+  ty1=tcache.ypos.hi-20;
+  ty2=tcache.ypos.hi+42;
+  tx1=tcache.xpos.uval-15;
+  tx2=tcache.xpos.uval+36;
+
   //  static uint8_t color;
   VIC.bordercolor=COLOR_CYAN;
-  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
-    if(acorn[ctmp].en) {
-      if((((acorn[ctmp].ypos.hi))>(tcache.ypos.hi-20)) &&
-	 (((acorn[ctmp].ypos.hi))<(tcache.ypos.hi+42)) ) {
-	if((tcache.xpos.val>(acorn[ctmp].xpos.val-36)) &&
-	   (tcache.xpos.uval<(acorn[ctmp].xpos.uval+15)) ) {
-	  acorn[ctmp].en=0;
+  for(i=0;i<MAX_ACORNS;i++) {
+    if(acorn[i].en) {
+      if(((acorn[i].ypos.hi)>ty1)  &&
+	 ((acorn[i].ypos.hi)<ty2)  &&
+	 ((acorn[i].xpos.val)>tx1) &&
+	 ((acorn[i].xpos.uval)<tx2) ) {
+	  acorn[i].en=0;
 	  start_sound();
 //	   VIC.spr_ena&=~(0x10<<a) 
 	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
@@ -471,7 +488,6 @@ void __fastcall__ check_collision(void)
 	}
       }
     }
-  }
   VIC.bordercolor=COLOR_GREEN;
 }
 
