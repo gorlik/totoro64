@@ -158,6 +158,8 @@ uint8_t STR_BUF[64];
 uint8_t spr_mux;
 uint8_t cr;
 
+uint16_t last_rand;
+
 int __fastcall__ utoa10 (uint16_t val);
 
 void __fastcall__ _strcpy8f (void)
@@ -272,7 +274,7 @@ void __fastcall__ acorn_init(void)
 unsigned char __fastcall__ acorn_free_slot(void)
 {
   if( (acorn[MAX_ACORNS-1].en==0) &&
-      (acorn[0].ypos.hi)>(ACORN_START_Y+2) &&
+      (acorn[0].ypos.hi)>(ACORN_START_Y+6) &&
      ( (acorn[MUX_SLOTS-1].ypos.hi>ACORN_START_Y+23) || (acorn[MUX_SLOTS-1].ypos.val==0) /*|| (acorn[2].ypos.val==0)*/) ) return 1;
   if(acorn[0].en==0) return 1;
   return 0;
@@ -285,39 +287,35 @@ void __fastcall__ acorn_add(void)
 
   // maybe change to counter
   if(MODE_PLAY_DEMO()
-     && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
+     //   && ((gstate.counter&0x40)==0x40)
+    // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
     )  {
-      //  if((frame&0xf)==1)  {
-    //    r=rand();
-      //    if(r<RAND_MAX/2) {
-      //      if(1) {
 	// new acorn
-	do {
-	  r=rand();
-	  r&=0x3f;
-	} while (abs(r-oldr)<8);
+        r=last_rand&0x3f;
+	if((r>=36) || (abs(r-oldr)<8) ) return;
 	oldr=r;
 
-	if(r<36) {
 	  r<<=3;
 	  r+=MIN_X;
       if(acorn_free_slot()) {
+ // VIC.bordercolor=COLOR_YELLOW;
 	// shift acorn data 
+	__asm__("sei");
 	__asm__("ldx #(%b*%b)",MAX_ACORNS-1,sizeof(struct acorn_t));
 	__asm__("loop1: lda %v-1,x",acorn);
 	__asm__("sta %v+%b-1,x",acorn,sizeof(struct acorn_t));
 	__asm__("dex");
 	__asm__("bne loop1");
-//	__asm__("lda $d01e");
+	__asm__("cli");
 
-	acorn[0].en=1;
 	acorn[0].xpos.val=r;
 	acorn[0].ypos.val=ACORN_START_Y<<8;
 	acorn[0].yv.val=4;
-	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+//	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
         acorn[0].spr_color=COLOR_ORANGE;
+	acorn[0].en=1;
 	  }
-	}
 	//   }
     }
 }
@@ -624,9 +622,8 @@ void __fastcall__ get_ready(void)
 
 void __fastcall__ game_loop(void)
 {
-  //  VIC.bordercolor=COLOR_RED;
   waitvsync();
-  //  VIC.bordercolor=COLOR_WHITE;
+//  cgetc();
   DEBUG_BORDER(COLOR_WHITE);
 
   // screen updates
@@ -639,6 +636,7 @@ void __fastcall__ game_loop(void)
   acorn_update();
   acorn_add();
   DEBUG_BORDER(COLOR_RED);
+  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
   totoro_update(CHU_TOTORO);
@@ -661,6 +659,7 @@ void __fastcall__ game_loop(void)
   if(gstate.time==20) vpb=VPB-1;
   if(gstate.time==10) vpb=VPB-2;
 
+  last_rand=rand();
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK);
 }
@@ -686,13 +685,10 @@ int main()
   mode_text();
   VIC.spr_ena=0x0f;
 
-  //memcpy((uint8_t *)(0x400+40*5+16),present_txt,8);
   scr_strcpy8(AT(5,16),present_txt);
   inflatemem (charset, charset_data);
   VIC.spr_ena=0xff;
 
-  //  memcpy((uint8_t *)(0x400+40*11+33),version_txt,5);
-  //  memcpy((uint8_t *)(0x400+40*14),intro_txt,39);
   scr_strcpy8(AT(11,33),version_txt);
   scr_strcpy8(AT(14,0),intro_txt);
 #if (DEBUG==0)
@@ -700,6 +696,8 @@ int main()
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);
+ // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
+//	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
 
 #if 0

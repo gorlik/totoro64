@@ -42,8 +42,6 @@
 .segment 	"BSS"
 tmp:
 	.res 1
-ctmp:
-	.res 1
 trk_offset:
 	.res 1
 
@@ -75,7 +73,6 @@ SID_offset:
 
 
 .macro load_track_state
-;.local loop
 	stx trk_offset
 	lda _track+TRACK_PTR0,x
 	sta _track_ptr

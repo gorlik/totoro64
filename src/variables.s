@@ -26,17 +26,17 @@ _track_ptr:
 	.res 2
 _temp_ptr:
 	.res 2
-_c1:
+itmp1:
 	.res 1
-_ctmp:
+itmp2:
 	.res 1
 
 
 .exportzp       _line_ptr
 .exportzp       _track_ptr
 .exportzp       _temp_ptr
-.exportzp       _c1
-.exportzp       _ctmp
+.exportzp       itmp1
+.exportzp       itmp2
 
 _VIC_BASE    = $4000
 _BITMAP_BASE = _VIC_BASE   + $2000

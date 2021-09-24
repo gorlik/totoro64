@@ -97,6 +97,12 @@
 #define CHU_TOTORO   0
 #define CHIBI_TOTORO sizeof(struct player_t)
 
+#define SF_PINECONES  0x01
+#define SF_WIND1      0x02
+#define SF_WIND2      0x04
+#define SF_KIKI       0x08
+#define SF_ACORN1     0x10
+
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)

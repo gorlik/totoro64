@@ -25,7 +25,6 @@
 ;.import         _charset	
 
 .importzp       _line_ptr
-.importzp       _c1
 
 .import _SCR_BASE
 .import _STR_BUF
