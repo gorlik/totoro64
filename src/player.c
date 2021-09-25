@@ -243,7 +243,7 @@ void __fastcall__ chibi_set_pos(void)
 {
   static uint8_t run_offset;
 
-  run_offset=0;
+  //  run_offset=0;
   VIC.spr_pos[0].x   = totoro[1].xpos.lo;
   VIC.spr_pos[1].x   = totoro[1].xpos.lo;
 
@@ -253,8 +253,7 @@ void __fastcall__ chibi_set_pos(void)
   VIC.spr_pos[0].y   = totoro[1].ypos.hi;
   VIC.spr_pos[1].y   = totoro[1].ypos.hi;
 
-  switch(totoro[1].state) {
-  case IDLE:
+  if (totoro[1].state==IDLE) {
     if(totoro[1].blink) {
       SPR_PTR[0]=SPR_CHIBI_IDLE+1;
       SPR_PTR[1]=SPR_CHIBI_IDLE;
@@ -266,12 +265,18 @@ void __fastcall__ chibi_set_pos(void)
       VIC.spr_color[0]=COLOR_BLACK;
       VIC.spr_color[1]=COLOR_WHITE;
     }
-    break;
-  case RUN:
-    run_offset=gstate.anim_idx&1;
-    // fallthrough
-  case BRAKE:
-  case JUMP:
+  } else {
+    switch(totoro[1].state) {
+    case RUN:
+      run_offset=gstate.anim_idx&1;
+      break;
+    case JUMP:
+      run_offset=1;
+      break;
+    case BRAKE:
+      run_offset=0;
+      break;
+    }
     VIC.spr_color[0]=COLOR_BLACK;
     VIC.spr_color[1]=COLOR_WHITE;
     if(totoro[1].xv>0) {
@@ -284,7 +289,6 @@ void __fastcall__ chibi_set_pos(void)
       SPR_PTR[0]=SPR_CHIBI_IDLE;
       SPR_PTR[1]=SPR_CHIBI_IDLE+1;
     }
-    break;
   }
 }
 
