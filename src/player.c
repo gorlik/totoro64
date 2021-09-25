@@ -335,7 +335,7 @@ void __fastcall__ totoro_move()
     tcache.yv.val+=JUMP_A;
   }
 
-  ground=(p_idx)?GROUND_Y+2:PGROUND_Y;
+  ground=(p_idx)?GROUND_Y:PGROUND_Y;
 
   if(tcache.ypos.hi>ground) {
     tcache.ypos.val=(ground<<8);
