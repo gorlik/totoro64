@@ -395,10 +395,10 @@ void __fastcall__ Title_Sprite_Setup(void)
   VIC.spr_pos[7].y=105;
 }
 
-void __fastcall__ wait_past_score(void)
+void __fastcall__ wait_line(uint8_t l)
 {
   //  VIC.bordercolor=COLOR_WHITE;
-  while(VIC.rasterline<=60) {};
+  while(VIC.rasterline<=l) {};
   //  VIC.bordercolor=COLOR_BLACK;
 }
 
@@ -416,7 +416,7 @@ void __fastcall__ update_top_bar(void)
       convert_big();
       break;
     case 2:
-      wait_past_score();
+      wait_line(60);
       printbigat(ACORNVAL_X,0);
       break;
     case 4:
@@ -427,7 +427,7 @@ void __fastcall__ update_top_bar(void)
       convert_big();
       break;
     case 6:
-      wait_past_score();
+      wait_line(60);
       printbigat(TIMEVAL_X,0);
       break;
     case 7:
@@ -435,7 +435,7 @@ void __fastcall__ update_top_bar(void)
       string_pad(5);
       break;
     case 8:
-      wait_past_score();
+      wait_line(60);
       printat(SCOREVAL_X,1);
       break;
 #if (DEBUG&DEBUG_INFO)
@@ -444,7 +444,7 @@ void __fastcall__ update_top_bar(void)
       sprintf(STR_BUF,"ST:%2d IDX:%2d", gstate.stage, gstate.stage_idx);
       break;
     case 11:
-      wait_past_score();
+      wait_line(60);
       DEBUG_BORDER_INC();
       printat(DEBUG_TXT_X,2);
       break;
@@ -453,7 +453,7 @@ void __fastcall__ update_top_bar(void)
       sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, gstate.accel);
       break;
     case 13:
-      wait_past_score();
+      wait_line(60);
       DEBUG_BORDER_INC();
       printat(DEBUG_TXT_X,3);
       break;
@@ -641,12 +641,8 @@ void __fastcall__ game_loop(void)
   chibi_set_pos();
 
   process_sound();
-  DEBUG_BORDER(COLOR_YELLOW);
-  // calculate new acorn positions
-  acorn_update();
-  acorn_add();
   DEBUG_BORDER(COLOR_RED);
-  VIC.bordercolor=COLOR_BLACK;
+  //  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
   totoro_update(CHU_TOTORO);
@@ -682,6 +678,12 @@ void __fastcall__ game_loop(void)
 
   last_rand=rand();
   // black background for idle time
+  DEBUG_BORDER(COLOR_BLACK);
+  wait_line(GROUND_Y+23);
+  DEBUG_BORDER(COLOR_YELLOW);
+  // calculate new acorn positions
+  acorn_update();
+  acorn_add();
   DEBUG_BORDER(COLOR_BLACK);
 }
 
@@ -847,7 +849,7 @@ int main()
       }
 
       // make totoro walk away
-      for(;totoro[0].xpos.uval<350;)
+      for(;totoro[0].xpos.uval<400;)
 	game_loop();
 
       delay(VFREQ/2);
