@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.19"
+#define VERSION "v0.20"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -62,7 +62,7 @@
 #define SPR_TXT_GO        (49+SPR_DATA_OFFSET)
 #define SPR_TXT_STAGE_CLR (51+SPR_DATA_OFFSET)
 
-#define SPR_TITLE_MOVIE_1 (58+SPR_DATA_OFFSET)
+#define SPR_TITLE_MOVIE_1 (55+SPR_DATA_OFFSET)
 #define SPR_CHU_IDLE      (0+SPR_DATA_OFFSET)
 #define SPR_CHU_BLINK     (3+SPR_DATA_OFFSET)
 #define SPR_CHU_RR1       (4+SPR_DATA_OFFSET)
@@ -76,10 +76,13 @@
 #define SPR_CHU_RL4       (19+SPR_DATA_OFFSET)
 #define SPR_CHU_BR        (13+SPR_DATA_OFFSET)
 #define SPR_CHU_BL        (25+SPR_DATA_OFFSET)
-#define SPR_CHIBI_IDLE    (61+SPR_DATA_OFFSET)
-#define SPR_CHIBI_IDLE    (61+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RR      (66+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RL      (63+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE    (58+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RR      (63+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RL      (60+SPR_DATA_OFFSET)
+
+#define SPR_KIKI_R        (66+SPR_DATA_OFFSET)
+#define SPR_KIKI_L        (68+SPR_DATA_OFFSET)
+
 
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8

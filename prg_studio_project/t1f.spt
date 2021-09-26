@@ -1035,13 +1035,13 @@
       <data>87376</data>
       <data>92752</data>
       <data>109200</data>
+      <data>43648</data>
       <data>43904</data>
       <data>43904</data>
       <data>43904</data>
       <data>43904</data>
       <data>44672</data>
-      <data>44672</data>
-      <data>10752</data>
+      <data>11776</data>
       <data>10752</data>
       <data>2048</data>
       <data>0</data>
@@ -1511,27 +1511,27 @@
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>11</spbkgnd>
-    <spcolour>8</spcolour>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
     <expandy>False</expandy>
     <sdata>
       <data>246000</data>
-      <data>799500</data>
-      <data>787212</data>
+      <data>963500</data>
+      <data>795404</data>
       <data>787212</data>
       <data>848892</data>
-      <data>799500</data>
+      <data>832268</data>
       <data>799500</data>
       <data>799500</data>
       <data>1570653</data>
       <data>348500</data>
       <data>0</data>
       <data>246531</data>
+      <data>963331</data>
       <data>799491</data>
-      <data>799491</data>
-      <data>798924</data>
+      <data>799438</data>
       <data>798924</data>
       <data>798924</data>
       <data>798768</data>
@@ -1546,29 +1546,29 @@
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
     <expandy>False</expandy>
     <sdata>
       <data>12636144</data>
-      <data>15977472</data>
-      <data>13421568</data>
-      <data>12635136</data>
+      <data>15978144</data>
+      <data>15649792</data>
+      <data>13159424</data>
       <data>12636096</data>
-      <data>12635136</data>
+      <data>12635776</data>
       <data>12635136</data>
       <data>12635136</data>
       <data>14016500</data>
       <data>5588304</data>
       <data>0</data>
       <data>4181952</data>
-      <data>3148848</data>
+      <data>3837616</data>
       <data>3148848</data>
       <data>3148848</data>
       <data>4132800</data>
-      <data>3149568</data>
+      <data>3804864</data>
       <data>3148992</data>
       <data>3148848</data>
       <data>8379764</data>
@@ -1599,7 +1599,7 @@
       <data>12791820</data>
       <data>12791820</data>
       <data>16531215</data>
-      <data>15743502</data>
+      <data>15481358</data>
       <data>13381644</data>
       <data>12791820</data>
       <data>14122973</data>
@@ -1805,10 +1805,9 @@
       <data>705292</data>
       <data>49932</data>
       <data>3195660</data>
-      <data>2053981</data>
+      <data>6248285</data>
       <data>1394005</data>
-      <data>329025</data>
-      <data>986127</data>
+      <data>986447</data>
       <data>3853326</data>
       <data>3181580</data>
       <data>3148812</data>
@@ -1817,7 +1816,8 @@
       <data>3148812</data>
       <data>3197964</data>
       <data>6250463</data>
-      <data>1381701</data>
+      <data>1398101</data>
+      <data>328961</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1842,16 +1842,16 @@
       <data>3345600</data>
       <data>3538431</data>
       <data>5592405</data>
-      <data>5263444</data>
       <data>15790332</data>
       <data>10726635</data>
       <data>199875</data>
       <data>199875</data>
       <data>12844286</data>
-      <data>8629488</data>
+      <data>8629484</data>
       <data>199884</data>
       <data>199875</data>
-      <data>16211415</data>
+      <data>15928515</data>
+      <data>5592405</data>
       <data>5330005</data>
     </sdata>
    </sprite>
@@ -1861,33 +1861,33 @@
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
     <expandy>False</expandy>
     <sdata>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>3944463</data>
-      <data>12791820</data>
-      <data>12595212</data>
-      <data>12595212</data>
-      <data>12595215</data>
-      <data>12595212</data>
-      <data>12595212</data>
-      <data>12791820</data>
-      <data>3964895</data>
-      <data>5576005</data>
+      <data>16320</data>
+      <data>262080</data>
+      <data>1048512</data>
+      <data>1048192</data>
+      <data>4188800</data>
+      <data>4171779</data>
+      <data>4161539</data>
+      <data>16744451</data>
+      <data>16678915</data>
+      <data>16650227</data>
+      <data>16650227</data>
+      <data>16649203</data>
+      <data>16647155</data>
+      <data>16647155</data>
+      <data>16715760</data>
+      <data>4194288</data>
+      <data>4194240</data>
+      <data>4194260</data>
+      <data>2096981</data>
+      <data>1398100</data>
+      <data>349520</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1896,138 +1896,33 @@
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
     <expandy>False</expandy>
     <sdata>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>15790332</data>
-      <data>199875</data>
-      <data>199875</data>
-      <data>199875</data>
-      <data>12844284</data>
-      <data>199932</data>
-      <data>199875</data>
-      <data>199875</data>
-      <data>16211415</data>
-      <data>5330005</data>
-    </sdata>
-   </sprite>
-  <sprite>
-    <description>catch2</description>
-    <links></links>
-    <include>True</include>
-    <multi>True</multi>
-    <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
-    <mcolour1>9</mcolour1>
-    <mcolour2>7</mcolour2>
-    <expandx>False</expandx>
-    <expandy>False</expandy>
-    <sdata>
-      <data>12829452</data>
-      <data>799500</data>
-      <data>787212</data>
-      <data>787212</data>
-      <data>787452</data>
-      <data>787212</data>
-      <data>787212</data>
-      <data>4993804</data>
-      <data>4708189</data>
-      <data>5591380</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-    </sdata>
-   </sprite>
-  <sprite>
-    <description>acorn_txt_1</description>
-    <links></links>
-    <include>True</include>
-    <multi>True</multi>
-    <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
-    <mcolour1>9</mcolour1>
-    <mcolour2>7</mcolour2>
-    <expandx>False</expandx>
-    <expandy>False</expandy>
-    <sdata>
-      <data>3158064</data>
-      <data>13421772</data>
-      <data>13418700</data>
-      <data>13418700</data>
-      <data>16564428</data>
-      <data>13418700</data>
-      <data>13418700</data>
-      <data>13421772</data>
-      <data>14513269</data>
-      <data>5592405</data>
-      <data>1040</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-    </sdata>
-   </sprite>
-  <sprite>
-    <description>acorn_txt2</description>
-    <links></links>
-    <include>True</include>
-    <multi>True</multi>
-    <spbkgnd>11</spbkgnd>
-    <spcolour>5</spcolour>
-    <mcolour1>9</mcolour1>
-    <mcolour2>7</mcolour2>
-    <expandx>False</expandx>
-    <expandy>False</expandy>
-    <sdata>
-      <data>15778572</data>
-      <data>13431603</data>
-      <data>13431600</data>
-      <data>13422384</data>
-      <data>15781644</data>
-      <data>13419267</data>
-      <data>13419267</data>
-      <data>13419319</data>
-      <data>14537565</data>
-      <data>5592405</data>
-      <data>1065220</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
+      <data>1032255</data>
+      <data>4190271</data>
+      <data>16776255</data>
+      <data>16776255</data>
+      <data>16777023</data>
+      <data>16449343</data>
+      <data>16269119</data>
+      <data>14683966</data>
+      <data>14683966</data>
+      <data>14683966</data>
+      <data>14683966</data>
+      <data>15732542</data>
+      <data>15744830</data>
+      <data>16531262</data>
+      <data>16776960</data>
+      <data>16776254</data>
+      <data>16776254</data>
+      <data>8385854</data>
+      <data>6280573</data>
+      <data>5592341</data>
+      <data>1397780</data>
     </sdata>
    </sprite>
   <sprite>
@@ -2207,7 +2102,7 @@
    </sprite>
   <sprite>
     <description>chibi-right-L1</description>
-    <links>66 64</links>
+    <links></links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>5</spbkgnd>
@@ -2242,7 +2137,7 @@
    </sprite>
   <sprite>
     <description>chibi-right-L1</description>
-    <links>66 65</links>
+    <links></links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>5</spbkgnd>
@@ -2277,7 +2172,7 @@
    </sprite>
   <sprite>
     <description>chibi-right-L1</description>
-    <links>66 64</links>
+    <links></links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>3</spbkgnd>
@@ -2416,41 +2311,6 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki-bw</description>
-    <links></links>
-    <include>True</include>
-    <multi>False</multi>
-    <spbkgnd>1</spbkgnd>
-    <spcolour>0</spcolour>
-    <mcolour1>8</mcolour1>
-    <mcolour2>7</mcolour2>
-    <expandx>True</expandx>
-    <expandy>True</expandy>
-    <sdata>
-      <data>31744</data>
-      <data>65024</data>
-      <data>65280</data>
-      <data>65024</data>
-      <data>30720</data>
-      <data>15360</data>
-      <data>32256</data>
-      <data>12713728</data>
-      <data>3399552</data>
-      <data>987134</data>
-      <data>987132</data>
-      <data>57336</data>
-      <data>16368</data>
-      <data>16320</data>
-      <data>32512</data>
-      <data>62448</data>
-      <data>1688063</data>
-      <data>2064638</data>
-      <data>983164</data>
-      <data>393272</data>
-      <data>16</data>
-    </sdata>
-   </sprite>
-  <sprite>
     <description>kiki1</description>
     <links></links>
     <include>True</include>
@@ -2521,11 +2381,116 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki3</description>
+    <description>kiki1</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>1</spbkgnd>
+    <spcolour>0</spcolour>
+    <mcolour1>8</mcolour1>
+    <mcolour2>7</mcolour2>
+    <expandx>True</expandx>
+    <expandy>True</expandy>
+    <sdata>
+      <data>167936</data>
+      <data>235520</data>
+      <data>256000</data>
+      <data>256000</data>
+      <data>253952</data>
+      <data>61440</data>
+      <data>43008</data>
+      <data>174080</data>
+      <data>5155328</data>
+      <data>4074152</data>
+      <data>3418784</data>
+      <data>76448</data>
+      <data>43648</data>
+      <data>43648</data>
+      <data>256512</data>
+      <data>248128</data>
+      <data>984405</data>
+      <data>8126805</data>
+      <data>5243223</data>
+      <data>1048660</data>
+      <data>112</data>
+    </sdata>
+   </sprite>
+  <sprite>
+    <description>kiki2</description>
+    <links></links>
+    <include>True</include>
+    <multi>True</multi>
+    <spbkgnd>1</spbkgnd>
+    <spcolour>0</spcolour>
+    <mcolour1>8</mcolour1>
+    <mcolour2>7</mcolour2>
+    <expandx>True</expandx>
+    <expandy>True</expandy>
+    <sdata>
+      <data>167936</data>
+      <data>235520</data>
+      <data>256000</data>
+      <data>256000</data>
+      <data>253952</data>
+      <data>61440</data>
+      <data>43008</data>
+      <data>174080</data>
+      <data>5155328</data>
+      <data>4074144</data>
+      <data>3418794</data>
+      <data>76456</data>
+      <data>43680</data>
+      <data>43648</data>
+      <data>256512</data>
+      <data>247104</data>
+      <data>984405</data>
+      <data>8126807</data>
+      <data>5243221</data>
+      <data>1048668</data>
+      <data>80</data>
+    </sdata>
+   </sprite>
+  <sprite>
+    <description>kiki-bw</description>
+    <links></links>
+    <include>True</include>
+    <multi>False</multi>
+    <spbkgnd>11</spbkgnd>
+    <spcolour>0</spcolour>
+    <mcolour1>8</mcolour1>
+    <mcolour2>7</mcolour2>
+    <expandx>True</expandx>
+    <expandy>True</expandy>
+    <sdata>
+      <data>31744</data>
+      <data>65024</data>
+      <data>65280</data>
+      <data>65024</data>
+      <data>30720</data>
+      <data>15360</data>
+      <data>32256</data>
+      <data>12713728</data>
+      <data>3399552</data>
+      <data>987134</data>
+      <data>987132</data>
+      <data>57336</data>
+      <data>16368</data>
+      <data>16320</data>
+      <data>32512</data>
+      <data>62448</data>
+      <data>1688063</data>
+      <data>2064638</data>
+      <data>983164</data>
+      <data>393272</data>
+      <data>16</data>
+    </sdata>
+   </sprite>
+  <sprite>
+    <description>kiki3</description>
+    <links></links>
+    <include>True</include>
+    <multi>True</multi>
+    <spbkgnd>11</spbkgnd>
     <spcolour>0</spcolour>
     <mcolour1>8</mcolour1>
     <mcolour2>7</mcolour2>
@@ -2562,7 +2527,7 @@
         <Cell>A</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
-        <Cell>A0570000000000099;</Cell>
+        <Cell>A0560000000000099;</Cell>
         <Cell>A</Cell>
         <Cell>A0300000000000099;</Cell>
         <Cell>A0290000000000099;</Cell>
@@ -2573,8 +2538,8 @@
         <Cell>A</Cell>
         <Cell>A</Cell>
         <Cell>A0550000000000099;</Cell>
-        <Cell>A0560000000000099;</Cell>
-        <Cell>A0580000000000099;</Cell>
+        <Cell>A</Cell>
+        <Cell>A0570000000000099;</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
@@ -2662,15 +2627,15 @@
         <Cell>A</Cell>
         <Cell>A0430000000000099;</Cell>
         <Cell>A</Cell>
+        <Cell>A0540000000001199;</Cell>
         <Cell>A</Cell>
-        <Cell>A0500000000001199;</Cell>
+        <Cell>A0550000000001199;</Cell>
         <Cell>A</Cell>
+        <Cell>A0580000000001199;</Cell>
         <Cell>A</Cell>
         <Cell>A0590000000001199;</Cell>
         <Cell>A</Cell>
         <Cell>A0600000000001199;</Cell>
-        <Cell>A</Cell>
-        <Cell>A0610000000001199;</Cell>
         <Cell>A</Cell>
         <Cell>A0430000000000099;</Cell>
         <Cell>A</Cell>
