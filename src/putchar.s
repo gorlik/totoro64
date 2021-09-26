@@ -77,11 +77,16 @@ end:
 .proc _CLR_TOP: near
 	ldx #160
 	lda #0
-@loop:  sta _BITMAP_BASE-1,x
+@loopb: sta _BITMAP_BASE-1,x
 	sta _BITMAP_BASE+160-1,x
 	sta _BITMAP_BASE+320-1,x
 	sta _BITMAP_BASE+480-1,x
 	dex
-	bne @loop
+	bne @loopb
+	ldx #80
+	lda #1 			; COLOR_WHITE
+@loopc:	sta $d800-1,x
+	dex
+	bne @loopc
 	rts
 .endproc

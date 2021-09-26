@@ -452,15 +452,21 @@ void __fastcall__ check_collision(void)
 	  ((a->ypos.hi)<ty2)   &&
 	  ((a->xpos.uval)>tx1) &&
 	  ((a->xpos.uval)<tx2) ) {
-	  a->en=0;
+	switch(a->en) {
+	case 1:
 	  start_sound();
 	  /* VIC.spr_ena&=~(0x10<<a) */
 	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  if(gstate.acorns) gstate.acorns--;
+	  break;
+	case 2:
+	  break;
 	}
+	a->en=0;
       }
     }
-//  VIC.bordercolor=COLOR_BLUE;
+  }
+  //  VIC.bordercolor=COLOR_BLUE;
 }
 
 #else

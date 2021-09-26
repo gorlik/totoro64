@@ -30,14 +30,23 @@
 #define STAGE_TIME 60
 
 // title bar positions
-#define TIMETXT_X 0
-#define TIMEVAL_X 9
+#define TIMEVAL_X 18
 
-#define ACORNTXT_X 22
-#define ACORNVAL_X 35
+#define P1_X          0
+#define P1_ICON_X     11
+#define P1_ACORNVAL_X 13
+#define P1_BONUSTXT_X 12
+#define P1_BONUSVAL_X 12
+#define P1_SCORETXT_X 5
+#define P1_SCOREVAL_X 5
 
-#define SCORETXT_X 15
-#define SCOREVAL_X 15
+#define P2_X          (P1_X+23)
+#define P2_ICON_X     (P1_ICON_X+23)
+#define P2_ACORNVAL_X (P1_ACORNVAL_X+23)
+#define P2_BONUSTXT_X (P1_BONUSTXT_X+23) 
+#define P2_BONUSVAL_X (P1_BONUSVAL_X+23) 
+#define P2_SCORETXT_X (P1_SCORETXT_X+23)
+#define P2_SCOREVAL_X (P1_SCOREVAL_X+23)
 
 // debug location
 #define DEBUG_TXT_LEN 12
@@ -61,13 +70,13 @@ extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
 extern const unsigned char license_txt[];
 
+//const unsigned char txt_1P  = "1P"
+  
 const unsigned char txt_score[]  = "SCORE";
-const unsigned char txt_time[]   = "TIME";
 const unsigned char txt_bonus[]  = "BONUS";
-const unsigned char txt_acorns[] = "ACORNS";
-const unsigned char txt_catch[]  = "CATCH    ";
+//const unsigned char txt_acorns[] = "ACORNS";
+const unsigned char txt_catch[]  = "CATCH    ACORNS";
 const unsigned char txt_stage[]  = "STAGE ";
-const unsigned char txt_clear[]  = "CLEAR";
 #ifdef SPRITE_MESSAGES
 #define MSG_READY     SPR_TXT_READY
 #define MSG_SET       SPR_TXT_SET
@@ -79,6 +88,7 @@ const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[]   = " SET ";
 const unsigned char txt_go[]    = " GO ";
 const unsigned char txt_game_over[] = "GAME OVER";
+const unsigned char txt_clear[]  = "CLEAR";
 #define MSG_READY     txt_ready
 #define MSG_SET       txt_set
 #define MSG_GO        txt_go
@@ -178,7 +188,8 @@ void __fastcall__ _strcpy8f (void)
 
 void __fastcall__ setup_sid(void)
 {
-  memset(&SID,0,24);
+  //memset(&SID,0,24);
+  memset8a(0xd400,0,24); // SID address
   SID.amp = 0x1f; // set volume to 15
   SID.v1.ad = 0x80;
   SID.v1.sr = 0xf6;
@@ -206,6 +217,22 @@ void __fastcall__ setup_sid(void)
   SID.v3.ad = 0x00;
   SID.v3.sr = 0xa9;
 }
+
+void __fastcall__ kiki_update()
+{
+  static uint16_t kiki_x;
+  kiki_x+=2;
+  if(gstate.counter&1) {
+    SPR_PTR[5]=SPR_PTR[5]^1;
+  } 
+  if(kiki_x>400) kiki_x=0;
+  VIC.spr_pos[5].y=110;
+  VIC.spr_pos[5].x=kiki_x;
+  if(kiki_x>255) VIC.spr_hi_x|=0x20;
+  else VIC.spr_hi_x&=0xdf;
+  VIC.spr_ena=0xff;
+}
+
 
 #define acorn_update_m(a)                   \
 do {	                                    \
@@ -402,7 +429,7 @@ void __fastcall__ wait_line(uint8_t l)
   //  VIC.bordercolor=COLOR_BLACK;
 }
 
-void __fastcall__ update_top_bar(void)
+void __fastcall__ update_top_bar()
 {
   // interleave the updates to reduce frame time
   //  if(MODE_PLAY_DEMO()) {
@@ -417,7 +444,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 2:
       wait_line(60);
-      printbigat(ACORNVAL_X,0);
+      printbigat(P1_ACORNVAL_X,0);
       break;
     case 4:
       utoa10(gstate.time-1);
@@ -436,7 +463,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 8:
       wait_line(60);
-      printat(SCOREVAL_X,1);
+      printat(P1_SCOREVAL_X,1);
       break;
 #if (DEBUG&DEBUG_INFO)
     case 10:
@@ -499,22 +526,33 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 {
   CLR_TOP();
 
-  PRINT_STRING_AT(TIMETXT_X,txt_time);
+  //  PRINT_STRING_AT(TIMETXT_X,txt_time);
 
   if(flag==0) {
-    //    strcpy8(STR_BUF,txt_acorns);
-    temp_ptr=(unsigned char *)txt_acorns;
+
+    STR_BUF[0]='1';
+    STR_BUF[1]='P';
+    STR_BUF[2]=0;
+    convprint_big(P1_X);
+    print_acorn(P1_ICON_X);
+    STR_BUF[0]=10;
+    STR_BUF[1]=0;
+    printat(TIMEVAL_X-1,0);
+    printat(TIMEVAL_X-1,1);
+    STR_BUF[0]=11;
+    STR_BUF[1]=0;
+    printat(TIMEVAL_X+4,0);
+    printat(TIMEVAL_X+4,1);
+    
   } else {
-    //    strcpy8(STR_BUF,txt_bonus);
-    temp_ptr=(unsigned char *)txt_bonus;
+    strcpy8f(txt_bonus);
+    printat(P1_BONUSTXT_X,0);
   }
-  _strcpy8f();
-  convprint_big(ACORNTXT_X);
 
   strcpy8f(txt_score);
-  printat(SCORETXT_X,0);
+  printat(P1_SCORETXT_X,0);
 
-  for(gstate.counter=0;gstate.counter<9;gstate.counter++)
+  for(gstate.counter=4;gstate.counter<9;gstate.counter++)
     update_top_bar();
   gstate.counter=0;
 }
@@ -531,7 +569,7 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_color[7]=COLOR_ORANGE;
 #endif
   VIC.spr_color[5]=COLOR_BLACK;
-  SPR_PTR[5]=70;
+  SPR_PTR[5]=SPR_KIKI_R;
 
   VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
   VIC.spr_exp_x=0x3C;
@@ -582,8 +620,8 @@ void __fastcall__ sprite_message2(uint8_t msg)
   
   SPR_PTR[6]=msg;
   SPR_PTR[7]=msg+1;
-  VIC.spr_color[6]=COLOR_ORANGE;
-  VIC.spr_color[7]=COLOR_ORANGE;
+  VIC.spr_color[6]=COLOR_BLACK;
+  VIC.spr_color[7]=COLOR_BLACK;
   VIC.spr_pos[6].x=SPR_CENTER_X-48;
   VIC.spr_pos[7].x=SPR_CENTER_X;
   VIC.spr_pos[6].y=120;
@@ -606,14 +644,14 @@ void __fastcall__ get_ready(void)
 {
   CLR_TOP();
   
+  // "STAGE XX"
   PRINT_STRING_AT(14,txt_stage);
   PRINT_NUMBERP_AT(26,gstate.stage,2);
   delay(VFREQ);
 
-  //  sprintf(STR_BUF,"CATCH %d ACORNS",stage[gstate.stage_idx].acorns);
+  // "CATCH XX ACORNS"
   PRINT_STRING_AT(6,txt_catch);
   PRINT_NUMBER_AT(18,gstate.acorns);
-  PRINT_STRING_AT(24,txt_acorns);
   delay(VFREQ);
 
   CLR_TOP();
@@ -684,6 +722,7 @@ void __fastcall__ game_loop(void)
   // calculate new acorn positions
   acorn_update();
   acorn_add();
+  //  kiki_update();
   DEBUG_BORDER(COLOR_BLACK);
 }
 
@@ -722,6 +761,8 @@ int main()
  // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
 //	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
+  memset(SCREEN_BASE,((COLOR_ORANGE<<4)|COLOR_BROWN),80); // can embed this in the color1_data array
+
 
 #if 0
   for(flag=0;flag<32;flag++) {
@@ -859,10 +900,12 @@ int main()
 	setup_top_bar(1);
 	do {
 	  PRINT_NUMBERP_AT(TIMEVAL_X,gstate.time,2);
-	  PRINT_NUMBER_AT(ACORNVAL_X-2,bonus);
+	  utoa10(bonus);
+	  string_pad(5);
+	  printat(P1_BONUSVAL_X,1);
 	  utoa10(gstate.score);
 	  string_pad(5);
-	  printat(SCOREVAL_X,1);
+	  printat(P1_SCOREVAL_X,1);
 	  delay(1);
 	  bonus+=5+gstate.stage;
 	  gstate.score+=5+gstate.stage;

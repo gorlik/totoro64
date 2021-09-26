@@ -90,7 +90,7 @@
 
 // sprite position constants/limits
 #define GROUND_Y 220
-#define ACORN_START_Y 68
+#define ACORN_START_Y 74
 
 #define MIN_X 32
 #define MAX_X 312
@@ -206,6 +206,7 @@ void __fastcall__ printat(uint8_t x, uint8_t y);
 void __fastcall__ convprint_big(uint8_t x);
 void __fastcall__ convert_big(void);
 void __fastcall__ printbigat(uint8_t x, uint8_t y);
+void __fastcall__ print_acorn(uint8_t c);
 
 // totoro actions
 void __fastcall__ totoro_init(uint8_t p);
@@ -269,4 +270,12 @@ extern uint8_t vpb;
   __asm__("l%v: sta %v-1,x",addr,addr);   \
   __asm__("dex"); \
   __asm__("bne l%v",addr);
+
+#define memset8a(addr, v, c) \
+  __asm__("ldx #%b",c);	    \
+  __asm__("lda #%b",v);		      \
+  __asm__("@l22: sta %w-1,x",addr);	\
+  __asm__("dex"); \
+  __asm__("bne @l22");
+
 #endif
