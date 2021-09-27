@@ -147,7 +147,7 @@ struct game_state_t {
   uint8_t  stage_idx; // index in the stage array
   uint8_t  field;     // 0 to VFREQ
   uint8_t  counter;   // free running
-  uint8_t  anim_idx;
+  //  uint8_t  anim_idx;
   //  struct stage_t st;
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
@@ -176,6 +176,7 @@ struct player_t {
   int8_t  xv;
   word_t  yv;    // 8.8 format
   uint8_t blink;
+  uint8_t poison;
   enum t_state  state;
   //  enum t_dir    dir;
 };

@@ -53,11 +53,9 @@ void __fastcall__ process_input(void);
 void __fastcall__ check_collision(void);
 void __fastcall__ totoro_move(void);
 
-void __fastcall__ tcache_load(uint8_t p)
+void __fastcall__ tcache_load(void)
 {
-  (void)p;
-  __asm__("sta %v",p_idx);
-  __asm__("tax");
+  __asm__("ldx %v",p_idx);
   __asm__("ldy #0"); 
   __asm__("tc_load_loop:");
   __asm__("lda %v,x",totoro);
@@ -87,7 +85,8 @@ void __fastcall__ totoro_init(uint8_t p)
   tcache.xv=0;
   tcache.yv.val=0;
   tcache.state=IDLE;
-  tcache.blink=0;  
+  tcache.blink=0;
+  tcache.poison=0;
 
   if(p) {
     // chibi
@@ -109,76 +108,19 @@ void __fastcall__ totoro_init(uint8_t p)
 
 #define same_direction(a,b) (!((a^b)&0x80))
 
-//#define ttotoro ((struct player_t *)temp_ptr)
-/*
-#pragma register-vars (on)
-
-void __fastcall__ totoro_init(register struct player_t *ttotoro)
-{
-  ttotoro->ypos.val=PGROUND_Y;
-  ttotoro->xv=0;
-  ttotoro->yv.val=0;
-  ttotoro->idx=0;
-  ttotoro->state=IDLE;
-  ttotoro->blink=0;  
-  
-  if(1) tcache.xpos.val=(MAX_PX-MIN_X)/2+50;
-  else tcache.xpos.val=(MAX_PX-MIN_X)/2;
-
-  //  tcache_save(p);
-  }*/
-
-/*
-void __fastcall__ totoro_update(uint8_t p)
-{
-  static uint16_t r;
- 
-  totoro[p].xpos.val+=(totoro[p].xv>>2);
-
-  if(totoro[p].xpos<MIN_X) {
-    totoro[p].xpos.val=MIN_X;
-    totoro[p].xv=-1;
-  } else if(totoro[p].xpos>MAX_PX) {
-    if(!(gstate.mode&0xfe)) {
-          totoro[p].xpos.val=MAX_PX;
-      totoro[p].xv=1;
-    }
-  }
-
-  totoro[p].ypos.val+=totoro[p].yv.val;
-
-  if(totoro[p].state==JUMP) {
-    totoro[p].yv++;
-  }
-
-  if(totoro[p].ypos>PGROUND_Y) {
-    totoro[p].ypos.val=PGROUND_Y;
-    if(totoro[p].xv) totoro[p].state=RUN;
-    else totoro[p].state=IDLE;
-    totoro[p].yv.val=0;
-  }
-
-  if((totoro[p].xv==0) && (totoro[p].state!=JUMP))
-    totoro[p].state=IDLE;
-
-  if(totoro[p].blink)
-    totoro[p].blink--;
-
-  totoro[p].idx=(gstate.counter&0xF)>>2;
-
-  if(gstate.field==25) {
-    if((totoro[p].state==IDLE) && (totoro[p].blink==0)) {
-      r=rand();
-      if((r&0x3)==0x3) {
-	totoro[p].blink=VFREQ/10;
-      }
-    }
-  }
-}
-*/
-
 void __fastcall__ totoro_set_pos(void)
 {
+  static uint8_t anim_idx;
+
+  if(totoro[0].poison) {
+    anim_idx=(gstate.counter&0xF)>>2;
+    VIC.spr_color[2] = COLOR_BLUE;
+    totoro[0].poison--;
+  } else {
+    anim_idx=(gstate.counter&0x1F)>>3;
+    VIC.spr_color[2] = COLOR_LIGHTBLUE;
+  }
+  
   VIC.spr_pos[2].x   = totoro[0].xpos.lo;
   VIC.spr_pos[3].x   = totoro[0].xpos.lo;
   VIC.spr_pos[4].x   = totoro[0].xpos.lo;
@@ -199,13 +141,13 @@ void __fastcall__ totoro_set_pos(void)
     break;
   case RUN:
     if(totoro[0].xv>0) {
-      SPR_PTR[2]=run_seq[gstate.anim_idx];
-      SPR_PTR[3]=run_seq[gstate.anim_idx]+1;
-      SPR_PTR[4]=run_seq[gstate.anim_idx]+2;
+      SPR_PTR[2]=run_seq[anim_idx];
+      SPR_PTR[3]=run_seq[anim_idx]+1;
+      SPR_PTR[4]=run_seq[anim_idx]+2;
     } else {
-      SPR_PTR[2]=run_seq[gstate.anim_idx+4];
-      SPR_PTR[3]=run_seq[gstate.anim_idx+4]+1;
-      SPR_PTR[4]=run_seq[gstate.anim_idx+4]+2;
+      SPR_PTR[2]=run_seq[anim_idx+4];
+      SPR_PTR[3]=run_seq[anim_idx+4]+1;
+      SPR_PTR[4]=run_seq[anim_idx+4]+2;
     }
     break;
   case BRAKE:
@@ -241,49 +183,59 @@ void __fastcall__ totoro_set_pos(void)
 
 void __fastcall__ chibi_set_pos(void)
 {
-  static uint8_t run_offset;
+  //  static uint8_t run_offset;
+  static uint8_t anim_idx;
+  static uint8_t tcolor;
 
+  if(totoro[1].poison) {
+    tcolor = COLOR_BLUE;
+    totoro[1].poison--;
+  } else {
+    tcolor = COLOR_WHITE;
+  }
+  
   //  run_offset=0;
   VIC.spr_pos[0].x   = totoro[1].xpos.lo;
   VIC.spr_pos[1].x   = totoro[1].xpos.lo;
 
   if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x03;
   else VIC.spr_hi_x &= 0xFC;
-
+  
   VIC.spr_pos[0].y   = totoro[1].ypos.hi;
   VIC.spr_pos[1].y   = totoro[1].ypos.hi;
-
+  
   if (totoro[1].state==IDLE) {
     if(totoro[1].blink) {
       SPR_PTR[0]=SPR_CHIBI_IDLE+1;
       SPR_PTR[1]=SPR_CHIBI_IDLE;
-      VIC.spr_color[0]=COLOR_WHITE;
+      VIC.spr_color[0]=tcolor;
       VIC.spr_color[1]=COLOR_BLACK;
     } else {
       SPR_PTR[0]=SPR_CHIBI_IDLE;
       SPR_PTR[1]=SPR_CHIBI_IDLE+1;
       VIC.spr_color[0]=COLOR_BLACK;
-      VIC.spr_color[1]=COLOR_WHITE;
+      VIC.spr_color[1]=tcolor;
     }
   } else {
     switch(totoro[1].state) {
     case RUN:
-      run_offset=gstate.anim_idx&1;
+      if(totoro[1].poison) anim_idx=(gstate.counter>>2)&1;
+      else anim_idx=(gstate.counter>>1)&1;
       break;
     case JUMP:
-      run_offset=1;
+      anim_idx=1;
       break;
     case BRAKE:
-      run_offset=0;
+      anim_idx=0;
       break;
     }
     VIC.spr_color[0]=COLOR_BLACK;
-    VIC.spr_color[1]=COLOR_WHITE;
+    VIC.spr_color[1]=tcolor;
     if(totoro[1].xv>0) {
-      SPR_PTR[0]=SPR_CHIBI_RR+run_offset;
+      SPR_PTR[0]=SPR_CHIBI_RR+anim_idx;
       SPR_PTR[1]=SPR_CHIBI_RR+2;
     } else if (totoro[1].xv<0) {
-      SPR_PTR[0]=SPR_CHIBI_RL+run_offset;
+      SPR_PTR[0]=SPR_CHIBI_RL+anim_idx;
       SPR_PTR[1]=SPR_CHIBI_RL+2;
     } else {
       SPR_PTR[0]=SPR_CHIBI_IDLE;
@@ -294,7 +246,8 @@ void __fastcall__ chibi_set_pos(void)
 
 void __fastcall__ totoro_update(uint8_t p)
 {
-  tcache_load(p);
+  p_idx=p;
+  tcache_load();
   process_input();
   //  VIC.bordercolor=COLOR_YELLOW;
   totoro_move();
@@ -395,7 +348,7 @@ void __fastcall__ process_input(void)
       #endif
       }
   } else key=18; // simulate 'D'
-  
+
   if(tcache.state!=JUMP)
     switch(key) {
     case 10: // A
@@ -435,6 +388,11 @@ void __fastcall__ process_input(void)
       }
       break;
     }
+
+  if(tcache.poison) {
+    if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
+    if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;    
+  }
 }
 
 #if 1
@@ -468,11 +426,11 @@ void __fastcall__ check_collision(void)
 	switch(a->en) {
 	case 1:
 	  start_sound();
-	  /* VIC.spr_ena&=~(0x10<<a) */
 	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  if(gstate.acorns) gstate.acorns--;
 	  break;
 	case 2:
+	  tcache.poison=250;
 	  break;
 	}
 	a->en=0;

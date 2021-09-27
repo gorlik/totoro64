@@ -372,8 +372,11 @@ void __fastcall__ acorn_add(void)
       //	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
       if((gstate.flags&SF_PINECONES)&& (((last_rand>>8)&0x7)==3) ) {
 	acorn[0].spr_color=COLOR_BLACK;
-      } else 	acorn[0].spr_color=COLOR_ORANGE;
-      acorn[0].en=1;
+	acorn[0].en=2;
+      } else {
+	acorn[0].spr_color=COLOR_ORANGE;
+	acorn[0].en=1;
+      }
     }
     //   }
   }
@@ -706,7 +709,7 @@ void __fastcall__ game_loop(void)
 
   // time
   gstate.counter++;
-  gstate.anim_idx=(gstate.counter&0xF)>>2;
+  //  gstate.anim_idx=(gstate.counter&0xF)>>2;
   gstate.field++;
   if(gstate.field==VFREQ) {
     if(MODE_PLAY_DEMO()) gstate.time--;
@@ -855,7 +858,7 @@ int main()
       gstate.time=0;
       gstate.field=0;
       gstate.counter=0;
-      gstate.anim_idx=0;
+      //      gstate.anim_idx=0;
 
       gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
 	LAST_STAGE_IDX() : gstate.stage-1 ;
