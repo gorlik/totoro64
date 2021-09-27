@@ -380,7 +380,7 @@ void __fastcall__ process_input(void)
     } else {
       // chibi totoro
       if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
-	 && same_direction(totoro[0].xv,totoro[1].xv) ) {
+	 && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
 	key=60;
         tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
       } else {
