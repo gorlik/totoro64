@@ -31,7 +31,6 @@
 
 // title bar positions
 
-
 // co-op
 #define P1_X          0
 #define P1_SCORETXT_X 5
@@ -51,7 +50,6 @@
 #define P2_X          29
 #define P2_SCORETXT_X (P1_SCORETXT_X+P2_X)
 #define P2_SCOREVAL_X (P1_SCOREVAL_X+P2_X)
-
 
 // vs.
 /*
@@ -77,7 +75,6 @@
 #define P2_BONUSVAL_X (P1_BONUSVAL_X+P2_X)
 */
 
-
 // debug location
 #define DEBUG_TXT_LEN 12
 #define DEBUG_TXT_X   (40-DEBUG_TXT_LEN)
@@ -99,12 +96,9 @@ extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
 extern const unsigned char license_txt[];
-
-//const unsigned char txt_1P  = "1P"
   
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
-//const unsigned char txt_acorns[] = "ACORNS";
 const unsigned char txt_catch[]  = "CATCH    ACORNS";
 const unsigned char txt_stage[]  = "STAGE ";
 #ifdef SPRITE_MESSAGES
@@ -213,7 +207,7 @@ void __fastcall__ _strcpy8f (void)
 
 #define strcpy8f(a) do {           \
     temp_ptr=(unsigned char *)a;   \
-  _strcpy8f();                     \
+    _strcpy8f();		   \
   } while (0)
 
 void __fastcall__ setup_sid(void)
@@ -351,38 +345,38 @@ void __fastcall__ acorn_add(void)
   // maybe change to counter
   if(MODE_PLAY_DEMO() 
      && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_ACORN1))
-    // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
-    )  {
-	// new acorn
-        r=last_rand&0x3f;
-	if((r>=36) || (abs(r-oldr)<8) ) return;
-	oldr=r;
-
-	  r<<=3;
-	  r+=MIN_X;
-      if(acorn_free_slot()) {
- // VIC.bordercolor=COLOR_YELLOW;
-	// shift acorn data 
-	__asm__("sei");
-	__asm__("ldx #(%b*%b)",MAX_ACORNS-1,sizeof(struct acorn_t));
-	__asm__("loop1: lda %v-1,x",acorn);
-	__asm__("sta %v+%b-1,x",acorn,sizeof(struct acorn_t));
-	__asm__("dex");
-	__asm__("bne loop1");
-	__asm__("cli");
-
-	acorn[0].xpos.val=r;
-	acorn[0].ypos.val=ACORN_START_Y<<8;
-	acorn[0].yv.val=4;
-	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-//	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
-        if((gstate.flags&SF_PINECONES)&& (((last_rand>>8)&0x7)==3) ) {
-	  acorn[0].spr_color=COLOR_BLACK;
-	} else 	acorn[0].spr_color=COLOR_ORANGE;
-	acorn[0].en=1;
-	  }
-	//   }
+     // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
+     )  {
+    // new acorn
+    r=last_rand&0x3f;
+    if((r>=36) || (abs(r-oldr)<8) ) return;
+    oldr=r;
+    
+    r<<=3;
+    r+=MIN_X;
+    if(acorn_free_slot()) {
+      // VIC.bordercolor=COLOR_YELLOW;
+      // shift acorn data 
+      __asm__("sei");
+      __asm__("ldx #(%b*%b)",MAX_ACORNS-1,sizeof(struct acorn_t));
+      __asm__("loop1: lda %v-1,x",acorn);
+      __asm__("sta %v+%b-1,x",acorn,sizeof(struct acorn_t));
+      __asm__("dex");
+      __asm__("bne loop1");
+      __asm__("cli");
+      
+      acorn[0].xpos.val=r;
+      acorn[0].ypos.val=ACORN_START_Y<<8;
+      acorn[0].yv.val=4;
+      acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+      //	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
+      if((gstate.flags&SF_PINECONES)&& (((last_rand>>8)&0x7)==3) ) {
+	acorn[0].spr_color=COLOR_BLACK;
+      } else 	acorn[0].spr_color=COLOR_ORANGE;
+      acorn[0].en=1;
     }
+    //   }
+  }
 }
 
 void __fastcall__ mode_bitmap(void)
@@ -459,7 +453,7 @@ void __fastcall__ wait_line(uint8_t l)
   //  VIC.bordercolor=COLOR_BLACK;
 }
 
-void __fastcall__ update_top_bar()
+void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
   //  if(MODE_PLAY_DEMO()) {
@@ -556,7 +550,6 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 {
   CLR_TOP();
 
-  convprint_big(P1_X);
   print_p(P1_X);
   print_p(P2_X);
   print_hourglass(TIME_ICON_X);
@@ -574,7 +567,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
   printat(P1_SCORETXT_X,0);
   
   for(gstate.counter=(flag)?4:0;gstate.counter<9;gstate.counter++)
-    update_top_bar();
+      update_top_bar();
   gstate.counter=0;
 }
 
@@ -667,7 +660,7 @@ void __fastcall__ get_ready(void)
   
   // "STAGE XX"
   PRINT_STRING_AT(14,txt_stage);
-  PRINT_NUMBERP_AT(26,gstate.stage,2);
+  PRINT_NUMBER_AT(26,gstate.stage);
   delay(VFREQ);
 
   // "CATCH XX ACORNS"
@@ -753,9 +746,9 @@ int main()
   static uint16_t bonus;
 
   inflatemem (SPR_DATA, sprite_src_data);
-  memcpy((uint8_t *)(0x4000-64*8),SPR_DATA+35*64,64*8);
+  memcpy((uint8_t *)(0x4000-64*8),VIC_BASE+SPR_GGLABS_1*64,64*8);
   // movie style title
-  // memcpy((uint8_t *)(0x4000-64*4),SPR_DATA+58*64,64*3);
+  // memcpy((uint8_t *)(0x4000-64*4),VIC_BASE+SPR_TITLE_MOVIE_1*64,64*3);
   setup_sid();
 
   spr_mux=0;
@@ -779,10 +772,10 @@ int main()
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);
- // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
-//	*(temp_ptr)=0;
+  // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
+  //	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
-  memset(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
+  memset8(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
 
 
 #if 0

@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.20"
+#define VERSION "v0.21"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -54,7 +54,7 @@
 #define SPR_ACORN_LG      (28+SPR_DATA_OFFSET)
 #define SPR_ACORN_SM      (29+SPR_DATA_OFFSET)
 #define SPR_GGLABS_1      (35+SPR_DATA_OFFSET)
-#define SPR_TITLE_BOLD_1  (29+SPR_DATA_OFFSET)
+#define SPR_TITLE_BOLD_1  (39+SPR_DATA_OFFSET)
 #define SPR_64            (42+SPR_DATA_OFFSET)
 #define SPR_TXT_GAME_OVER (43+SPR_DATA_OFFSET)
 #define SPR_TXT_READY     (45+SPR_DATA_OFFSET)
@@ -255,7 +255,7 @@ extern uint8_t BITMAP_BASE[];   // screen base
 extern uint8_t SCREEN_BASE[]; // color base
 extern uint8_t SPR_DATA[];   // sprite data
 extern uint8_t SPR_PTR[];    // sprite pointers
-//extern uint8_t VIC_BASE[];
+extern uint8_t VIC_BASE[];
 
 // global variables
 extern uint8_t STR_BUF[64];
