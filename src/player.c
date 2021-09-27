@@ -364,10 +364,12 @@ void __fastcall__ process_input(void)
 {
   static uint8_t key;
   static uint8_t js;
+  static uint8_t acc;
   
   if(gstate.mode==GMODE_PLAY) {
     if(p_idx==0) {
       // chu totoro
+      acc=2;	
       key=PEEK(197);
       js=joy2();
       if(js) {
@@ -378,7 +380,9 @@ void __fastcall__ process_input(void)
 	if(js&0x01) key = 60; // up?
       }
     } else {
+	#if 1
       // chibi totoro
+      acc=3;
       if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
 	 && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
 	key=60;
@@ -388,14 +392,15 @@ void __fastcall__ process_input(void)
 	else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) key=10;
 	else key=0;
       }
-    }
+      #endif
+      }
   } else key=18; // simulate 'D'
   
   if(tcache.state!=JUMP)
     switch(key) {
     case 10: // A
       if(tcache.xv>-MAX_XV) {
-	tcache.xv-=2;
+	tcache.xv-=acc;
 	if(tcache.xv>0) {
 	  tcache.state=BRAKE;
 	} else {
@@ -405,7 +410,7 @@ void __fastcall__ process_input(void)
       break;
     case 18: // D
       if(tcache.xv<MAX_XV) {
-	tcache.xv+=2;
+	tcache.xv+=acc;
 	if(tcache.xv<0) {
 	  tcache.state=BRAKE;
 	} else {
@@ -439,11 +444,18 @@ void __fastcall__ check_collision(void)
   register struct acorn_t *a;
   static uint8_t ty1, ty2;
   static int16_t tx1, tx2;
-
+  //  static uint8_t color;
+  // color=0;
+  
   ty1=tcache.ypos.hi-20;
-  ty2=tcache.ypos.hi+42;
   tx1=tcache.xpos.uval-15;
-  tx2=tcache.xpos.uval+36;
+  if(p_idx) {
+    ty2=tcache.ypos.hi+22;
+    tx2=tcache.xpos.uval+20;
+  } else {
+    ty2=tcache.ypos.hi+42;
+    tx2=tcache.xpos.uval+36;
+  }
 
 //  VIC.bordercolor=COLOR_WHITE;
   for(a=acorn;a!=acorn+8;a++) {
@@ -452,6 +464,7 @@ void __fastcall__ check_collision(void)
 	  ((a->ypos.hi)<ty2)   &&
 	  ((a->xpos.uval)>tx1) &&
 	  ((a->xpos.uval)<tx2) ) {
+	#if 1
 	switch(a->en) {
 	case 1:
 	  start_sound();
@@ -463,10 +476,13 @@ void __fastcall__ check_collision(void)
 	  break;
 	}
 	a->en=0;
+	#endif
+	//	color=1;
       }
     }
   }
   //  VIC.bordercolor=COLOR_BLUE;
+  //  if(p_idx) VIC.bordercolor=color;
 }
 
 #else
@@ -478,7 +494,7 @@ void __fastcall__ check_collision(void)
   static uint8_t i;
 
   ty1=tcache.ypos.hi-20;
-  ty2=tcache.ypos.hi+42;
+  ty2=tcache.ypos.hi+(p_idx)?21:42;
   tx1=tcache.xpos.uval-15;
   tx2=tcache.xpos.uval+36;
 
