@@ -30,23 +30,53 @@
 #define STAGE_TIME 60
 
 // title bar positions
-#define TIMEVAL_X 18
 
+
+// co-op
 #define P1_X          0
-#define P1_ICON_X     11
-#define P1_ACORNVAL_X 13
-#define P1_BONUSTXT_X 12
-#define P1_BONUSVAL_X 12
 #define P1_SCORETXT_X 5
 #define P1_SCOREVAL_X 5
+#define P1_BAR_X      11
 
-#define P2_X          (P1_X+23)
-#define P2_ICON_X     (P1_ICON_X+23)
-#define P2_ACORNVAL_X (P1_ACORNVAL_X+23)
-#define P2_BONUSTXT_X (P1_BONUSTXT_X+23) 
-#define P2_BONUSVAL_X (P1_BONUSVAL_X+23) 
-#define P2_SCORETXT_X (P1_SCORETXT_X+23)
-#define P2_SCOREVAL_X (P1_SCOREVAL_X+23)
+#define TIME_ICON_X   13
+#define TIMEVAL_X     15
+
+#define P1_ICON_X     21
+#define P1_ACORNVAL_X 23
+
+#define P1_BONUSTXT_X 21
+#define P1_BONUSVAL_X 21
+
+#define P2_BAR_X      28
+#define P2_X          29
+#define P2_SCORETXT_X (P1_SCORETXT_X+P2_X)
+#define P2_SCOREVAL_X (P1_SCOREVAL_X+P2_X)
+
+
+// vs.
+/*
+#define P1_X          0
+#define P1_SCORETXT_X 5
+#define P1_SCOREVAL_X 5
+#define P1_ICON_X     10
+#define P1_ACORNVAL_X 12
+#define P1_BAR_X      16
+#define P1_BONUSTXT_X 10
+#define P1_BONUSVAL_X 10
+
+#define TIME_ICON_X   17
+#define TIMEVAL_X     19
+
+#define P2_BAR_X      23
+#define P2_X          24
+#define P2_SCORETXT_X (P1_SCORETXT_X+P2_X)
+#define P2_SCOREVAL_X (P1_SCOREVAL_X+P2_X)
+#define P2_ICON_X     (P1_ICON_X+P2_X)
+#define P2_ACORNVAL_X (P1_ACORNVAL_X+P2_X)
+#define P2_BONUSTXT_X (P1_BONUSTXT_X+P2_X)
+#define P2_BONUSVAL_X (P1_BONUSVAL_X+P2_X)
+*/
+
 
 // debug location
 #define DEBUG_TXT_LEN 12
@@ -526,33 +556,24 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 {
   CLR_TOP();
 
-  //  PRINT_STRING_AT(TIMETXT_X,txt_time);
-
+  convprint_big(P1_X);
+  print_p(P1_X);
+  print_p(P2_X);
+  print_hourglass(TIME_ICON_X);
+  print_col(P1_BAR_X|COL_R);
+  print_col(P2_BAR_X|COL_L);
+  
   if(flag==0) {
-
-    STR_BUF[0]='1';
-    STR_BUF[1]='P';
-    STR_BUF[2]=0;
-    convprint_big(P1_X);
     print_acorn(P1_ICON_X);
-    STR_BUF[0]=10;
-    STR_BUF[1]=0;
-    printat(TIMEVAL_X-1,0);
-    printat(TIMEVAL_X-1,1);
-    STR_BUF[0]=11;
-    STR_BUF[1]=0;
-    printat(TIMEVAL_X+4,0);
-    printat(TIMEVAL_X+4,1);
-    
   } else {
     strcpy8f(txt_bonus);
     printat(P1_BONUSTXT_X,0);
   }
-
+  
   strcpy8f(txt_score);
   printat(P1_SCORETXT_X,0);
-
-  for(gstate.counter=4;gstate.counter<9;gstate.counter++)
+  
+  for(gstate.counter=(flag)?4:0;gstate.counter<9;gstate.counter++)
     update_top_bar();
   gstate.counter=0;
 }
@@ -761,7 +782,7 @@ int main()
  // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
 //	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
-  memset(SCREEN_BASE,((COLOR_ORANGE<<4)|COLOR_BROWN),80); // can embed this in the color1_data array
+  memset(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
 
 
 #if 0

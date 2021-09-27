@@ -59,20 +59,51 @@ static unsigned char * const line[] = {
 
 static const unsigned char conv_table[] = {
    2,
-   12, 16, 20, 24, 28, 96, // '/' 0 .. 4
+   8, 12, 16, 20, 24, 28, 96, // '/' 0 .. 4
    100, 104, 108, 112, 116, // 5 .. 9
    120, 124, 128, 132, 136, 140, 144, 148, 152, // A..
    156, 160, 164, 168, 172, 176, 180, 184, 188, // .. R
    224, 228, 232, 236, 240, 244, 248, 252,      // S .. Z
 };
 
+void __fastcall__ print_col(uint8_t c)
+{
+  STR_BUF[0]=(c&COL_L)?7:6;
+  STR_BUF[1]=0;
+  c&=0x7f;
+  printat(c,0);
+  printat(c,1);
+ 
+  POKE(COLOR_RAM+c,COLOR_BROWN);
+  POKE(COLOR_RAM+40+c,COLOR_BROWN);
+}
+
+
+void __fastcall__ print_p(uint8_t c)
+{
+  STR_BUF[0]=(c>20)?'2':'1';
+  STR_BUF[1]='P';
+  STR_BUF[2]=0;
+  convprint_big(c);
+}
+
+void __fastcall__ print_hourglass(uint8_t c)
+{
+  STR_BUF[0]='.';
+  STR_BUF[1]=0;
+  convprint_big(c);
+  POKE(COLOR_RAM+c,COLOR_CYAN);
+  POKE(COLOR_RAM+1+c,COLOR_CYAN);
+  POKE(COLOR_RAM+40+c,COLOR_CYAN);
+  POKE(COLOR_RAM+41+c,COLOR_CYAN);
+}
 void __fastcall__ print_acorn(uint8_t c)
 {
   STR_BUF[0]='/';
-  STR_BUF[2]=0;
+  STR_BUF[1]=0;
   convprint_big(c);
-  POKE(COLOR_RAM+40+c,COLOR_YELLOW);
-  POKE(COLOR_RAM+41+c,COLOR_YELLOW);
+  POKE(COLOR_RAM+c,COLOR_BROWN);
+  POKE(COLOR_RAM+1+c,COLOR_BROWN);
 }
 
 void __fastcall__ printat(uint8_t x, uint8_t y)
@@ -92,10 +123,10 @@ void __fastcall__ convert_big(void)
    static uint8_t j,idx;
 
    for(j=0;STR_BUF[j];j++) {
-    if(STR_BUF[j]>='/' && STR_BUF[j]<='9') {
-      idx=STR_BUF[j]+1-'/';
+    if(STR_BUF[j]>='.' && STR_BUF[j]<='9') {
+      idx=STR_BUF[j]+1-'.';
     } else if(STR_BUF[j]>='A' && STR_BUF[j]<='Z') {
-      idx=STR_BUF[j]+12-'A';
+      idx=STR_BUF[j]+13-'A';
     } else idx=0;
     // printf("c: %c %d = %d\n",STR_BUF[j],STR_BUF[j],char_table[idx]);
     STR_BUF[j+41]=conv_table[idx];

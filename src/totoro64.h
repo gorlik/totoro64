@@ -106,6 +106,9 @@
 #define SF_KIKI       0x08
 #define SF_ACORN1     0x10
 
+#define COL_R 0x00
+#define COL_L 0x80
+
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
@@ -207,6 +210,9 @@ void __fastcall__ convprint_big(uint8_t x);
 void __fastcall__ convert_big(void);
 void __fastcall__ printbigat(uint8_t x, uint8_t y);
 void __fastcall__ print_acorn(uint8_t c);
+void __fastcall__ print_hourglass(uint8_t c);
+void __fastcall__ print_col(uint8_t c);
+void __fastcall__ print_p(uint8_t c);
 
 // totoro actions
 void __fastcall__ totoro_init(uint8_t p);
