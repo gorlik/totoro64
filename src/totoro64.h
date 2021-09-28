@@ -53,6 +53,9 @@
 // indexes in the sprite data
 #define SPR_ACORN_LG      (28+SPR_DATA_OFFSET)
 #define SPR_ACORN_SM      (29+SPR_DATA_OFFSET)
+#define SPR_BERRY         (30+SPR_DATA_OFFSET)
+#define SPR_APPLE         (31+SPR_DATA_OFFSET)
+
 #define SPR_GGLABS_1      (35+SPR_DATA_OFFSET)
 #define SPR_TITLE_BOLD_1  (39+SPR_DATA_OFFSET)
 #define SPR_64            (42+SPR_DATA_OFFSET)
@@ -100,11 +103,11 @@
 #define CHU_TOTORO   0
 #define CHIBI_TOTORO sizeof(struct player_t)
 
-#define SF_PINECONES  0x01
+#define SF_BERRIES    0x01
 #define SF_WIND1      0x02
 #define SF_WIND2      0x04
 #define SF_KIKI       0x08
-#define SF_ACORN1     0x10
+#define SF_DBL_ACORN  0x10
 
 #define COL_R 0x00
 #define COL_L 0x80

@@ -136,47 +136,36 @@ const uint16_t sound_seq[] = {
   0x2714,
 };
 
-#ifdef NTSC
-const struct stage_t stage[] =
-  {
-   { STAGE_TIME, 10, 3, SF_PINECONES },
-   { STAGE_TIME, 15, 4, SF_WIND1 },
-   { STAGE_TIME, 20, 6, SF_ACORN1 },
-   { STAGE_TIME, 25, 7, 0 },
-   { STAGE_TIME, 30, 8, 0 },
-   { STAGE_TIME, 35, 10, 0 },
-   { STAGE_TIME, 40, 11, 0 },
-   { STAGE_TIME, 50, 13, 0 },
-   { STAGE_TIME, 60, 15, 0 },
+#define ACC(a) ((a*50)/VFREQ)
+
+const struct stage_t stage[] = {
+  { STAGE_TIME, 10, ACC(4),  SF_BERRIES },
+  { STAGE_TIME, 15, ACC(6),  SF_WIND1 },
+  { STAGE_TIME, 20, ACC(8),  SF_DBL_ACORN },
+  { STAGE_TIME, 25, ACC(10), SF_BERRIES },
+  { STAGE_TIME, 30, ACC(12), SF_BERRIES },
+  { STAGE_TIME, 35, ACC(14), SF_BERRIES },
+  { STAGE_TIME, 40, ACC(16), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 45, ACC(18), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 50, ACC(21), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 60, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 70, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 80, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
 };
-#else
-const struct stage_t stage[] =
-  {
-   { STAGE_TIME, 10, 4, SF_PINECONES },
-   { STAGE_TIME, 15, 6, SF_WIND1 },
-   { STAGE_TIME, 20, 8, SF_ACORN1 },
-   { STAGE_TIME, 25, 10, 0 },
-   { STAGE_TIME, 30, 12, 0 },
-   { STAGE_TIME, 35, 14, 0 },
-   { STAGE_TIME, 40, 16, 0 },
-   { STAGE_TIME, 50, 18, 0 },
-   { STAGE_TIME, 60, 21, 0 },
-};
-#endif
 
 #ifdef SPRITE_MESSAGES
 #define MESSAGEP(p,m) sprite_message2p(m)
-#define MESSAGE(p,m) sprite_message2(m)
+#define MESSAGE(p,m)  sprite_message2(m)
 #else
 #define MESSAGEP(p,m) do { strcpy8f(m); convprint_big(p); delay(VFREQ/3); } while (0)
-#define MESSAGE(p,m) do { strcpy8f(m); convprint_big(p); } while (0)
+#define MESSAGE(p,m)  do { strcpy8f(m); convprint_big(p); } while (0)
 #endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
 
-#define PRINT_STRING_AT(p,m)   do { strcpy8f(m); convprint_big(p); } while (0)
+#define PRINT_STRING_AT(p,m)    do { strcpy8f(m); convprint_big(p); } while (0)
 #define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); convprint_big(p); } while (0)
-#define PRINT_NUMBER_AT(p,n)   do { utoa10(n); convprint_big(p); } while (0)
+#define PRINT_NUMBER_AT(p,n)    do { utoa10(n); convprint_big(p); } while (0)
 
 struct game_state_t gstate;
 
@@ -226,7 +215,7 @@ void __fastcall__ setup_sid(void)
   track[0].voice_offset=0;
 
   SID.v2.ad = 0x40;
-  SID.v2.sr = 0x56; 
+  SID.v2.sr = 0x56;
   track[1].ptr=(uint16_t)track1_data;
   track[1].restart_ptr=(uint16_t)track1_data;
   track[1].track_offset=0;
@@ -344,7 +333,7 @@ void __fastcall__ acorn_add(void)
 
   // maybe change to counter
   if(MODE_PLAY_DEMO() 
-     && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_ACORN1))
+     && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_DBL_ACORN))
      // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
      )  {
     // new acorn
@@ -368,17 +357,17 @@ void __fastcall__ acorn_add(void)
       acorn[0].xpos.val=r;
       acorn[0].ypos.val=ACORN_START_Y<<8;
       acorn[0].yv.val=4;
-      acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-      //	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_LG;
-      if((gstate.flags&SF_PINECONES)&& (((last_rand>>8)&0x7)==3) ) {
+
+      if((gstate.flags&SF_BERRIES)&& (((last_rand>>8)&0x7)==3) ) {
+	acorn[0].spr_ptr=SPR_BERRY;
 	acorn[0].spr_color=COLOR_BLACK;
 	acorn[0].en=2;
       } else {
+	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
 	acorn[0].spr_color=COLOR_ORANGE;
 	acorn[0].en=1;
       }
     }
-    //   }
   }
 }
 
@@ -474,7 +463,7 @@ void __fastcall__ update_top_bar(void)
       printbigat(P1_ACORNVAL_X,0);
       break;
     case 4:
-      utoa10(gstate.time-1);
+      utoa10(gstate.time);
       string_pad(2);
       break;
     case 5:
@@ -578,13 +567,6 @@ void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_ena=0;
 
-#if (DEBUG&DEBUG_ACORNS)
-  VIC.spr_color[6]=COLOR_BLUE;
-  VIC.spr_color[7]=COLOR_GREEN;
-#else
-  VIC.spr_color[6]=COLOR_ORANGE;
-  VIC.spr_color[7]=COLOR_ORANGE;
-#endif
   VIC.spr_color[5]=COLOR_BLACK;
   SPR_PTR[5]=SPR_KIKI_R;
 
@@ -612,7 +594,7 @@ void __fastcall__ process_sound(void)
       return;
     }
     SID.v3.freq=sound_seq[sound.index];
-    
+
     if(sound.index==0) {
       SID.v3.ctrl=0x21;
     }
@@ -634,7 +616,7 @@ void __fastcall__ sprite_message2(uint8_t msg)
 {
   spr_mux=0;
   waitvsync();
-  
+
   SPR_PTR[6]=msg;
   SPR_PTR[7]=msg+1;
   VIC.spr_color[6]=COLOR_BLACK;
@@ -660,7 +642,7 @@ void __fastcall__ sprite_message2p(uint8_t msg)
 void __fastcall__ get_ready(void)
 {
   CLR_TOP();
-  
+
   // "STAGE XX"
   PRINT_STRING_AT(14,txt_stage);
   PRINT_NUMBER_AT(26,gstate.stage);
@@ -686,7 +668,7 @@ void __fastcall__ get_ready(void)
 void __fastcall__ game_loop(void)
 {
   static uint8_t tr;
-  
+
   waitvsync();
 //  cgetc();
   DEBUG_BORDER(COLOR_WHITE);
@@ -858,7 +840,6 @@ int main()
       gstate.time=0;
       gstate.field=0;
       gstate.counter=0;
-      //      gstate.anim_idx=0;
 
       gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
 	LAST_STAGE_IDX() : gstate.stage-1 ;
@@ -878,14 +859,14 @@ int main()
 
       VIC.spr_ena=0x1F;
       //VIC.spr_ena=0x1C;
-      
+
       get_ready();
-      
+
       VIC.spr_ena=0x1F;
       VIC.spr_exp_x=0x3C;
       VIC.spr_exp_y=0x3C;
       spr_mux=1;
-  
+
       gstate.mode=GMODE_PLAY;
 
       for(;gstate.time&&gstate.acorns;)
