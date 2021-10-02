@@ -402,8 +402,6 @@ void __fastcall__ check_collision(void)
   register struct acorn_t *a;
   static uint8_t ty1, ty2;
   static int16_t tx1, tx2;
-  //  static uint8_t color;
-  // color=0;
   
   ty1=tcache.ypos.hi-20;
   tx1=tcache.xpos.uval-15;
@@ -452,9 +450,14 @@ void __fastcall__ check_collision(void)
   static uint8_t i;
 
   ty1=tcache.ypos.hi-20;
-  ty2=tcache.ypos.hi+(p_idx)?21:42;
   tx1=tcache.xpos.uval-15;
-  tx2=tcache.xpos.uval+36;
+  if(p_idx) {
+    ty2=tcache.ypos.hi+22;
+    tx2=tcache.xpos.uval+20;
+  } else {
+    ty2=tcache.ypos.hi+42;
+    tx2=tcache.xpos.uval+36;
+  }
 
   //  static uint8_t color;
   VIC.bordercolor=COLOR_CYAN;
