@@ -2,8 +2,10 @@ all: c64
 # c128
 
 c64: artwork
+	mkdir -p build-c64n
+	cd build-c64n; TV=NTSC make -f ../Makefile.c64
 	mkdir -p build-c64
-	cd build-c64; make -f ../Makefile.c64
+	cd build-c64; TV=PAL make -f ../Makefile.c64
 	grep ^RODATA build-c64/game.map
 
 #c128:
@@ -11,13 +13,13 @@ c64: artwork
 #	cd build-c128; make -f ../Makefile.c128
 
 clean:
-	rm -rf build-c64 build-c128 src/charset.* src/sprites.* src/background*
+	rm -rf build-c64 build-c64n build-c128 src/charset.* src/sprites.* src/background*
 	rm -rf src/bitmap.c src/color1.c src/color2.c src/*~
 	cd utils; make clean
 
 bin: all
-	tar cvfz gterm_bin.tar.gz \
-		build-c64/*.bin  build-c64/*.crt
+	tar cvfz totoro64_bin.tar.gz \
+		build-c64/*.bin  build-c64/*.crt build-c64n/*.bin  build-c64n/*.crt
 
 artwork: charset sprites background
 

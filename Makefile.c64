@@ -6,12 +6,11 @@ VPATH=../src
 INCLUDE=../src
 SYS_INCLUDE=../src
 
-CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -O -t $(TARGET)
+CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -O -t $(TARGET) -D${TV}
 
 OBJECTS=  player.o variables.o sprites.o charset.o text_util.o \
           irq.o irqplayer.o irqmux.o putchar.o util.o \
 	  bitmap.o color1.o color2.o music.o intro_text.o
-
 
 LIBS=
 
@@ -22,7 +21,7 @@ all:    game64 game64.crt game64.bin
 #	ld65 $< $(OBJECTS) $(LIBS) -C $(SYS_INCLUDE)/c64zp.cfg --lib $(TARGET).lib -o $@
 
 game64: game64.bin
-	dd if=$< bs=1 skip=7 | cat ../src/prg_header.bin - >$@ 
+	dd if=$< bs=1 skip=7 | cat ../src/prg_header.bin - >$@
 
 game64.o: main.c totoro64.h
 	cl65 $(CFLAGS) -c -o $@ $<
