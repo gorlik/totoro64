@@ -139,9 +139,14 @@ const uint16_t sound_seq[] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
+#ifndef RELEASE
   { STAGE_TIME, 10, ACC(4),  SF_BERRIES },
   { STAGE_TIME, 15, ACC(6),  SF_WIND1 },
   { STAGE_TIME, 20, ACC(8),  SF_DBL_ACORN },
+#endif
+  { STAGE_TIME, 10, ACC(4),  0 },
+  { STAGE_TIME, 15, ACC(6),  0 },
+  { STAGE_TIME, 20, ACC(8),  0 },
   { STAGE_TIME, 25, ACC(10), SF_BERRIES },
   { STAGE_TIME, 30, ACC(12), SF_BERRIES },
   { STAGE_TIME, 35, ACC(14), SF_BERRIES },
@@ -151,6 +156,7 @@ const struct stage_t stage[] = {
   { STAGE_TIME, 60, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 70, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 80, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 90, ACC(23), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
 };
 
 #ifdef SPRITE_MESSAGES
@@ -360,7 +366,7 @@ void __fastcall__ acorn_add(void)
 
       if((gstate.flags&SF_BERRIES)&& (((last_rand>>8)&0x7)==3) ) {
 	acorn[0].spr_ptr=SPR_BERRY;
-	acorn[0].spr_color=COLOR_BLACK;
+	acorn[0].spr_color=COLOR_BLUE;
 	acorn[0].en=2;
       } else {
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
@@ -448,7 +454,9 @@ void __fastcall__ wait_line(uint8_t l)
 void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
-  //  if(MODE_PLAY_DEMO()) {
+#ifndef SPRITE_MESSAGES
+  if(MODE_PLAY_DEMO())
+#endif
 #if 1
     switch(gstate.counter&0x0F) {
     case 0:
@@ -880,8 +888,8 @@ int main()
 	MESSAGE(0,MSG_STAGE_CLR);
 #else
 	CLR_TOP();
-	PRINT_STRING_AT(8,txt_stage);
-	PRINT_STRING_AT(20,txt_clear);
+	PRINT_STRING_AT(9,txt_stage);
+	PRINT_STRING_AT(21,txt_clear);
 #endif
       } else {
 	flag=0;
