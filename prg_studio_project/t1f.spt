@@ -1051,7 +1051,7 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>leaf_l</description>
+    <description>berry</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
@@ -1064,10 +1064,10 @@
     <sdata>
       <data>0</data>
       <data>0</data>
-      <data>256</data>
-      <data>256</data>
-      <data>1024</data>
-      <data>1024</data>
+      <data>768</data>
+      <data>768</data>
+      <data>3072</data>
+      <data>3072</data>
       <data>10752</data>
       <data>43648</data>
       <data>43648</data>
@@ -1086,12 +1086,12 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>leaf_r</description>
+    <description>apple</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>12</spbkgnd>
-    <spcolour>2</spcolour>
+    <spcolour>10</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>True</expandx>
@@ -1099,9 +1099,11 @@
     <sdata>
       <data>0</data>
       <data>4096</data>
-      <data>5120</data>
+      <data>4096</data>
+      <data>1024</data>
       <data>1024</data>
       <data>42624</data>
+      <data>174752</data>
       <data>174752</data>
       <data>174816</data>
       <data>699112</data>
@@ -1110,49 +1112,47 @@
       <data>699064</data>
       <data>699048</data>
       <data>699048</data>
-      <data>699048</data>
-      <data>699048</data>
+      <data>174752</data>
       <data>174752</data>
       <data>174752</data>
       <data>43648</data>
       <data>10752</data>
       <data>0</data>
-      <data>0</data>
     </sdata>
    </sprite>
   <sprite>
-    <description>acorn_sm</description>
+    <description>spinner</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>12</spbkgnd>
-    <spcolour>8</spcolour>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
-    <expandx>True</expandx>
-    <expandy>True</expandy>
+    <expandx>False</expandx>
+    <expandy>False</expandy>
     <sdata>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>65536</data>
-      <data>344064</data>
-      <data>1396736</data>
-      <data>1462272</data>
-      <data>1740800</data>
-      <data>688128</data>
-      <data>688128</data>
-      <data>688128</data>
-      <data>688128</data>
-      <data>131072</data>
+      <data>10240</data>
+      <data>10240</data>
+      <data>10240</data>
+      <data>174720</data>
+      <data>2779560</data>
+      <data>9791830</data>
+      <data>11163050</data>
+      <data>9874070</data>
+      <data>10835286</data>
+      <data>10048854</data>
+      <data>10835286</data>
+      <data>10048854</data>
+      <data>11883870</data>
+      <data>3102200</data>
+      <data>2555736</data>
+      <data>628064</data>
+      <data>157056</data>
+      <data>38400</data>
+      <data>10240</data>
+      <data>10240</data>
+      <data>10240</data>
     </sdata>
    </sprite>
   <sprite>
@@ -2311,7 +2311,7 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki1</description>
+    <description>kiki1_r</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
@@ -2346,7 +2346,7 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki2</description>
+    <description>kiki2_r</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
@@ -2381,7 +2381,7 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki1</description>
+    <description>kiki1_l</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
@@ -2416,7 +2416,7 @@
     </sdata>
    </sprite>
   <sprite>
-    <description>kiki2</description>
+    <description>kiki2_l</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
