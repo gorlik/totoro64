@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.21"
+#define VERSION "v0.22"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -51,21 +51,24 @@
 #define SPR_DATA_OFFSET   16
 
 // indexes in the sprite data
-#define SPR_ACORN_LG      (28+SPR_DATA_OFFSET)
-#define SPR_ACORN_SM      (29+SPR_DATA_OFFSET)
-#define SPR_BERRY         (30+SPR_DATA_OFFSET)
-#define SPR_APPLE         (31+SPR_DATA_OFFSET)
+#define SPR_ACORN_LG      (36+SPR_DATA_OFFSET)
+#define SPR_ACORN_SM      (37+SPR_DATA_OFFSET)
+#define SPR_BERRY         (38+SPR_DATA_OFFSET)
+#define SPR_APPLE         (39+SPR_DATA_OFFSET)
+#define SPR_SPIN          (40+SPR_DATA_OFFSET)
 
-#define SPR_GGLABS_1      (35+SPR_DATA_OFFSET)
-#define SPR_TITLE_BOLD_1  (39+SPR_DATA_OFFSET)
-#define SPR_64            (42+SPR_DATA_OFFSET)
-#define SPR_TXT_GAME_OVER (43+SPR_DATA_OFFSET)
-#define SPR_TXT_READY     (45+SPR_DATA_OFFSET)
-#define SPR_TXT_SET       (47+SPR_DATA_OFFSET)
-#define SPR_TXT_GO        (49+SPR_DATA_OFFSET)
-#define SPR_TXT_STAGE_CLR (51+SPR_DATA_OFFSET)
+#define SPR_GGLABS_1      (43+SPR_DATA_OFFSET)
+#define SPR_TITLE_BOLD_1  (47+SPR_DATA_OFFSET)
+#define SPR_64            (50+SPR_DATA_OFFSET)
+#define SPR_TITLE_MOVIE_1 (51+SPR_DATA_OFFSET)
 
-#define SPR_TITLE_MOVIE_1 (55+SPR_DATA_OFFSET)
+#define SPR_TXT_GAME_OVER (54+SPR_DATA_OFFSET)
+#define SPR_TXT_READY     (56+SPR_DATA_OFFSET)
+#define SPR_TXT_SET       (58+SPR_DATA_OFFSET)
+#define SPR_TXT_GO        (60+SPR_DATA_OFFSET)
+#define SPR_TXT_STAGE_CLR (62+SPR_DATA_OFFSET)
+#define SPR_TXT_GO2       (64+SPR_DATA_OFFSET)
+
 #define SPR_CHU_IDLE      (0+SPR_DATA_OFFSET)
 #define SPR_CHU_BLINK     (3+SPR_DATA_OFFSET)
 #define SPR_CHU_RR1       (4+SPR_DATA_OFFSET)
@@ -79,13 +82,12 @@
 #define SPR_CHU_RL4       (19+SPR_DATA_OFFSET)
 #define SPR_CHU_BR        (13+SPR_DATA_OFFSET)
 #define SPR_CHU_BL        (25+SPR_DATA_OFFSET)
-#define SPR_CHIBI_IDLE    (58+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RR      (63+SPR_DATA_OFFSET)
-#define SPR_CHIBI_RL      (60+SPR_DATA_OFFSET)
+#define SPR_CHIBI_IDLE    (28+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RR      (30+SPR_DATA_OFFSET)
+#define SPR_CHIBI_RL      (33+SPR_DATA_OFFSET)
 
 #define SPR_KIKI_R        (66+SPR_DATA_OFFSET)
 #define SPR_KIKI_L        (68+SPR_DATA_OFFSET)
-
 
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8
