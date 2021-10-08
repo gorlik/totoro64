@@ -161,7 +161,6 @@ struct game_state_t {
   uint8_t  wind_cnt;
   int8_t   wind_sp;
   int8_t   wind_dir;
-  uint16_t score;
   uint16_t hi_score;
   enum g_mode mode;
 };
@@ -176,12 +175,14 @@ struct acorn_t {
 };
 
 struct player_t {
+  uint8_t enabled;
+  uint16_t score;
   word_t  xpos;
   word_t  ypos;
   int8_t  xv;
   word_t  yv;    // 8.8 format
   uint8_t blink;
-  uint8_t poison;
+  uint16_t poison;
   enum t_state  state;
   //  enum t_dir    dir;
 };
@@ -234,6 +235,7 @@ uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
 void __fastcall__ start_sound(void);
+uint8_t __fastcall__ joy1(void);
 uint8_t __fastcall__ joy2(void);
 void __fastcall__ string_pad(int8_t pad);
 

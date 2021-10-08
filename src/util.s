@@ -19,6 +19,7 @@
 ;******************************************************************************
 .include "c64.inc"
 
+.export    _joy1
 .export    _joy2
 .export    _utoa10
 
@@ -29,6 +30,18 @@
 
 .segment        "CODE"
 
+.proc _joy1: near
+	lda     #$7F
+        sei
+        sta     CIA1_PRA
+        lda     CIA1_PRB
+        cli
+        and     #$1F
+        eor     #$1F
+        rts
+.endproc
+
+	
 .proc _joy2: near
 	ldx #0
 	lda #$E0
