@@ -388,16 +388,17 @@ void __fastcall__ process_input(void)
     }
 
     if(js==0) {
-      if(tcache.xv>0) {
-	tcache.xv--;
-	tcache.state=BRAKE;
-      } else if(tcache.xv<0) {
-	tcache.xv++;
-	tcache.state=BRAKE;
-      } else {
+      if(tcache==0) {
 	tcache.state=IDLE;
+      } else {
+	tcache.state=BRAKE;
+	if(tcache.xv>0) {
+	  tcache.xv--;
+	} else {
+	  tcache.xv++;
+	}
       }
-    }      
+    }
   
     if(tcache.poison) {
       if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
