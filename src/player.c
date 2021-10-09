@@ -327,9 +327,9 @@ void __fastcall__ process_input(void)
       // chu totoro
       acc=2;
       
-      js=joy2();
-      if((js&0x1c)==0) {
-	key=PEEK(197);
+      js=joy2()&0x1c; // mask joy up and down
+      if(js==0) {
+	key=PEEK(203);
 	if(key==10) js=0x04;
 	else if (key==18) js=0x08;
 	else if (key==60) js=0x10;
@@ -338,15 +338,21 @@ void __fastcall__ process_input(void)
 #if 1
       // chibi totoro
       acc=3;
-      if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
-	 && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
-	js=0x10;
-        tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
-      } else {
-	if((totoro[0].xpos.val-totoro[1].xpos.val)>50) js=0x08;
-	else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) js=0x04;
-	else js=0;
-      }
+      if(tcache.enabled==1) {
+	// follow mode
+	if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
+	   && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
+	  js=0x10;
+	  tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
+	} else {
+	  if((totoro[0].xpos.val-totoro[1].xpos.val)>50) js=0x08;
+	  else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) js=0x04;
+	  else js=0;
+	}
+      } else if(tcache.enabled==2) {
+	// 2 player mode
+	js=joy1() & 0x1c; // mask joy up and down
+      } else key=0;
 #endif
     }
   } else js=0x08; // simulate 'D'
@@ -363,6 +369,7 @@ void __fastcall__ process_input(void)
 	}
       }
     }
+    
     if(js&0x08) {
       if(tcache.xv<MAX_XV) {
 	tcache.xv+=acc;
@@ -373,12 +380,14 @@ void __fastcall__ process_input(void)
 	}
       }
     }
+
     if(js&0x10) {
       // make chibi totoro jump higher
       tcache.yv.val=(p_idx)?-(JUMP_V+JUMP_A):-JUMP_V;
       tcache.state=JUMP;
     }
-    if( (js&0x1c) == 0 ) {
+
+    if(js==0) {
       if(tcache.xv>0) {
 	tcache.xv--;
 	tcache.state=BRAKE;
@@ -389,11 +398,11 @@ void __fastcall__ process_input(void)
 	tcache.state=IDLE;
       }
     }      
-  }
-
-  if(tcache.poison) {
-    if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
-    if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;    
+  
+    if(tcache.poison) {
+      if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
+      if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;    
+    }
   }
 }
 
