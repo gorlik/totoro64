@@ -431,7 +431,7 @@ void __fastcall__ check_collision(void)
 	  if(gstate.acorns) gstate.acorns--;
 	  break;
 	case 2:
-	  tcache.poison=250;
+	  tcache.poison+=250;
 	  break;
 	}
 	a->en=0;
