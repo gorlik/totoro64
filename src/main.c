@@ -506,6 +506,17 @@ void __fastcall__ update_top_bar(void)
       wait_line(60);
       printat(P1_SCOREVAL_X,1);
       break;
+    case 9:
+      utoa10(totoro[1].score);
+      string_pad(5);
+      break;
+    case 10:
+      if(totoro[1].enabled==2) {
+	wait_line(60);
+	printat(P2_SCOREVAL_X,1);
+      }
+      break;
+      
 #if (DEBUG&DEBUG_INFO)
     case 10:
       DEBUG_BORDER_INC();
@@ -707,8 +718,8 @@ void __fastcall__ game_loop(void)
   //  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
-  totoro_update(CHU_TOTORO);
-  totoro_update(CHIBI_TOTORO);
+  if(totoro[0].enabled) totoro_update(CHU_TOTORO);
+  if(totoro[1].enabled) totoro_update(CHIBI_TOTORO);
   DEBUG_BORDER(COLOR_GREEN);
 
   // other screen updates
@@ -856,6 +867,9 @@ int main()
 
     // game init
     totoro[0].score=0;
+    totoro[1].score=0;
+    totoro[0].enabled=1;
+    totoro[1].enabled=1;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 
