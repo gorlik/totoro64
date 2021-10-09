@@ -289,7 +289,7 @@ do {	                                    \
 } while(0)
 
 #pragma register-vars (on)
-void acorn_update_f(uint8_t idx)
+static void acorn_update_f(uint8_t idx)
 {
   register struct acorn_t *a=&acorn[idx];
 
@@ -594,6 +594,10 @@ void __fastcall__ setup_top_bar(uint8_t flag)
   
   strcpy8f(txt_score);
   printat(P1_SCORETXT_X,0);
+
+  if(totoro[1].enabled==2) {
+    printat(P2_SCORETXT_X,0);
+  }  
   
   for(gstate.counter=(flag)?4:0;gstate.counter<9;gstate.counter++)
       update_top_bar();
@@ -933,9 +937,15 @@ int main()
 	  utoa10(totoro[0].score);
 	  string_pad(5);
 	  printat(P1_SCOREVAL_X,1);
-	  delay(1);
+	  if(totoro[1].enabled==2) {
+	    utoa10(totoro[1].score);
+	    string_pad(5);
+	    printat(P2_SCOREVAL_X,1);
+	    totoro[1].score+=5+gstate.stage;
+	  }
 	  bonus+=5+gstate.stage;
 	  totoro[0].score+=5+gstate.stage;
+	  delay(1);
 	} while (gstate.time--);
 	delay(VFREQ/2);
 	gstate.stage++;
