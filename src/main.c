@@ -126,7 +126,7 @@ const unsigned char txt_clear[]  = "CLEAR";
   __asm__("beq fs%v",src);			\
   __asm__("sta %w,x",dst);			\
   __asm__("bne ls%v",src);			\
-  __asm__("fs%v:",src);     
+  __asm__("fs%v:",src);
 
 const uint16_t sound_seq[] = {
   0x22d0,
@@ -243,15 +243,16 @@ void __fastcall__ stage_init()
   stage_idx=((gstate.stage>LAST_STAGE_IDX()) ?
 	     LAST_STAGE_IDX() : gstate.stage-1 ) * sizeof(struct stage_t);
 
+  __asm__("ldy #0");
   __asm__("ldx %v",stage_idx);
   __asm__("stl: lda %v,x",stage);
-  __asm__("sta %v+%b,x",gstate,offsetof(struct game_state_t,time));
+  __asm__("sta %v+%b,y",gstate,offsetof(struct game_state_t,time));
   __asm__("inx");
-  __asm__("cpx #%b",sizeof(struct stage_t));
+  __asm__("iny");
+  __asm__("cpy #%b",sizeof(struct stage_t));
   __asm__("bne stl");
 
   gstate.wind_sp=0;
-  gstate.time=0;
   gstate.field=0;
   gstate.counter=0;
 }
@@ -887,7 +888,6 @@ int main()
 
       game_sprite_setup();
       VIC.spr_ena=0x1F;
-      //VIC.spr_ena=0x1C;
 
       get_ready();
 
