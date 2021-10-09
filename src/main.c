@@ -237,7 +237,7 @@ void __fastcall__ setup_sid(void)
   SID.v3.sr = 0xa9;
 }
 
-void __fastcall__ kiki_update()
+static void __fastcall__ kiki_update()
 {
   static uint16_t kiki_x;
   kiki_x+=2;
@@ -482,7 +482,7 @@ void __fastcall__ update_top_bar(void)
       printbigat(TIMEVAL_X,0);
       break;
     case 7:
-      utoa10(gstate.score);
+      utoa10(totoro[0].score);
       string_pad(5);
       break;
     case 8:
@@ -838,7 +838,7 @@ int main()
     while(PEEK(197)!=60);
 
     // game init
-    gstate.score=0;
+    totoro[0].score=0;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 
@@ -858,21 +858,20 @@ int main()
       gstate.flags=stage[gstate.stage_idx].flags;
       gstate.wind_sp=0;
 
-      game_sprite_setup();
       totoro_init(CHU_TOTORO);
       totoro_init(CHIBI_TOTORO);
       acorn_init();
       totoro_set_pos();
       chibi_set_pos();
 
+      game_sprite_setup();
       VIC.spr_ena=0x1F;
       //VIC.spr_ena=0x1C;
 
       get_ready();
 
+      game_sprite_setup();
       VIC.spr_ena=0x1F;
-      VIC.spr_exp_x=0x3C;
-      VIC.spr_exp_y=0x3C;
       spr_mux=1;
 
       gstate.mode=GMODE_PLAY;
@@ -909,12 +908,12 @@ int main()
 	  utoa10(bonus);
 	  string_pad(5);
 	  printat(P1_BONUSVAL_X,1);
-	  utoa10(gstate.score);
+	  utoa10(totoro[0].score);
 	  string_pad(5);
 	  printat(P1_SCOREVAL_X,1);
 	  delay(1);
 	  bonus+=5+gstate.stage;
-	  gstate.score+=5+gstate.stage;
+	  totoro[0].score+=5+gstate.stage;
 	} while (gstate.time--);
 	delay(VFREQ/2);
 	gstate.stage++;

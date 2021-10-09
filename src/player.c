@@ -82,6 +82,8 @@ void __fastcall__ tcache_save(void)
 void __fastcall__ totoro_init(uint8_t p)
 {
   p_idx=p;
+  tcache_load();
+  
   tcache.xv=0;
   tcache.yv.val=0;
   tcache.state=IDLE;
@@ -248,6 +250,7 @@ void __fastcall__ totoro_update(uint8_t p)
 {
   p_idx=p;
   tcache_load();
+  
   process_input();
   //  VIC.bordercolor=COLOR_YELLOW;
   totoro_move();
@@ -424,7 +427,7 @@ void __fastcall__ check_collision(void)
 	switch(a->en) {
 	case 1:
 	  start_sound();
-	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
+	  tcache.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  if(gstate.acorns) gstate.acorns--;
 	  break;
 	case 2:
