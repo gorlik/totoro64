@@ -398,7 +398,6 @@ void __fastcall__ process_input(void)
   }
 }
 
-#if 1
 #pragma register-vars (on)
 void __fastcall__ check_collision(void)
 {
@@ -444,41 +443,3 @@ void __fastcall__ check_collision(void)
   //  if(p_idx) VIC.bordercolor=color;
 }
 
-#else
-
-void __fastcall__ check_collision(void)
-{
-  static uint8_t ty1, ty2;
-  static int16_t tx1, tx2;
-  static uint8_t i;
-
-  ty1=tcache.ypos.hi-20;
-  tx1=tcache.xpos.uval-15;
-  if(p_idx) {
-    ty2=tcache.ypos.hi+22;
-    tx2=tcache.xpos.uval+20;
-  } else {
-    ty2=tcache.ypos.hi+42;
-    tx2=tcache.xpos.uval+36;
-  }
-
-  //  static uint8_t color;
-  VIC.bordercolor=COLOR_CYAN;
-  for(i=0;i<MAX_ACORNS;i++) {
-    if(acorn[i].en) {
-      if(((acorn[i].ypos.hi)>ty1)  &&
-	 ((acorn[i].ypos.hi)<ty2)  &&
-	 ((acorn[i].xpos.val)>tx1) &&
-	 ((acorn[i].xpos.uval)<tx2) ) {
-	  acorn[i].en=0;
-	  start_sound();
-//	   VIC.spr_ena&=~(0x10<<a) 
-	  gstate.score+=10+(PGROUND_Y-tcache.ypos.hi);
-	  if(gstate.acorns) gstate.acorns--;
-	}
-      }
-    }
-  VIC.bordercolor=COLOR_GREEN;
-}
-
-#endif
