@@ -325,36 +325,35 @@ void __fastcall__ process_input(void)
   if(gstate.mode==GMODE_PLAY) {
     if(p_idx==0) {
       // chu totoro
-      acc=2;	
-      key=PEEK(197);
-      js=joy2();
-      if(js) {
-	if(js&0x04) key = 10; // left
-	if(js&0x08) key = 18; // right
-	if(js&0x10) key = 60; // button
+      acc=2;
       
-	if(js&0x01) key = 60; // up?
+      js=joy2();
+      if((js&0x1c)==0) {
+	key=PEEK(197);
+	if(key==10) js=0x04;
+	else if (key==18) js=0x08;
+	else if (key==60) js=0x10;
       }
     } else {
-	#if 1
+#if 1
       // chibi totoro
       acc=3;
       if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
 	 && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
-	key=60;
+	js=0x10;
         tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
       } else {
-	if((totoro[0].xpos.val-totoro[1].xpos.val)>50) key=18;
-	else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) key=10;
-	else key=0;
+	if((totoro[0].xpos.val-totoro[1].xpos.val)>50) js=0x08;
+	else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) js=0x04;
+	else js=0;
       }
-      #endif
-      }
-  } else key=18; // simulate 'D'
-
-  if(tcache.state!=JUMP)
-    switch(key) {
-    case 10: // A
+#endif
+    }
+  } else js=0x08; // simulate 'D'
+  
+  if(tcache.state!=JUMP) {
+    
+    if(js&0x04) {
       if(tcache.xv>-MAX_XV) {
 	tcache.xv-=acc;
 	if(tcache.xv>0) {
@@ -363,8 +362,8 @@ void __fastcall__ process_input(void)
 	  tcache.state=RUN;
 	}
       }
-      break;
-    case 18: // D
+    }
+    if(js&0x08) {
       if(tcache.xv<MAX_XV) {
 	tcache.xv+=acc;
 	if(tcache.xv<0) {
@@ -373,13 +372,13 @@ void __fastcall__ process_input(void)
 	  tcache.state=RUN;
 	}
       }
-      break;
-    case 60: // space
+    }
+    if(js&0x10) {
       // make chibi totoro jump higher
       tcache.yv.val=(p_idx)?-(JUMP_V+JUMP_A):-JUMP_V;
       tcache.state=JUMP;
-      break;
-    default:
+    }
+    if( (js&0x1c) == 0 ) {
       if(tcache.xv>0) {
 	tcache.xv--;
 	tcache.state=BRAKE;
@@ -389,8 +388,8 @@ void __fastcall__ process_input(void)
       } else {
 	tcache.state=IDLE;
       }
-      break;
-    }
+    }      
+  }
 
   if(tcache.poison) {
     if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
@@ -426,10 +425,20 @@ void __fastcall__ check_collision(void)
 	switch(a->en) {
 	case 1:
 	  start_sound();
+	  
+	  if(p_idx) {
+	    if(tcache.enabled==1)
+	      totoro[0].score+=10+(GROUND_Y-tcache.ypos.hi);
+	    else
+	      tcache.score+=10+(GROUND_Y-tcache.ypos.hi);
+	  } else {
 	  tcache.score+=10+(PGROUND_Y-tcache.ypos.hi);
+	  }
+	  
 	  if(gstate.acorns) gstate.acorns--;
 	  break;
 	case 2:
+          // FIXME: start error sound
 	  tcache.poison+=250;
 	  break;
 	}
