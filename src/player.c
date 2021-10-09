@@ -388,7 +388,7 @@ void __fastcall__ process_input(void)
     }
 
     if(js==0) {
-      if(tcache==0) {
+      if(tcache.xv==0) {
 	tcache.state=IDLE;
       } else {
 	tcache.state=BRAKE;
