@@ -237,6 +237,25 @@ void __fastcall__ setup_sid(void)
   SID.v3.sr = 0xa9;
 }
 
+void __fastcall__ stage_init()
+{
+  static uint8_t stage_idx;
+  stage_idx=((gstate.stage>LAST_STAGE_IDX()) ?
+	     LAST_STAGE_IDX() : gstate.stage-1 ) * sizeof(struct stage_t);
+
+  __asm__("ldx %v",stage_idx);
+  __asm__("stl: lda %v,x",stage);
+  __asm__("sta %v+%b,x",gstate,offsetof(struct game_state_t,time));
+  __asm__("inx");
+  __asm__("cpx #%b",sizeof(struct stage_t));
+  __asm__("bne stl");
+
+  gstate.wind_sp=0;
+  gstate.time=0;
+  gstate.field=0;
+  gstate.counter=0;
+}
+
 static void __fastcall__ kiki_update()
 {
   static uint16_t kiki_x;
@@ -337,10 +356,8 @@ void __fastcall__ acorn_add(void)
   static unsigned int oldr=0;
   static unsigned int r;
 
-  // maybe change to counter
   if(MODE_PLAY_DEMO() 
      && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_DBL_ACORN))
-     // && (gstate.field==10 || gstate.field==27 || gstate.field==44 ) 
      )  {
     // new acorn
     r=last_rand&0x3f;
@@ -845,18 +862,8 @@ int main()
     do {
       // stage init
       vpb=VPB;
-      gstate.time=0;
-      gstate.field=0;
-      gstate.counter=0;
 
-      gstate.stage_idx=(gstate.stage>LAST_STAGE_IDX()) ?
-	LAST_STAGE_IDX() : gstate.stage-1 ;
-
-      gstate.time=stage[gstate.stage_idx].time;
-      gstate.acorns=stage[gstate.stage_idx].acorns;
-      gstate.accel=stage[gstate.stage_idx].accel;
-      gstate.flags=stage[gstate.stage_idx].flags;
-      gstate.wind_sp=0;
+      stage_init();
 
       totoro_init(CHU_TOTORO);
       totoro_init(CHIBI_TOTORO);

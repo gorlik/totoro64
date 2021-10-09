@@ -148,21 +148,21 @@ struct stage_t {
 };
 
 struct game_state_t {
+  enum g_mode mode;
   uint8_t  stage;     // current stage
-  uint8_t  stage_idx; // index in the stage array
   uint8_t  field;     // 0 to VFREQ
   uint8_t  counter;   // free running
-  //  uint8_t  anim_idx;
   //  struct stage_t st;
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
   uint8_t  accel;
   uint8_t  flags;
+  // wind parameters
   uint8_t  wind_cnt;
   int8_t   wind_sp;
   int8_t   wind_dir;
+  // misc
   uint16_t hi_score;
-  enum g_mode mode;
 };
 
 struct acorn_t {
