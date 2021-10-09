@@ -613,6 +613,9 @@ void __fastcall__ game_sprite_setup(void)
 
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
+
+  if(totoro[0].enabled) VIC.spr_ena|=0x1c;
+  if(totoro[1].enabled) VIC.spr_ena|=0x03;
 }
 
 void __fastcall__ start_sound(void)
@@ -887,12 +890,10 @@ int main()
       chibi_set_pos();
 
       game_sprite_setup();
-      VIC.spr_ena=0x1F;
 
       get_ready();
 
       game_sprite_setup();
-      VIC.spr_ena=0x1F;
       spr_mux=1;
 
       gstate.mode=GMODE_PLAY;
