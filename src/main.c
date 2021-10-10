@@ -100,7 +100,7 @@ extern const unsigned char license_txt[];
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
 const unsigned char txt_catch[]  = "CATCH    ACORNS";
-const unsigned char txt_stage[]  = "STAGE ";
+const unsigned char txt_stage[]  = "STAGE";
 #ifdef SPRITE_MESSAGES
 #define MSG_READY     SPR_TXT_READY
 #define MSG_SET       SPR_TXT_SET
@@ -112,11 +112,12 @@ const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[]   = " SET ";
 const unsigned char txt_go[]    = " GO ";
 const unsigned char txt_game_over[] = "GAME OVER";
-const unsigned char txt_clear[]  = "CLEAR";
+const unsigned char txt_clear[]  = "STAGE CLEAR";
 #define MSG_READY     txt_ready
 #define MSG_SET       txt_set
 #define MSG_GO        txt_go
 #define MSG_GAME_OVER txt_game_over
+#define MSG_STAGE_CLR txt_clear
 #endif
 
 #define scr_strcpy8(dst,src)    \
@@ -656,7 +657,7 @@ void __fastcall__ delay(uint8_t f)
 }
 
 #ifdef SPRITE_MESSAGES
-void __fastcall__ sprite_message2(uint8_t msg)
+static void __fastcall__ sprite_message2(uint8_t msg)
 {
   spr_mux=0;
   waitvsync();
@@ -676,7 +677,7 @@ void __fastcall__ sprite_message2(uint8_t msg)
   VIC.spr_ena |= 0xc0;
 }
 
-void __fastcall__ sprite_message2p(uint8_t msg)
+static void __fastcall__ sprite_message2p(uint8_t msg)
 {
   sprite_message2(msg);
   delay(VFREQ/3);
@@ -685,11 +686,13 @@ void __fastcall__ sprite_message2p(uint8_t msg)
 
 void __fastcall__ get_ready(void)
 {
+  static uint8_t offset;
+  offset=(gstate.stage>9)?0:1;
   CLR_TOP();
 
   // "STAGE XX"
-  PRINT_STRING_AT(14,txt_stage);
-  PRINT_NUMBER_AT(26,gstate.stage);
+  PRINT_STRING_AT(12+offset,txt_stage);
+  PRINT_NUMBER_AT(24+offset,gstate.stage);
   delay(VFREQ);
 
   // "CATCH XX ACORNS"
@@ -877,7 +880,7 @@ int main()
     totoro[0].score=0;
     totoro[1].score=0;
     totoro[0].enabled=1;
-    totoro[1].enabled=1;
+    totoro[1].enabled=2;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 
@@ -909,13 +912,10 @@ int main()
       if(gstate.acorns==0) {
 	flag=1;
 	track[0].next_offset=rand()&0xe;
-#ifdef SPRITE_MESSAGES
-	MESSAGE(0,MSG_STAGE_CLR);
-#else
+#ifndef SPRITE_MESSAGES
 	CLR_TOP();
-	PRINT_STRING_AT(9,txt_stage);
-	PRINT_STRING_AT(21,txt_clear);
 #endif
+	MESSAGE(9,MSG_STAGE_CLR);
       } else {
 	flag=0;
       }
@@ -954,7 +954,10 @@ int main()
     } while(flag);
 
     // game over
-    MESSAGE(0,MSG_GAME_OVER);
+#ifndef SPRITE_MESSAGES
+	CLR_TOP();
+#endif
+    MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ*3);
   }
 
