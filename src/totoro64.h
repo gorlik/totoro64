@@ -110,6 +110,7 @@
 #define SF_WIND2      0x04
 #define SF_KIKI       0x08
 #define SF_DBL_ACORN  0x10
+#define SF_SPIN       0x20
 
 #define COL_R 0x00
 #define COL_L 0x80
@@ -117,6 +118,10 @@
 #define CTRL_OFF  0x00
 #define CTRL_AUTO 0x01
 #define CTRL_PLAY 0x02
+
+#define OBJ_ACORN 0x1
+#define OBJ_BERRY 0x2
+#define OBJ_APPLE 0x3
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
@@ -146,6 +151,7 @@ typedef union word word_t;
 struct stage_t {
   uint8_t time;
   uint8_t acorns;
+  uint8_t apples;
   uint8_t accel;
   uint8_t flags;
 };
@@ -158,6 +164,7 @@ struct game_state_t {
   //  struct stage_t st;
   uint8_t  time;      // remaining stage time in secons
   uint8_t  acorns;    // remaining acorns to catch
+  uint8_t  apples;
   uint8_t  accel;
   uint8_t  flags;
   // wind parameters

@@ -433,7 +433,7 @@ void __fastcall__ check_collision(void)
 	  ((a->xpos.uval)<tx2) ) {
 	#if 1
 	switch(a->en) {
-	case 1:
+	case OBJ_ACORN:
 	  start_sound();
 	  
 	  if(p_idx) {
@@ -447,9 +447,13 @@ void __fastcall__ check_collision(void)
 	  
 	  if(gstate.acorns) gstate.acorns--;
 	  break;
-	case 2:
+	case OBJ_BERRY:
           // FIXME: start error sound
 	  tcache.poison+=250;
+	  break;
+	case OBJ_APPLE:
+	  // FIXME: bonus sound
+	  gstate.time+=10;
 	  break;
 	}
 	a->en=0;
