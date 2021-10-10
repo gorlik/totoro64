@@ -861,7 +861,8 @@ int main()
   }
 #endif
 
-  cgetc();
+  while(!(joy1()||joy2()));
+  //  cgetc();
 
   inflatemem (COLOR_RAM, color2_data);
   //    cgetc();
@@ -899,8 +900,9 @@ int main()
 #endif
     MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ*3);
-    
-    while(PEEK(197)!=60);
+
+    while(!(joy1()||joy2()));
+    //    while(PEEK(197)!=60);
 
     // game init
     totoro[0].score=0;
