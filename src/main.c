@@ -286,6 +286,55 @@ static void __fastcall__ spin_update()
   //  VIC.spr_ena=0xff;
 }
 
+#define acorn_update_a(idx) do {	       \
+  __asm__ volatile ("ldy #%b",idx*sizeof(struct acorn_t)); \
+  acorn_update_asm();			       \
+  } while (0)
+
+static void __fastcall__ acorn_update_asm()
+{
+  //  __asm__("tay");
+  __asm__("lda _acorn+3,y");
+  __asm__("ora _acorn+3+1,y");
+  __asm__("beq end");
+  __asm__("lda _gstate+7");
+  __asm__("clc");
+  __asm__("adc _acorn+5,y");
+  __asm__("sta _acorn+5,y");
+  __asm__("lda #$00");
+  __asm__("adc _acorn+5+1,y");
+  __asm__("sta _acorn+5+1,y");
+  __asm__("lda _acorn+5,y");
+  __asm__("clc");
+  __asm__("adc _acorn+3,y");
+  __asm__("sta _acorn+3,y");
+  __asm__("lda _acorn+5+1,y");
+  __asm__("adc _acorn+3+1,y");
+  __asm__("sta _acorn+3+1,y");
+  //  __asm__("lda     _acorn+4,y");
+  __asm__("cmp #$DD");
+  __asm__("bcc active");
+  __asm__("lda #$00");
+  __asm__("sta _acorn,y");
+  __asm__("sta _acorn+3,y");
+  __asm__("sta _acorn+3+1,y");
+  //  __asm__("jmp end");
+  __asm__("rts");
+  __asm__("active:	lda     _gstate+9");
+  __asm__("bne end");
+  __asm__("tax");
+  __asm__("lda _gstate+11");
+  __asm__("cmp #$80");
+  __asm__("bcc not_neg");
+  __asm__("dex");
+  __asm__("clc");
+  __asm__("not_neg:	adc     _acorn+1,y");
+  __asm__("sta _acorn+1,y");
+  __asm__("txa");
+  __asm__("adc _acorn+1+1,y");
+  __asm__("sta _acorn+1+1,y");
+  __asm__("end:");
+}
 
 #define acorn_update_m(a)                   \
 do {	                                    \
@@ -302,53 +351,31 @@ do {	                                    \
    }   \
 } while(0)
 
-#pragma register-vars (on)
-static void acorn_update_f(uint8_t idx)
-{
-  register struct acorn_t *a=&acorn[idx];
-
-  if(a->ypos.val) {
-    a->yv.val+=gstate.accel;
-    a->ypos.val+=(a->yv.val);
-    if((a->ypos.hi)>GROUND_Y) {
-      a->en=0;
-      a->ypos.val=0;
-    } else {
-   if(gstate.wind_cnt==0)
-      a->xpos.val+=gstate.wind_dir;
-  }
-}
-}
-
 void __fastcall__ acorn_update(void)
 {
-  acorn_update_m(0);
-  acorn_update_m(1);
-  acorn_update_m(2);
-  acorn_update_m(3);
-  acorn_update_m(4);
-  acorn_update_m(5);
-  acorn_update_m(6);
-  acorn_update_m(7);
-
-/*
-  for(ctmp=0;ctmp<MAX_ACORNS;ctmp++) {
-    if(acorn[ctmp].ypos.val) {
-      acorn[ctmp].yv.val+=gstate.accel;
-      acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
-      if((acorn[ctmp].ypos.hi)>GROUND_Y) {
-      	acorn[ctmp].en=0;
-	acorn[ctmp].ypos.val=0;
-	}
-    } */
-
-/*    if(acorn[ctmp].en) {
-      acorn[ctmp].yv.val+=gstate.accel;
-      acorn[ctmp].ypos.val+=(acorn[ctmp].yv.val);
-      if((acorn[ctmp].ypos.hi)>GROUND_Y)
-	acorn[ctmp].en=0;
-    }
-  }*/
+#if 0
+  acorn_update_a(0);
+  acorn_update_a(1);
+  acorn_update_a(2);
+  acorn_update_a(3);
+  acorn_update_a(4);
+  acorn_update_a(5);
+  acorn_update_a(6);
+  acorn_update_a(7);
+#else
+  __asm__ volatile ("ldy #%b",7*sizeof(struct acorn_t));
+  __asm__("loop:");
+  acorn_update_asm();
+  //  __asm__("jsr _acorn_update_asm");
+  __asm__("tya");
+  __asm__("beq end");
+  __asm__("sec");
+  __asm__("sbc #%b",sizeof(struct acorn_t));
+  __asm__("tay");
+  __asm__("jmp loop");
+  __asm__("end:");
+  
+#endif
 }
 
 void __fastcall__ acorn_init(void)
