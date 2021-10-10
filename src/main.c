@@ -513,7 +513,7 @@ void __fastcall__ update_top_bar(void)
       string_pad(5);
       break;
     case 10:
-      if(totoro[1].enabled==2) {
+      if(totoro[1].ctrl==CTRL_PLAY) {
 	wait_line(60);
 	printat(P2_SCOREVAL_X,1);
       }
@@ -596,7 +596,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
   strcpy8f(txt_score);
   printat(P1_SCORETXT_X,0);
 
-  if(totoro[1].enabled==2) {
+  if(totoro[1].ctrl==CTRL_PLAY) {
     printat(P2_SCORETXT_X,0);
   }  
   
@@ -619,8 +619,8 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_mcolor0=COLOR_BROWN;
   VIC.spr_mcolor1=COLOR_YELLOW;
 
-  if(totoro[0].enabled) VIC.spr_ena|=0x1c;
-  if(totoro[1].enabled) VIC.spr_ena|=0x03;
+  if(totoro[0].ctrl) VIC.spr_ena|=0x1c;
+  if(totoro[1].ctrl) VIC.spr_ena|=0x03;
 }
 
 void __fastcall__ start_sound(void)
@@ -729,8 +729,8 @@ void __fastcall__ game_loop(void)
   //  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
-  if(totoro[0].enabled) totoro_update(CHU_TOTORO);
-  if(totoro[1].enabled) totoro_update(CHIBI_TOTORO);
+  if(totoro[0].ctrl) totoro_update(CHU_TOTORO);
+  if(totoro[1].ctrl) totoro_update(CHIBI_TOTORO);
   DEBUG_BORDER(COLOR_GREEN);
 
   // other screen updates
@@ -879,8 +879,8 @@ int main()
     // game init
     totoro[0].score=0;
     totoro[1].score=0;
-    totoro[0].enabled=1;
-    totoro[1].enabled=2;
+    totoro[0].ctrl=CTRL_PLAY;
+    totoro[1].ctrl=CTRL_PLAY;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 
@@ -937,7 +937,7 @@ int main()
 	  utoa10(totoro[0].score);
 	  string_pad(5);
 	  printat(P1_SCOREVAL_X,1);
-	  if(totoro[1].enabled==2) {
+	  if(totoro[1].ctrl==CTRL_PLAY) {
 	    utoa10(totoro[1].score);
 	    string_pad(5);
 	    printat(P2_SCOREVAL_X,1);

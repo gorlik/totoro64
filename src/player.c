@@ -332,13 +332,13 @@ void __fastcall__ process_input(void)
 	key=PEEK(203);
 	if(key==10) js=0x04;
 	else if (key==18) js=0x08;
-	else if (key==60) js=0x10;
+	//	else if (key==60) js=0x10;
       }
     } else {
 #if 1
       // chibi totoro
       acc=3;
-      if(tcache.enabled==1) {
+      if(tcache.ctrl==CTRL_AUTO) {
 	// follow mode
 	if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
 	   && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
@@ -349,7 +349,7 @@ void __fastcall__ process_input(void)
 	  else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) js=0x04;
 	  else js=0;
 	}
-      } else if(tcache.enabled==2) {
+      } else if(tcache.ctrl==CTRL_PLAY) {
 	// 2 player mode
 	js=joy1() & 0x1c; // mask joy up and down
       } else key=0;
@@ -437,7 +437,7 @@ void __fastcall__ check_collision(void)
 	  start_sound();
 	  
 	  if(p_idx) {
-	    if(tcache.enabled==1)
+	    if(tcache.ctrl==CTRL_AUTO)
 	      totoro[0].score+=10+(GROUND_Y-tcache.ypos.hi);
 	    else
 	      tcache.score+=10+(GROUND_Y-tcache.ypos.hi);

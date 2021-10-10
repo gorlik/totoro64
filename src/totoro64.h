@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERSION "v0.22"
+#define VERSION "v0.23"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -114,6 +114,9 @@
 #define COL_R 0x00
 #define COL_L 0x80
 
+#define CTRL_OFF  0x00
+#define CTRL_AUTO 0x01
+#define CTRL_PLAY 0x02
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
@@ -175,7 +178,7 @@ struct acorn_t {
 };
 
 struct player_t {
-  uint8_t enabled;
+  uint8_t  ctrl;
   uint16_t score;
   word_t  xpos;
   word_t  ypos;
