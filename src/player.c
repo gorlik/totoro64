@@ -90,7 +90,7 @@ void __fastcall__ totoro_init(uint8_t p)
   tcache.blink=0;
   tcache.poison=0;
 
-  if(p) {
+  if(p_idx) {
     // chibi
     tcache.ypos.val=GROUND_Y<<8;
     tcache.xpos.val=(MAX_X-MIN_X)/2+50;
@@ -123,16 +123,18 @@ void __fastcall__ totoro_set_pos(void)
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
   
-  VIC.spr_pos[2].x   = totoro[0].xpos.lo;
+  /*  VIC.spr_pos[2].x   = totoro[0].xpos.lo;
   VIC.spr_pos[3].x   = totoro[0].xpos.lo;
-  VIC.spr_pos[4].x   = totoro[0].xpos.lo;
+  VIC.spr_pos[4].x   = totoro[0].xpos.lo;*/
+  VIC.spr_pos[2].x   = VIC.spr_pos[3].x   = VIC.spr_pos[4].x   = totoro[0].xpos.lo;
 
+  /*  VIC.spr_pos[2].y   = totoro[0].ypos.hi;
+  VIC.spr_pos[3].y   = totoro[0].ypos.hi;
+  VIC.spr_pos[4].y   = totoro[0].ypos.hi;*/
+  VIC.spr_pos[2].y   = VIC.spr_pos[3].y   = VIC.spr_pos[4].y   = totoro[0].ypos.hi;
+  
   if(totoro[0].xpos.hi)   VIC.spr_hi_x |=0x1C;
   else VIC.spr_hi_x &= 0xE3;
-
-  VIC.spr_pos[2].y   = totoro[0].ypos.hi;
-  VIC.spr_pos[3].y   = totoro[0].ypos.hi;
-  VIC.spr_pos[4].y   = totoro[0].ypos.hi;
 
   switch(totoro[0].state) {
   case IDLE:
@@ -196,15 +198,12 @@ void __fastcall__ chibi_set_pos(void)
     tcolor = COLOR_WHITE;
   }
   
-  //  run_offset=0;
-  VIC.spr_pos[0].x   = totoro[1].xpos.lo;
-  VIC.spr_pos[1].x   = totoro[1].xpos.lo;
-
+  VIC.spr_pos[0].x  = VIC.spr_pos[1].x   = totoro[1].xpos.lo;
+  VIC.spr_pos[0].y  = VIC.spr_pos[1].y   = totoro[1].ypos.hi;
+  
   if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x03;
   else VIC.spr_hi_x &= 0xFC;
   
-  VIC.spr_pos[0].y   = totoro[1].ypos.hi;
-  VIC.spr_pos[1].y   = totoro[1].ypos.hi;
   
   if (totoro[1].state==IDLE) {
     if(totoro[1].blink) {
