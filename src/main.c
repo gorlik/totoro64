@@ -947,7 +947,7 @@ int main()
       }
 
       // make totoro walk away
-      for(;totoro[0].xpos.uval<400;)
+      for(;(totoro[0].xpos.uval<350)||(totoro[1].ctrl&&(totoro[1].xpos.uval<350));)
 	game_loop();
 
       delay(VFREQ/2);

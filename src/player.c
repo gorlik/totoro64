@@ -273,16 +273,20 @@ void __fastcall__ totoro_move()
 
   tcache.xpos.val+=(tcache.xv>>2);
 
-  max_x=(p_idx)?MAX_X:MAX_PX;
+  if(gstate.mode&0xfe) {
+    max_x=350;
+  } else {
+    max_x=(p_idx)?MAX_X:MAX_PX;
+  }
+    
+
 
   if(tcache.xpos<MIN_X) {
     tcache.xpos.val=MIN_X;
     tcache.xv=-1;
   } else if(tcache.xpos>max_x) {
-    if(!(gstate.mode&0xfe)) {
-          tcache.xpos.val=max_x;
+      tcache.xpos.val=max_x;
       tcache.xv=1;
-    }
   }
 
   tcache.ypos.val+=tcache.yv.val;
