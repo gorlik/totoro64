@@ -127,13 +127,23 @@
   do { SID.v3.ctrl=0x20; } while(0)
 
 // types
-enum t_state {
-  IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
-};
+//enum t_state {
+//  IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
+//};
 
-enum g_mode {
+#define IDLE 0
+#define JUMP 1
+#define RUN  2
+#define BRAKE 3
+
+/*enum g_mode {
   GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
-};
+  };*/
+
+#define GMODE_PLAY 0
+#define GMODE_DEMO 1
+#define GMODE_CUT1 2
+
 
 union word {
   uint16_t uval;
@@ -157,7 +167,8 @@ struct stage_t {
 };
 
 struct game_state_t {
-  enum g_mode mode;
+  //  enum g_mode mode;
+  uint8_t  mode;
   uint8_t  stage;     // current stage
   uint8_t  field;     // 0 to VFREQ
   uint8_t  counter;   // free running
@@ -193,7 +204,8 @@ struct player_t {
   word_t  yv;    // 8.8 format
   uint8_t blink;
   uint16_t poison;
-  enum t_state  state;
+  //  enum t_state  state;
+  uint8_t  state;
   //  enum t_dir    dir;
 };
 
