@@ -465,20 +465,34 @@ void __fastcall__ mode_text(void)
   VIC.bgcolor[0]=COLOR_WHITE;
 }
 
+static const uint8_t tpos[17] = {
+  SPR_CENTER_X-48, 60,
+  SPR_CENTER_X-24, 60,
+  SPR_CENTER_X,    60,
+  SPR_CENTER_X+24, 60,
+  SPR_CENTER_X-96, 105,
+  SPR_CENTER_X-48, 105,
+  SPR_CENTER_X,    105,
+  SPR_CENTER_X+48, 105,
+  0, // VIC.spr_hi_x
+};
+
+static const uint8_t tcol[8] = {
+  COLOR_RED,
+  COLOR_RED,
+  COLOR_RED,
+  COLOR_RED,
+  COLOR_BLACK,
+  COLOR_BLACK,
+  COLOR_BLACK,
+  COLOR_RED,
+};
+  
 void __fastcall__ Title_Sprite_Setup(void)
 {
-  VIC.spr_ena=0;
-
-  VIC.spr_color[0]=COLOR_RED;
-  VIC.spr_color[1]=COLOR_RED;
-  VIC.spr_color[2]=COLOR_RED;
-  VIC.spr_color[3]=COLOR_RED;
-  VIC.spr_color[4]=COLOR_BLACK;
-  VIC.spr_color[5]=COLOR_BLACK;
-  VIC.spr_color[6]=COLOR_BLACK;
-  VIC.spr_color[7]=COLOR_RED;
-
+  VIC.spr_ena=0;       // disable all sprites
   VIC.spr_mcolor=0x00; // all no multicolor
+
   VIC.spr_exp_x=0xf0;  // totoro64 exp x
   VIC.spr_exp_y=0xf0;  // totoro64 exp y
 
@@ -489,26 +503,22 @@ void __fastcall__ Title_Sprite_Setup(void)
   __asm__("sta $7f8-248,x");
   __asm__("inx");
   __asm__("bne loopt");
-  
-  VIC.spr_pos[0].x=SPR_CENTER_X-48;
-  VIC.spr_pos[1].x=SPR_CENTER_X-24;
-  VIC.spr_pos[2].x=SPR_CENTER_X;
-  VIC.spr_pos[3].x=SPR_CENTER_X+24;
 
-  VIC.spr_pos[4].x=SPR_CENTER_X-96;
-  VIC.spr_pos[5].x=SPR_CENTER_X-48;
-  VIC.spr_pos[6].x=SPR_CENTER_X;
-  VIC.spr_pos[7].x=SPR_CENTER_X+48;
+  // setup sprite position
+  //  memcpy(0xd000,tpos,sizeof(tpos));
+  __asm__("ldy #%b",sizeof(tpos));
+  __asm__("loop: lda %v-1,y",tpos);
+  __asm__("sta %w-1,y",0xd000);
+  __asm__("dey");
+  __asm__("bne loop");
 
-  VIC.spr_pos[0].y=60;
-  VIC.spr_pos[1].y=60;
-  VIC.spr_pos[2].y=60;
-  VIC.spr_pos[3].y=60;
-
-  VIC.spr_pos[4].y=105;
-  VIC.spr_pos[5].y=105;
-  VIC.spr_pos[6].y=105;
-  VIC.spr_pos[7].y=105;
+  //  setup sprite colors
+  //  memcpy(0xd027,tpos,sizeof(tcol));
+  __asm__("ldy #%b",sizeof(tcol));
+  __asm__("cloop: lda %v-1,y",tcol);
+  __asm__("sta %w-1,y",0xd027);
+  __asm__("dey");
+  __asm__("bne cloop");
 }
 
 void __fastcall__ wait_line(uint8_t l)
@@ -535,7 +545,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 2:
       wait_line(60);
-      printbigat(P1_ACORNVAL_X,0);
+      printbigat(P1_ACORNVAL_X);
       break;
     case 4:
       utoa10(gstate.time);
@@ -546,7 +556,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 6:
       wait_line(60);
-      printbigat(TIMEVAL_X,0);
+      printbigat(TIMEVAL_X);
       break;
     case 7:
       utoa10(totoro[0].score);
@@ -824,7 +834,20 @@ int main()
   static uint16_t bonus;
 
   inflatemem (SPR_DATA, sprite_src_data);
+#if 0
   memcpy((uint8_t *)(0x4000-64*8),VIC_BASE+SPR_GGLABS_1*64,64*8);
+#else
+  __asm__("ldy #0");
+  __asm__("loop: lda %w-1,y",(0x4000+SPR_GGLABS_1*64));
+  __asm__("sta %w-1,y",0x4000-64*8);
+
+  __asm__("lda %w-1,y",0x4000+SPR_GGLABS_1*64+256);
+  __asm__("sta %w-1,y",0x4000-64*4);
+
+  __asm__("dey");
+  __asm__("bne loop");
+#endif
+  
   // movie style title
   // memcpy((uint8_t *)(0x4000-64*4),VIC_BASE+SPR_TITLE_MOVIE_1*64,64*3);
   setup_sid();
@@ -846,7 +869,7 @@ int main()
   scr_strcpy8(AT(11,33),version_txt);
   scr_strcpy8(AT(14,0),intro_txt);
 #if (DEBUG==0)
-  memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
+  //  memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);

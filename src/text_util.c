@@ -30,15 +30,17 @@ const uint8_t hexdigit[] = {
 #endif
 
 static unsigned char * const line[] = {
-	        BITMAP_BASE+0,
-			BITMAP_BASE+320*1,
-			BITMAP_BASE+320*2,
-			BITMAP_BASE+320*3,
-			BITMAP_BASE+320*4,
-			BITMAP_BASE+320*5,
-			BITMAP_BASE+320*6,
-			BITMAP_BASE+320*7,
-			/*			BITMAP_BASE+320*8,
+  BITMAP_BASE+0,
+  BITMAP_BASE+320*1,
+#if (DEBUG)	
+  BITMAP_BASE+320*2,
+  BITMAP_BASE+320*3,
+  BITMAP_BASE+320*4,
+  BITMAP_BASE+320*5,
+  BITMAP_BASE+320*6,
+  BITMAP_BASE+320*7,
+#endif
+  /*			BITMAP_BASE+320*8,
 			BITMAP_BASE+320*9,
 			BITMAP_BASE+320*10,
 			BITMAP_BASE+320*11,
@@ -66,16 +68,30 @@ static const unsigned char conv_table[] = {
    224, 228, 232, 236, 240, 244, 248, 252,      // S .. Z
 };
 
-void __fastcall__ print_col(uint8_t c)
+void __fastcall__ print_col(uint8_t pos)
 {
-  STR_BUF[0]=(c&COL_L)?7:6;
+  static uint8_t c;
+
+  (void)pos;
+  //      c=pos;
+  //      STR_BUF[0]=(c&COL_L)?7:6;
+  __asm__("ldx #7");
+  __asm__("sta %v",c);
+  __asm__("bpl skip"); // COL_L is the sign bit
+  __asm__("dex");
+  __asm__("skip: stx %v",STR_BUF);
+    
   STR_BUF[1]=0;
   c&=0x7f;
   printat(c,0);
   printat(c,1);
- 
-  POKE(COLOR_RAM+c,COLOR_BROWN);
-  POKE(COLOR_RAM+40+c,COLOR_BROWN);
+
+  //  POKE(COLOR_RAM+c,COLOR_BROWN);
+  //  POKE(COLOR_RAM+40+c,COLOR_BROWN)
+  __asm__("ldy %v",c);
+  __asm__("lda #%b",COLOR_BROWN);
+  __asm__("sta %w,y",0xd800);
+  __asm__("sta %w,y",0xd800+40);
 }
 
 
@@ -87,23 +103,39 @@ void __fastcall__ print_p(uint8_t c)
   convprint_big(c);
 }
 
-void __fastcall__ print_hourglass(uint8_t c)
+void __fastcall__ print_hourglass(uint8_t pos)
 {
+  static uint8_t c;
+  c=pos;
   STR_BUF[0]='.';
   STR_BUF[1]=0;
   convprint_big(c);
-  POKE(COLOR_RAM+c,COLOR_CYAN);
-  POKE(COLOR_RAM+1+c,COLOR_CYAN);
-  POKE(COLOR_RAM+40+c,COLOR_CYAN);
-  POKE(COLOR_RAM+41+c,COLOR_CYAN);
+  //  POKE(COLOR_RAM+c,COLOR_CYAN);
+  //  POKE(COLOR_RAM+1+c,COLOR_CYAN);
+  //  POKE(COLOR_RAM+40+c,COLOR_CYAN);
+  //  POKE(COLOR_RAM+41+c,COLOR_CYAN);
+  __asm__("ldy %v",c);
+  __asm__("lda #%b",COLOR_CYAN);
+  __asm__("sta %w,y",0xd800);
+  __asm__("sta %w,y",0xd801);
+  __asm__("sta %w,y",0xd800+40);
+  __asm__("sta %w,y",0xd801+40);
 }
-void __fastcall__ print_acorn(uint8_t c)
+void __fastcall__ print_acorn(uint8_t pos)
 {
+  static uint8_t c;
+  c=pos;
+  
   STR_BUF[0]='/';
   STR_BUF[1]=0;
   convprint_big(c);
-  POKE(COLOR_RAM+c,COLOR_BROWN);
-  POKE(COLOR_RAM+1+c,COLOR_BROWN);
+
+  //  POKE(COLOR_RAM+c,COLOR_BROWN);
+  //  POKE(COLOR_RAM+1+c,COLOR_BROWN);
+  __asm__("ldy %v",c);
+  __asm__("lda #%b",COLOR_BROWN);
+  __asm__("sta %w,y",0xd800);
+  __asm__("sta %w,y",0xd800+1);
 }
 
 void __fastcall__ printat(uint8_t x, uint8_t y)
@@ -115,7 +147,7 @@ void __fastcall__ printat(uint8_t x, uint8_t y)
 void __fastcall__ convprint_big(uint8_t x)
 {
   convert_big();
-  printbigat(x,0);
+  printbigat(x);
 }
 
 void __fastcall__ convert_big(void)
@@ -134,7 +166,7 @@ void __fastcall__ convert_big(void)
    STR_BUF[j+41]=0;
 }
 
-void __fastcall__ printbigat(uint8_t x, uint8_t y)
+void __fastcall__ printbigat(uint8_t x)
 {
   static uint8_t j,k;
 
@@ -157,7 +189,7 @@ void __fastcall__ printbigat(uint8_t x, uint8_t y)
     k++;
   }
   STR_BUF[k]=0;
-  printat(x,y);
+  printat(x,0);
 
   for(k=0,j=41;STR_BUF[j];j++) {
     STR_BUF[k]=(STR_BUF[j])+2;
@@ -166,7 +198,7 @@ void __fastcall__ printbigat(uint8_t x, uint8_t y)
     k++;
   }
   STR_BUF[k]=0;
-  printat(x,y+1);
+  printat(x,1);
 
 }
 
