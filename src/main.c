@@ -209,7 +209,7 @@ void __fastcall__ _strcpy8f (void)
 void __fastcall__ setup_sid(void)
 {
   //memset(&SID,0,24);
-  memset8a(0xd400,0,24); // SID address
+  memset8c(0xd400,0,24); // SID address
   SID.amp = 0x1f; // set volume to 15
   SID.v1.ad = 0x80;
   SID.v1.sr = 0xf6;
@@ -381,7 +381,7 @@ void __fastcall__ acorn_update(void)
 void __fastcall__ acorn_init(void)
 {
   // init data
-  memset8(acorn,0,sizeof(acorn));
+  memset8s(acorn,0,sizeof(acorn));
 }
 
 unsigned char __fastcall__ acorn_free_slot(void)
@@ -876,7 +876,7 @@ int main()
   // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
   //	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
-  memset8(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
+  memset8s(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
 
 
 #if 0

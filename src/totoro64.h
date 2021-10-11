@@ -300,14 +300,14 @@ extern struct  track_t track[2];
 extern uint8_t vpb;
 
 
-#define memset8(addr, v, c) \
+#define memset8s(addr, v, c) \
   __asm__("ldx #%b",c);	    \
   __asm__("lda #%b",v);		      \
   __asm__("l%v: sta %v-1,x",addr,addr);   \
   __asm__("dex"); \
   __asm__("bne l%v",addr);
 
-#define memset8a(addr, v, c) \
+#define memset8c(addr, v, c) \
   __asm__("ldx #%b",c);	    \
   __asm__("lda #%b",v);		      \
   __asm__("@l22: sta %w-1,x",addr);	\
