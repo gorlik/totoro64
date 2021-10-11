@@ -245,7 +245,7 @@ void __fastcall__ print_p(uint8_t c);
 
 // totoro actions
 void __fastcall__ totoro_init(uint8_t p);
-void __fastcall__ totoro_update(uint8_t p);
+void __fastcall__ totoro_update(void);
 void __fastcall__ totoro_set_pos(void);
 void __fastcall__ chibi_set_pos(void);
 
@@ -298,6 +298,7 @@ extern const   uint8_t track0_data[];
 extern const   uint8_t track1_data[];
 extern struct  track_t track[2];
 extern uint8_t vpb;
+extern uint8_t p_idx;
 
 
 #define memset8s(addr, v, c) \

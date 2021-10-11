@@ -192,6 +192,11 @@ uint16_t last_rand;
 
 int __fastcall__ utoa10 (uint16_t val);
 
+#define totoro_update_m(p) \
+  do { p_idx=p;\
+  totoro_update(); \
+  } while (0)
+
 void __fastcall__ _strcpy8f (void)
 {
   __asm__("ldy #$FF");
@@ -784,8 +789,8 @@ void __fastcall__ game_loop(void)
   //  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
-  if(totoro[0].ctrl) totoro_update(CHU_TOTORO);
-  if(totoro[1].ctrl) totoro_update(CHIBI_TOTORO);
+  if(totoro[0].ctrl) totoro_update_m(CHU_TOTORO);
+  if(totoro[1].ctrl) totoro_update_m(CHIBI_TOTORO);
   DEBUG_BORDER(COLOR_GREEN);
 
   // other screen updates

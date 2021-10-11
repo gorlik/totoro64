@@ -41,7 +41,7 @@
 struct player_t totoro[2];
 
 static struct player_t tcache;
-static uint8_t p_idx;
+uint8_t p_idx;
 
 const uint8_t run_seq[] =
   {
@@ -245,9 +245,8 @@ void __fastcall__ chibi_set_pos(void)
   }
 }
 
-void __fastcall__ totoro_update(uint8_t p)
+void __fastcall__ totoro_update(void)
 {
-  p_idx=p;
   tcache_load();
   
   process_input();
