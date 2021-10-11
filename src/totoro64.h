@@ -23,6 +23,14 @@
 
 #include <stdint.h>
 
+// user modifiable compile time options
+//#define NTSC
+#define STAGE_TIME 60
+#define SPRITE_MESSAGES
+//#define MOVIE_TITLE
+//#define TWO_PLAYER
+
+
 #define VERSION "v0.25"
 
 #define DEBUG_TIMING 0x01
@@ -35,8 +43,6 @@
 #define DEBUG 0
 #endif
 
-//#define NTSC
-
 #ifdef NTSC
 #define VPB 10
 #define VFREQ 60
@@ -44,8 +50,6 @@
 #define VPB 8
 #define VFREQ 50
 #endif
-
-#define SPRITE_MESSAGES
 
 // (SPR_DATA-VIC_BASE)/64
 #define SPR_DATA_OFFSET   16

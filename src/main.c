@@ -27,8 +27,6 @@
 
 #include "totoro64.h"
 
-#define STAGE_TIME 60
-
 // title bar positions
 
 // co-op
@@ -140,7 +138,7 @@ const uint16_t sound_seq[] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
-#ifndef TESTING
+#ifdef TESTING
   { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 15, 0, ACC(10), SF_BERRIES },
   { STAGE_TIME, 25, 3, ACC(6),  SF_WIND1 },
@@ -148,16 +146,18 @@ const struct stage_t stage[] = {
 #endif
   { STAGE_TIME, 10, 0, ACC(4),  0 },
   { STAGE_TIME, 15, 0, ACC(6),  0 },
-  { STAGE_TIME, 20, 3, ACC(8),  0 },
-  { STAGE_TIME, 25, 0, ACC(10), SF_BERRIES },
-  { STAGE_TIME, 30, 0, ACC(12), SF_BERRIES },
-  { STAGE_TIME, 35, 3, ACC(14), SF_BERRIES },
-  { STAGE_TIME, 40, 0, ACC(16), SF_BERRIES | SF_WIND1 },
-  { STAGE_TIME, 45, 0, ACC(18), SF_BERRIES | SF_WIND1 },
-  { STAGE_TIME, 50, 3, ACC(21), SF_BERRIES | SF_WIND1 },
-  { STAGE_TIME, 60, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
-  { STAGE_TIME, 70, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
-  { STAGE_TIME, 80, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 20, 1, ACC(8),  0 },
+  { STAGE_TIME, 25, 1, ACC(10), SF_BERRIES },
+  { STAGE_TIME, 30, 1, ACC(12), SF_BERRIES },
+  { STAGE_TIME, 35, 1, ACC(14), SF_BERRIES },
+  { STAGE_TIME, 40, 2, ACC(16), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 45, 2, ACC(18), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 50, 2, ACC(21), SF_BERRIES | SF_WIND1 },
+  { STAGE_TIME, 55, 3, ACC(22), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 60, 3, ACC(22), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 65, 3, ACC(22), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 70, 2, ACC(23), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
+  { STAGE_TIME, 80, 2, ACC(23), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 90, 1, ACC(23), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
 };
 
@@ -211,6 +211,15 @@ void __fastcall__ _strcpy8f (void)
     temp_ptr=(unsigned char *)a;   \
     _strcpy8f();		   \
   } while (0)
+
+void __fastcall__ wait_for_input(void)
+{
+#ifdef TWO_PLAYER
+    while(!(joy1()||joy2()));
+#else
+    while(!(joy2()||(PEEK(203)!=0x40)));
+#endif
+}
 
 void __fastcall__ setup_sid(void)
 {
@@ -855,9 +864,11 @@ int main()
 #endif
   
   // movie style title
-  // memcpy((uint8_t *)(0x4000-64*4),VIC_BASE+SPR_TITLE_MOVIE_1*64,64*3);
+#ifdef MOVIE_TITLE
+  memcpy((uint8_t *)(0x4000-64*4),VIC_BASE+SPR_TITLE_MOVIE_1*64,64*3);
+#endif
   setup_sid();
-
+  
   spr_mux=0;
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
@@ -918,7 +929,7 @@ int main()
   }
 #endif
 
-  while(!(joy1()||joy2()));
+  wait_for_input();
   //  cgetc();
 
   inflatemem (COLOR_RAM, color2_data);
@@ -958,14 +969,17 @@ int main()
     MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ*3);
 
-    while(!(joy1()||joy2()));
-    //    while(PEEK(197)!=60);
+    wait_for_input();
 
     // game init
     totoro[0].score=0;
     totoro[1].score=0;
     totoro[0].ctrl=CTRL_PLAY;
+#ifdef TWO_PLAYER
+    totoro[1].ctrl=CTRL_PLAY;
+#else
     totoro[1].ctrl=CTRL_AUTO;
+#endif
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 

@@ -328,14 +328,15 @@ void __fastcall__ process_input(void)
     if(p_idx==0) {
       // chu totoro
       acc=2;
-      
       js=joy2()&0x1c; // mask joy up and down
+#ifndef TWO_PLAYER
       if(js==0) {
 	key=PEEK(203);
 	if(key==10) js=0x04;
 	else if (key==18) js=0x08;
-	//	else if (key==60) js=0x10;
+	if(PEEK(653)&1) js|=0x10;
       }
+#endif
     } else {
 #if 1
       // chibi totoro
