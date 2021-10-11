@@ -22,12 +22,15 @@
 .export    _joy1
 .export    _joy2
 .export    _utoa10
-
-.import    __hextab
 .importzp  sreg
 .importzp  _temp_ptr
 .import    _STR_BUF
 
+.segment        "RODATA"
+__dectab:
+	.byte '0', '1', '2', '3', '4'
+	.byte '5', '6', '7', '8', '9'
+	
 .segment        "CODE"
 
 .proc _joy1: near
@@ -83,7 +86,7 @@ L7:     dey
         bne     L6
 
         tay                     ; get remainder into y
-        lda     __hextab,y      ; get hex character
+        lda     __dectab,y      ; get dec character
         pha                     ; save char value on stack
 
         lda     sreg
