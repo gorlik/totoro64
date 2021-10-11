@@ -140,7 +140,8 @@ const uint16_t sound_seq[] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
-#ifndef RELEASE
+#ifndef TESTING
+  { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 15, 0, ACC(10), SF_BERRIES },
   { STAGE_TIME, 25, 3, ACC(6),  SF_WIND1 },
   { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
@@ -258,7 +259,7 @@ void __fastcall__ stage_init()
   __asm__("cpy #%b",sizeof(struct stage_t));
   __asm__("bne stl");
 
-  gstate.wind_sp=0;
+  gstate.wind_dir=0;
   gstate.field=0;
   gstate.counter=0;
 }
@@ -875,6 +876,7 @@ int main()
   scr_strcpy8(AT(14,0),intro_txt);
 #if (DEBUG==0)
   //  memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
+  memcpy((uint8_t *)(0x400+40*18),license_txt,2*40);
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);
@@ -963,7 +965,7 @@ int main()
     totoro[0].score=0;
     totoro[1].score=0;
     totoro[0].ctrl=CTRL_PLAY;
-    totoro[1].ctrl=CTRL_PLAY;
+    totoro[1].ctrl=CTRL_AUTO;
     gstate.stage=1;
     gstate.mode=GMODE_CUT1;
 

@@ -81,13 +81,16 @@ const unsigned char present_txt[] = "Presents";
 const unsigned char intro_txt[] = "A Commodore 64 tribute to Studio Ghibli";
 
 #if (DEBUG==0)
+//#if 0
 const unsigned char license_txt[] =
-  "Copyright (c) 2021 Gabriele Gorla       "
-  "This program is free software: you can  "
-  "redistribute it and/or modify it under  "
-  "the terms of the GNU General Public     "
-  "License as published by the Free        "
-  "Software Foundation either License      "
-  "version 3 or (at your option) any later "
-  "version.";
+  "   Copyright (c) 2021 Gabriele Gorla    "
+  " Licensed under the GNU GPL v3 or later ";
+//  "This program is free software: you can  "
+//  "redistribute it and/or modify it under  "
+//  "the terms of the GNU General Public     "
+//  "License version 3 or any later version. ";
+//  "License as published by the Free        "
+//  "Software Foundation either License      "
+//  "version 3 or (at your option) any later "
+//  "version.";
 #endif
