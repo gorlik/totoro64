@@ -94,50 +94,6 @@ void __fastcall__ print_col(uint8_t pos)
   __asm__("sta %w,y",0xd800+40);
 }
 
-
-void __fastcall__ print_p(uint8_t c)
-{
-  STR_BUF[0]=(c>20)?'2':'1';
-  STR_BUF[1]='P';
-  STR_BUF[2]=0;
-  convprint_big(c);
-}
-
-void __fastcall__ print_hourglass(uint8_t pos)
-{
-  static uint8_t c;
-  c=pos;
-  STR_BUF[0]='.';
-  STR_BUF[1]=0;
-  convprint_big(c);
-  //  POKE(COLOR_RAM+c,COLOR_CYAN);
-  //  POKE(COLOR_RAM+1+c,COLOR_CYAN);
-  //  POKE(COLOR_RAM+40+c,COLOR_CYAN);
-  //  POKE(COLOR_RAM+41+c,COLOR_CYAN);
-  __asm__("ldy %v",c);
-  __asm__("lda #%b",COLOR_CYAN);
-  __asm__("sta %w,y",0xd800);
-  __asm__("sta %w,y",0xd801);
-  __asm__("sta %w,y",0xd800+40);
-  __asm__("sta %w,y",0xd801+40);
-}
-void __fastcall__ print_acorn(uint8_t pos)
-{
-  static uint8_t c;
-  c=pos;
-  
-  STR_BUF[0]='/';
-  STR_BUF[1]=0;
-  convprint_big(c);
-
-  //  POKE(COLOR_RAM+c,COLOR_BROWN);
-  //  POKE(COLOR_RAM+1+c,COLOR_BROWN);
-  __asm__("ldy %v",c);
-  __asm__("lda #%b",COLOR_BROWN);
-  __asm__("sta %w,y",0xd800);
-  __asm__("sta %w,y",0xd800+1);
-}
-
 void __fastcall__ printat(uint8_t x, uint8_t y)
 {
   line_ptr=(line[y]+(x<<3));
@@ -170,18 +126,6 @@ void __fastcall__ printbigat(uint8_t x)
 {
   static uint8_t j,k;
 
-  /*   for(j=0;STR_BUF[j];j++) {
-    if(STR_BUF[j]>='0' && STR_BUF[j]<='9') {
-      idx=STR_BUF[j]+1-'0';
-    } else if(STR_BUF[j]>='A' && STR_BUF[j]<='Z') {
-      idx=STR_BUF[j]+11-'A';
-    } else idx=0;
-    // printf("c: %c %d = %d\n",STR_BUF[j],STR_BUF[j],char_table[idx]);
-    STR_BUF[j+40]=char_table[idx];
-  }
-   STR_BUF[j+40]=0;
-  */
-
   for(k=0,j=41;STR_BUF[j];j++) {
     STR_BUF[k]=(STR_BUF[j])+0;
     k++;
@@ -200,16 +144,4 @@ void __fastcall__ printbigat(uint8_t x)
   STR_BUF[k]=0;
   printat(x,1);
 
-}
-
-void __fastcall__ string_pad(int8_t pad)
-{
-  static int8_t delta, i;
-  delta=pad-strlen(STR_BUF);
-
-  if(delta==0) return;
-
-  for(i=pad;i>=0;i--)
-    if((i-delta)>=0) STR_BUF[i]=STR_BUF[i-delta];
-    else STR_BUF[i]=' ';
 }

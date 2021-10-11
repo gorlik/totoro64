@@ -23,6 +23,10 @@
 
 .export _PutLine
 .export _CLR_TOP
+.export _print_acorn
+.export _print_hourglass
+.export _print_p
+.export _string_pad
 
 .segment "BSS"
 t1:
@@ -89,4 +93,121 @@ end:
 	dex
 	bne @loopc
 	rts
+.endproc
+
+
+.segment	"BSS"
+
+cpos:
+	.res	1,$00
+ccolor:
+	.res	1,$00
+
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_p (unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_print_p: near
+
+.segment	"CODE"
+
+	ldx     #'1' 		; '
+	cmp     #$15		; a>20 ?
+	bcc     skip
+	inx			; '1'+1 = '2'
+skip:	stx     _STR_BUF
+	ldx     #$D0
+	stx     _STR_BUF+1
+	ldx     #0
+	stx     _STR_BUF+2
+	jsr     _convprint_big	; position is still in a
+	rts
+.endproc
+
+	
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_acorn (unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_print_acorn: near
+
+
+	sta     cpos
+	ldy     #$09		; BROWN
+	sty     ccolor
+	ldy     #$2F
+	jmp     print_color_char
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_hourglass (unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_print_hourglass: near
+
+	sta     cpos
+	ldy     #$03		; CYAN
+	sty     ccolor
+	ldy     #$2E
+	jmp     print_color_char
+.endproc
+	
+.proc	print_color_char: near
+;;  char in y
+;; pos in a and cpos
+;;;  color in ccolor
+	sty     _STR_BUF
+	ldy     #$00
+	sty     _STR_BUF+1
+	;; 	lda     temp_b
+	jsr     _convprint_big
+	ldy     cpos
+	lda     ccolor
+	sta     $D800,y
+	sta     $D801,y
+	sta     $D828,y
+	sta     $D829,y
+	rts
+	.endproc
+	
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ string_pad (unsigned char)
+; ---------------------------------------------------------------
+	
+.segment	"BSS"
+pad:
+	.res	1,$00
+
+.segment	"CODE"
+
+.proc	_string_pad: near
+	
+	sta pad
+	tay
+	ldx #$FF
+lloop:	inx
+	lda _STR_BUF,x
+	bne lloop
+
+	cpx pad
+	beq end
+	;;  	ldy pad
+cloop1:
+	lda _STR_BUF,x
+	sta _STR_BUF,y
+	dey
+	dex
+	bpl cloop1
+	lda #' '
+cloop2: sta _STR_BUF,y
+	dey
+	bpl cloop2
+end:	rts
+
 .endproc
