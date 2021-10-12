@@ -471,7 +471,7 @@ void __fastcall__ mode_bitmap(void)
   VIC.spr_mcolor1=COLOR_YELLOW;
 }
 
-void __fastcall__ mode_text(void)
+static void __fastcall__ mode_text(void)
 {
   CIA2.pra|=0x03; // selects vic page 0x0000-0x3fff
 
@@ -876,7 +876,8 @@ int main()
   VIC.imr=0x1; // enable raster interrupt
 
   Title_Sprite_Setup();
-  mode_text();
+  //  mode_text();
+  VIC.bgcolor[0]=COLOR_WHITE;
   VIC.spr_ena=0x0f;
 
   scr_strcpy8(AT(5,16),present_txt);
