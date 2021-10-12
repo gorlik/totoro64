@@ -86,7 +86,7 @@ void __fastcall__ totoro_init(uint8_t p)
   
   tcache.xv=0;
   tcache.yv.val=0;
-  tcache.state=IDLE;
+  tcache.state=PSTATE_IDLE;
   tcache.blink=0;
   tcache.poison=0;
 
@@ -115,11 +115,11 @@ void __fastcall__ totoro_set_pos(void)
   static uint8_t anim_idx;
 
   if(totoro[0].poison) {
-    anim_idx=(gstate.counter&0xF)>>2;
+    anim_idx=(game.counter&0xF)>>2;
     VIC.spr_color[2] = COLOR_BLUE;
     totoro[0].poison--;
   } else {
-    anim_idx=(gstate.counter&0x1F)>>3;
+    anim_idx=(game.counter&0x1F)>>3;
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
   
@@ -137,13 +137,13 @@ void __fastcall__ totoro_set_pos(void)
   else VIC.spr_hi_x &= 0xE3;
 
   switch(totoro[0].state) {
-  case IDLE:
+  case PSTATE_IDLE:
     if(totoro[0].blink)   SPR_PTR[2]=SPR_CHU_BLINK;
     else   SPR_PTR[2]=SPR_CHU_IDLE;
     SPR_PTR[3]=SPR_CHU_IDLE+1;
     SPR_PTR[4]=SPR_CHU_IDLE+2;
     break;
-  case RUN:
+  case PSTATE_RUN:
     if(totoro[0].xv>0) {
       SPR_PTR[2]=run_seq[anim_idx];
       SPR_PTR[3]=run_seq[anim_idx]+1;
@@ -154,7 +154,7 @@ void __fastcall__ totoro_set_pos(void)
       SPR_PTR[4]=run_seq[anim_idx+4]+2;
     }
     break;
-  case BRAKE:
+  case PSTATE_BRAKE:
     if(totoro[0].xv>0) {
       SPR_PTR[2]=SPR_CHU_BR;
       SPR_PTR[3]=SPR_CHU_BR+1;
@@ -165,7 +165,7 @@ void __fastcall__ totoro_set_pos(void)
       SPR_PTR[4]=SPR_CHU_BL+2;
     }
     break;
-  case JUMP:
+  case PSTATE_JUMP:
     if(totoro[0].xv>0) {
       SPR_PTR[2]=run_seq[0];
       SPR_PTR[3]=run_seq[0]+1;
@@ -205,7 +205,7 @@ void __fastcall__ chibi_set_pos(void)
   else VIC.spr_hi_x &= 0xFC;
   
   
-  if (totoro[1].state==IDLE) {
+  if (totoro[1].state==PSTATE_IDLE) {
     if(totoro[1].blink) {
       SPR_PTR[0]=SPR_CHIBI_IDLE+1;
       SPR_PTR[1]=SPR_CHIBI_IDLE;
@@ -219,14 +219,14 @@ void __fastcall__ chibi_set_pos(void)
     }
   } else {
     switch(totoro[1].state) {
-    case RUN:
-      if(totoro[1].poison) anim_idx=(gstate.counter>>2)&1;
-      else anim_idx=(gstate.counter>>1)&1;
+    case PSTATE_RUN:
+      if(totoro[1].poison) anim_idx=(game.counter>>2)&1;
+      else anim_idx=(game.counter>>1)&1;
       break;
-    case JUMP:
+    case PSTATE_JUMP:
       anim_idx=1;
       break;
-    case BRAKE:
+    case PSTATE_BRAKE:
       anim_idx=0;
       break;
     }
@@ -271,7 +271,7 @@ void __fastcall__ totoro_move()
 
   tcache.xpos.val+=(tcache.xv>>2);
 
-  if(gstate.mode&0xfe) {
+  if(game.state&0xfe) {
     max_x=350;
   } else {
     max_x=(p_idx)?MAX_X:MAX_PX;
@@ -289,7 +289,7 @@ void __fastcall__ totoro_move()
 
   tcache.ypos.val+=tcache.yv.val;
 
-  if(tcache.state==JUMP) {
+  if(tcache.state==PSTATE_JUMP) {
     tcache.yv.val+=JUMP_A;
   }
 
@@ -297,19 +297,19 @@ void __fastcall__ totoro_move()
 
   if(tcache.ypos.hi>ground) {
     tcache.ypos.val=(ground<<8);
-    if(tcache.xv) tcache.state=RUN;
-    else tcache.state=IDLE;
+    if(tcache.xv) tcache.state=PSTATE_RUN;
+    else tcache.state=PSTATE_IDLE;
     tcache.yv.val=0;
   }
 
-  if((tcache.xv==0) && (tcache.state!=JUMP))
-    tcache.state=IDLE;
+  if((tcache.xv==0) && (tcache.state!=PSTATE_JUMP))
+    tcache.state=PSTATE_IDLE;
 
   if(tcache.blink)
     tcache.blink--;
 
-  if(gstate.field==25) {
-    if((tcache.state==IDLE) && (tcache.blink==0)) {
+  if(game.field==25) {
+    if((tcache.state==PSTATE_IDLE) && (tcache.blink==0)) {
       r=rand();
       if((r&0x3)==0x3) {
 	tcache.blink=VFREQ/10;
@@ -324,7 +324,7 @@ void __fastcall__ process_input(void)
   static uint8_t js;
   static uint8_t acc;
   
-  if(gstate.mode==GMODE_PLAY) {
+  if(game.state==GSTATE_PLAY) {
     if(p_idx==0) {
       // chu totoro
       acc=2;
@@ -343,7 +343,7 @@ void __fastcall__ process_input(void)
       acc=3;
       if(tcache.ctrl==CTRL_AUTO) {
 	// follow mode
-	if(((totoro[0].state==JUMP) && (totoro[1].state!=JUMP))
+	if(((totoro[0].state==PSTATE_JUMP) && (totoro[1].state!=PSTATE_JUMP))
 	   && ((totoro[1].xv==0)|| same_direction(totoro[0].xv,totoro[1].xv)) ) {
 	  js=0x10;
 	  tcache.xv=totoro[0].xv; // must use tcache to prevent overwriting
@@ -360,15 +360,15 @@ void __fastcall__ process_input(void)
     }
   } else js=0x08; // simulate 'D'
   
-  if(tcache.state!=JUMP) {
+  if(tcache.state!=PSTATE_JUMP) {
     
     if(js&0x04) {
       if(tcache.xv>-MAX_XV) {
 	tcache.xv-=acc;
 	if(tcache.xv>0) {
-	  tcache.state=BRAKE;
+	  tcache.state=PSTATE_BRAKE;
 	} else {
-	  tcache.state=RUN;
+	  tcache.state=PSTATE_RUN;
 	}
       }
     }
@@ -377,9 +377,9 @@ void __fastcall__ process_input(void)
       if(tcache.xv<MAX_XV) {
 	tcache.xv+=acc;
 	if(tcache.xv<0) {
-	  tcache.state=BRAKE;
+	  tcache.state=PSTATE_BRAKE;
 	} else {
-	  tcache.state=RUN;
+	  tcache.state=PSTATE_RUN;
 	}
       }
     }
@@ -387,14 +387,14 @@ void __fastcall__ process_input(void)
     if(js&0x10) {
       // make chibi totoro jump higher
       tcache.yv.val=(p_idx)?-(JUMP_V+JUMP_A):-JUMP_V;
-      tcache.state=JUMP;
+      tcache.state=PSTATE_JUMP;
     }
 
     if(js==0) {
       if(tcache.xv==0) {
-	tcache.state=IDLE;
+	tcache.state=PSTATE_IDLE;
       } else {
-	tcache.state=BRAKE;
+	tcache.state=PSTATE_BRAKE;
 	if(tcache.xv>0) {
 	  tcache.xv--;
 	} else {
@@ -448,7 +448,7 @@ void __fastcall__ check_collision(void)
 	  tcache.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  }
 	  
-	  if(gstate.acorns) gstate.acorns--;
+	  if(game.acorns) game.acorns--;
 	  break;
 	case OBJ_BERRY:
           // FIXME: start error sound
@@ -456,7 +456,7 @@ void __fastcall__ check_collision(void)
 	  break;
 	case OBJ_APPLE:
 	  // FIXME: bonus sound
-	  gstate.time+=10;
+	  game.time+=10;
 	  break;
 	}
 	a->en=0;

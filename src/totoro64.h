@@ -130,23 +130,19 @@
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
 
-// types
-//enum t_state {
-//  IDLE, JUMP, /*JUMP_UP, JUMP_DOWN,*/ RUN, BRAKE
-//};
+#define PSTATE_IDLE  0
+#define PSTATE_JUMP  1
+#define PSTATE_RUN   2
+#define PSTATE_BRAKE 3
 
-#define IDLE 0
-#define JUMP 1
-#define RUN  2
-#define BRAKE 3
+#define GSTATE_PLAY 0
+#define GSTATE_DEMO 1
+#define GSTATE_CUT1 2
 
-/*enum g_mode {
-  GMODE_PLAY=0, GMODE_DEMO=1, GMODE_CUT1
-  };*/
-
-#define GMODE_PLAY 0
-#define GMODE_DEMO 1
-#define GMODE_CUT1 2
+#define GMODE_1P_SOLO  0
+#define GMODE_1P_STD   1
+#define GMODE_2P_COOP  2
+#define GMODE_2P_VS    3
 
 
 union word {
@@ -160,7 +156,7 @@ union word {
 
 typedef union word word_t;
 
-#define MODE_PLAY_DEMO() (!(gstate.mode&0xfe))
+#define STATE_PLAY_DEMO() (!(game.state&0xfe))
 
 struct stage_t {
   uint8_t time;
@@ -171,8 +167,8 @@ struct stage_t {
 };
 
 struct game_state_t {
-  //  enum g_mode mode;
   uint8_t  mode;
+  uint8_t  state;
   uint8_t  stage;     // current stage
   uint8_t  field;     // 0 to VFREQ
   uint8_t  counter;   // free running
@@ -183,9 +179,9 @@ struct game_state_t {
   uint8_t  accel;
   uint8_t  flags;
   // wind parameters
-  uint8_t  wind_cnt;
-  int8_t   wind_sp;
-  int8_t   wind_dir;
+  uint8_t  wind_sp;   // vblanks between updates
+  uint8_t  wind_cnt;  // update counter
+  int8_t   wind_dir;  // 0, 1, -1
   // misc
   uint16_t hi_score;
 };
@@ -293,7 +289,7 @@ extern uint8_t VIC_BASE[];
 
 // global variables
 extern uint8_t STR_BUF[64];
-extern struct  game_state_t gstate;
+extern struct  game_state_t game;
 extern struct  player_t totoro[2];
 extern struct  acorn_t acorn[MAX_ACORNS];
 

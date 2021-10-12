@@ -175,7 +175,7 @@ const struct stage_t stage[] = {
 #define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); convprint_big(p); } while (0)
 #define PRINT_NUMBER_AT(p,n)    do { utoa10(n); convprint_big(p); } while (0)
 
-struct game_state_t gstate;
+struct game_state_t game;
 
 struct acorn_t acorn[MAX_ACORNS];
 struct sound_t sound;
@@ -256,28 +256,28 @@ void __fastcall__ setup_sid(void)
 void __fastcall__ stage_init()
 {
   static uint8_t stage_idx;
-  stage_idx=((gstate.stage>LAST_STAGE_IDX()) ?
-	     LAST_STAGE_IDX() : gstate.stage-1 ) * sizeof(struct stage_t);
+  stage_idx=((game.stage>LAST_STAGE_IDX()) ?
+	     LAST_STAGE_IDX() : game.stage-1 ) * sizeof(struct stage_t);
 
   __asm__("ldy #0");
   __asm__("ldx %v",stage_idx);
   __asm__("stl: lda %v,x",stage);
-  __asm__("sta %v+%b,y",gstate,offsetof(struct game_state_t,time));
+  __asm__("sta %v+%b,y",game,offsetof(struct game_state_t,time));
   __asm__("inx");
   __asm__("iny");
   __asm__("cpy #%b",sizeof(struct stage_t));
   __asm__("bne stl");
 
-  gstate.wind_dir=0;
-  gstate.field=0;
-  gstate.counter=0;
+  game.wind_dir=0;
+  game.field=0;
+  game.counter=0;
 }
 
 static void __fastcall__ kiki_update()
 {
   static uint16_t kiki_x;
   kiki_x+=2;
-  if(gstate.counter&1) {
+  if(game.counter&1) {
     SPR_PTR[5]=SPR_PTR[5]^1;
   } 
   if(kiki_x>400) kiki_x=0;
@@ -312,7 +312,7 @@ static void __fastcall__ acorn_update_asm()
   __asm__("lda _acorn+3,y");
   __asm__("ora _acorn+3+1,y");
   __asm__("beq end");
-  __asm__("lda _gstate+7");
+  __asm__("lda _game+7");
   __asm__("clc");
   __asm__("adc _acorn+5,y");
   __asm__("sta _acorn+5,y");
@@ -335,10 +335,10 @@ static void __fastcall__ acorn_update_asm()
   __asm__("sta _acorn+3+1,y");
   //  __asm__("jmp end");
   __asm__("rts");
-  __asm__("active:	lda     _gstate+9");
+  __asm__("active:	lda     _game+9");
   __asm__("bne end");
   __asm__("tax");
-  __asm__("lda _gstate+11");
+  __asm__("lda _game+11");
   __asm__("cmp #$80");
   __asm__("bcc not_neg");
   __asm__("dex");
@@ -354,14 +354,14 @@ static void __fastcall__ acorn_update_asm()
 #define acorn_update_m(a)                   \
 do {	                                    \
     if(acorn[a].ypos.val) {		    \
-      acorn[a].yv.val+=gstate.accel;        \
+      acorn[a].yv.val+=game.accel;        \
       acorn[a].ypos.val+=(acorn[a].yv.val); \
       if((acorn[a].ypos.hi)>GROUND_Y) {     \
       	acorn[a].en=0;			    \
 	acorn[a].ypos.val=0;                \
       } else {                              \
         if(gstate.wind_cnt==0)              \
-          acorn[a].xpos.val+=gstate.wind_dir;   \
+          acorn[a].xpos.val+=game.wind_dir;   \
       }					    \
    }   \
 } while(0)
@@ -413,8 +413,8 @@ void __fastcall__ acorn_add(void)
   static unsigned int oldr=0;
   static unsigned int r;
 
-  if(MODE_PLAY_DEMO() 
-     && ( ((gstate.counter&0x40)==0x40) || (gstate.flags & SF_DBL_ACORN))
+  if(STATE_PLAY_DEMO() 
+     && ( ((game.counter&0x40)==0x40) || (game.flags & SF_DBL_ACORN))
      )  {
     // new acorn
     r=last_rand&0x3f;
@@ -438,12 +438,12 @@ void __fastcall__ acorn_add(void)
       acorn[0].ypos.val=ACORN_START_Y<<8;
       acorn[0].yv.val=4;
 
-      if((gstate.flags&SF_BERRIES) && (((last_rand>>8)&0x6)==4) ) {
+      if((game.flags&SF_BERRIES) && (((last_rand>>8)&0x6)==4) ) {
 	acorn[0].spr_ptr=SPR_BERRY;
 	acorn[0].spr_color=COLOR_BLUE;
 	acorn[0].en=OBJ_BERRY;
-      } else if((gstate.apples) && (((last_rand>>8)&0x3f)==25) ) {
-	gstate.apples--;
+      } else if((game.apples) && (((last_rand>>8)&0x3f)==25) ) {
+	game.apples--;
 	acorn[0].spr_ptr=SPR_APPLE;
 	acorn[0].spr_color=COLOR_LIGHTRED;
 	acorn[0].en=OBJ_APPLE;
@@ -547,12 +547,12 @@ void __fastcall__ update_top_bar(void)
 {
   // interleave the updates to reduce frame time
 #ifndef SPRITE_MESSAGES
-  if(MODE_PLAY_DEMO())
+  if(STATE_PLAY_DEMO())
 #endif
 #if 1
-    switch(gstate.counter&0x0F) {
+    switch(game.counter&0x0F) {
     case 0:
-      utoa10(gstate.acorns);
+      utoa10(game.acorns);
       string_pad(2);
       break;
     case 1:
@@ -563,7 +563,7 @@ void __fastcall__ update_top_bar(void)
       printbigat(P1_ACORNVAL_X);
       break;
     case 4:
-      utoa10(gstate.time);
+      utoa10(game.time);
       string_pad(2);
       break;
     case 5:
@@ -595,7 +595,7 @@ void __fastcall__ update_top_bar(void)
 #if (DEBUG&DEBUG_INFO)
     case 10:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"ST:%2d IDX:%2d", gstate.stage, gstate.stage_idx);
+      sprintf(STR_BUF,"ST:%2d IDX:%2d", game.stage, game.stage_idx);
       break;
     case 11:
       wait_line(60);
@@ -604,7 +604,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 12:
       DEBUG_BORDER_INC();
-      sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, gstate.accel);
+      sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, game.accel);
       break;
     case 13:
       wait_line(60);
@@ -673,9 +673,9 @@ void __fastcall__ setup_top_bar(uint8_t flag)
     printat(P2_SCORETXT_X,0);
   }  
   
-  for(gstate.counter=(flag)?4:0;gstate.counter<9;gstate.counter++)
+  for(game.counter=(flag)?4:0;game.counter<9;game.counter++)
       update_top_bar();
-  gstate.counter=0;
+  game.counter=0;
 }
 
 void __fastcall__ game_sprite_setup(void)
@@ -696,7 +696,7 @@ void __fastcall__ game_sprite_setup(void)
 void __fastcall__ start_sound(void)
 {
   stop_sound();
-  if(MODE_PLAY_DEMO()) {
+  if(STATE_PLAY_DEMO()) {
     sound.timer=10;
     sound.index=0;
   }
@@ -757,17 +757,17 @@ static void __fastcall__ sprite_message2p(uint8_t msg)
 void __fastcall__ get_ready(void)
 {
   static uint8_t offset;
-  offset=(gstate.stage>9)?0:1;
+  offset=(game.stage>9)?0:1;
   CLR_TOP();
 
   // "STAGE XX"
   PRINT_STRING_AT(12+offset,txt_stage);
-  PRINT_NUMBER_AT(24+offset,gstate.stage);
+  PRINT_NUMBER_AT(24+offset,game.stage);
   delay(VFREQ);
 
   // "CATCH XX ACORNS"
   PRINT_STRING_AT(6,txt_catch);
-  PRINT_NUMBER_AT(18,gstate.acorns);
+  PRINT_NUMBER_AT(18,game.acorns);
   delay(VFREQ);
 
   CLR_TOP();
@@ -807,28 +807,28 @@ void __fastcall__ game_loop(void)
   update_top_bar();
 
   // time
-  gstate.counter++;
-  //  gstate.anim_idx=(gstate.counter&0xF)>>2;
-  gstate.field++;
-  if(gstate.field==VFREQ) {
-    if(MODE_PLAY_DEMO()) gstate.time--;
-    gstate.field=0;
+  game.counter++;
+  //  game.anim_idx=(game.counter&0xF)>>2;
+  game.field++;
+  if(game.field==VFREQ) {
+    if(STATE_PLAY_DEMO()) game.time--;
+    game.field=0;
   }
 
-  if(gstate.flags&SF_WIND1) {
-    if(gstate.counter==187) {
+  if(game.flags&SF_WIND1) {
+    if(game.counter==187) {
       tr=last_rand;
-      gstate.wind_sp=(tr&7)+1;
-      if(tr&0x80) gstate.wind_dir=1;
-      else gstate.wind_dir=-1;
+      game.wind_sp=(tr&7)+1;
+      if(tr&0x80) game.wind_dir=1;
+      else game.wind_dir=-1;
     }
-    if(gstate.wind_cnt==0) gstate.wind_cnt=gstate.wind_sp;
-    else gstate.wind_cnt--;
+    if(game.wind_cnt==0) game.wind_cnt=game.wind_sp;
+    else game.wind_cnt--;
   }
 
   // speed up music
-  if(gstate.time==20) vpb=VPB-1;
-  if(gstate.time==10) vpb=VPB-2;
+  if(game.time==20) vpb=VPB-1;
+  if(game.time==10) vpb=VPB-2;
 
   last_rand=rand();
   // black background for idle time
@@ -981,8 +981,8 @@ int main()
 #else
     totoro[1].ctrl=CTRL_AUTO;
 #endif
-    gstate.stage=1;
-    gstate.mode=GMODE_CUT1;
+    game.stage=1;
+    game.state=GSTATE_CUT1;
 
     do {
       // stage init
@@ -1003,13 +1003,13 @@ int main()
       game_sprite_setup();
       spr_mux=1;
 
-      gstate.mode=GMODE_PLAY;
+      game.state=GSTATE_PLAY;
 
-      for(;gstate.time&&gstate.acorns;)
+      for(;game.time&&game.acorns;)
 	game_loop();
 
-      gstate.mode=GMODE_CUT1;
-      if(gstate.acorns==0) {
+      game.state=GSTATE_CUT1;
+      if(game.acorns==0) {
 	flag=1;
 	track[0].next_offset=rand()&0xe;
 #ifndef SPRITE_MESSAGES
@@ -1030,7 +1030,7 @@ int main()
 	bonus=0;
 	setup_top_bar(1);
 	do {
-	  PRINT_NUMBERP_AT(TIMEVAL_X,gstate.time,2);
+	  PRINT_NUMBERP_AT(TIMEVAL_X,game.time,2);
 	  utoa10(bonus);
 	  string_pad(5);
 	  printat(P1_BONUSVAL_X,1);
@@ -1041,14 +1041,14 @@ int main()
 	    utoa10(totoro[1].score);
 	    string_pad(5);
 	    printat(P2_SCOREVAL_X,1);
-	    totoro[1].score+=5+gstate.stage;
+	    totoro[1].score+=5+game.stage;
 	  }
-	  bonus+=5+gstate.stage;
-	  totoro[0].score+=5+gstate.stage;
+	  bonus+=5+game.stage;
+	  totoro[0].score+=5+game.stage;
 	  delay(1);
-	} while (gstate.time--);
+	} while (game.time--);
 	delay(VFREQ/2);
-	gstate.stage++;
+	game.stage++;
       }
 
     } while(flag);
