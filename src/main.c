@@ -138,7 +138,7 @@ const uint16_t sound_seq[] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
-#ifdef TESTING
+#ifndef TESTING
   { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
   { STAGE_TIME, 15, 0, ACC(10), SF_BERRIES },
   { STAGE_TIME, 25, 3, ACC(6),  SF_WIND1 },
@@ -309,45 +309,47 @@ static void __fastcall__ spin_update()
 static void __fastcall__ acorn_update_asm()
 {
   //  __asm__("tay");
-  __asm__("lda _acorn+3,y");
-  __asm__("ora _acorn+3+1,y");
+  __asm__("lda %v+%b,y",acorn,offsetof(struct acorn_t,ypos));
+  __asm__("ora %v+%b+1,y",acorn,offsetof(struct acorn_t,ypos));
   __asm__("beq end");
-  __asm__("lda _game+7");
+  __asm__("lda %v+%b",game,offsetof(struct game_state_t,accel));
   __asm__("clc");
-  __asm__("adc _acorn+5,y");
-  __asm__("sta _acorn+5,y");
+  __asm__("adc %v+%b,y",acorn,offsetof(struct acorn_t,yv));
+  __asm__("sta %v+%b,y",acorn,offsetof(struct acorn_t,yv));
   __asm__("lda #$00");
-  __asm__("adc _acorn+5+1,y");
-  __asm__("sta _acorn+5+1,y");
-  __asm__("lda _acorn+5,y");
+  __asm__("adc %v+%b+1,y",acorn,offsetof(struct acorn_t,yv));
+  __asm__("sta %v+%b+1,y",acorn,offsetof(struct acorn_t,yv));
+  __asm__("lda %v+%b,y",acorn,offsetof(struct acorn_t,yv));
   __asm__("clc");
-  __asm__("adc _acorn+3,y");
-  __asm__("sta _acorn+3,y");
-  __asm__("lda _acorn+5+1,y");
-  __asm__("adc _acorn+3+1,y");
-  __asm__("sta _acorn+3+1,y");
+  __asm__("adc %v+%b,y",acorn,offsetof(struct acorn_t,ypos));
+  __asm__("sta %v+%b,y",acorn,offsetof(struct acorn_t,ypos));
+  __asm__("lda %v+%b+1,y",acorn,offsetof(struct acorn_t,yv));
+  __asm__("adc %v+%b+1,y",acorn,offsetof(struct acorn_t,ypos));
+  __asm__("sta %v+%b+1,y",acorn,offsetof(struct acorn_t,ypos));
   //  __asm__("lda     _acorn+4,y");
   __asm__("cmp #$DD");
   __asm__("bcc active");
   __asm__("lda #$00");
-  __asm__("sta _acorn,y");
-  __asm__("sta _acorn+3,y");
-  __asm__("sta _acorn+3+1,y");
+  __asm__("sta %v+%b,y",acorn,offsetof(struct acorn_t,en));
+  __asm__("sta %v+%b,y",acorn,offsetof(struct acorn_t,ypos));
+  __asm__("sta %v+%b+1,y",acorn,offsetof(struct acorn_t,ypos));
   //  __asm__("jmp end");
   __asm__("rts");
-  __asm__("active:	lda     _game+9");
+  __asm__("active:");
+  __asm__("lda %v+%b",game,offsetof(struct game_state_t,wind_cnt));
   __asm__("bne end");
   __asm__("tax");
-  __asm__("lda _game+11");
+  __asm__("lda %v+%b",game,offsetof(struct game_state_t,wind_dir));
   __asm__("cmp #$80");
   __asm__("bcc not_neg");
   __asm__("dex");
   __asm__("clc");
-  __asm__("not_neg:	adc     _acorn+1,y");
-  __asm__("sta _acorn+1,y");
+  __asm__("not_neg:");
+  __asm__("adc %v+%b,y",acorn,offsetof(struct acorn_t,xpos));
+  __asm__("sta %v+%b,y",acorn,offsetof(struct acorn_t,xpos));
   __asm__("txa");
-  __asm__("adc _acorn+1+1,y");
-  __asm__("sta _acorn+1+1,y");
+  __asm__("adc %v+%b+1,y",acorn,offsetof(struct acorn_t,xpos));
+  __asm__("sta %v+%b+1,y",acorn,offsetof(struct acorn_t,xpos));
   __asm__("end:");
 }
 
@@ -360,7 +362,7 @@ do {	                                    \
       	acorn[a].en=0;			    \
 	acorn[a].ypos.val=0;                \
       } else {                              \
-        if(gstate.wind_cnt==0)              \
+        if(game.wind_cnt==0)              \
           acorn[a].xpos.val+=game.wind_dir;   \
       }					    \
    }   \
