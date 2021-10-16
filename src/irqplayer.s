@@ -33,6 +33,8 @@
 .import   _FTableLo
 .import   _FTableHi
 
+.import   _itable
+
 .import color_save
 	
 .define SIDRestart  0
@@ -203,19 +205,25 @@ cmd_ff:	 				; end of stream
 	sta global_offset
 	jmp next
 
-cmd_fe:	 			; change instrument
-	lda (_track_ptr),y
+cmd_fe:				; change instrument from table	
+	lda (_track_ptr),y	; instrument index
+	tay                     ; intrument indexd in Y
+	lda _itable,y
 	sta instr
-	jsr inc_track_ptr
-	jmp next
+	ldx SID_offset
+	lda _itable+1,y
+	sta SID_AD1,x
+	lda _itable+2,y
+	sta SID_SUR1,x
+	jmp inc_track_next
 
 cmd_fd:	 			; change track offset
 	lda (_track_ptr),y
 	sta _track+TRACK_OFF,x
 	sta track_offset
-	jsr inc_track_ptr
-	jmp next
+	jmp inc_track_next
 
+	
 cmd_ex:	 			; change sid register
 	lda tmp
 	and #$0f
@@ -226,11 +234,18 @@ cmd_ex:	 			; change sid register
 	tax
 	lda (_track_ptr),y
 	sta SID,x
-	jsr inc_track_ptr
-	jmp next
-	
-.endproc
+	jmp inc_track_next
 
+
+	
+inc_track_next:
+	inc _track_ptr
+	bne inc_end
+	inc _track_ptr+1
+inc_end:
+	jmp next
+.endproc
+	
 .proc inc_track_ptr: near
 	inc _track_ptr
 	bne inc_end
