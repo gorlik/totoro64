@@ -320,7 +320,6 @@ void __fastcall__ totoro_move()
 
 void __fastcall__ process_input(void)
 {
-  static uint8_t key;
   static uint8_t js;
   static uint8_t acc;
   
@@ -328,17 +327,11 @@ void __fastcall__ process_input(void)
     if(p_idx==0) {
       // chu totoro
       acc=2;
-      js=joy2()&0x1c; // mask joy up and down
-#ifndef TWO_PLAYER
-      if(js==0) {
-	key=PEEK(203);
-	if(key==10) js=0x04;
-	else if (key==18) js=0x08;
-	if(PEEK(653)&1) js|=0x10;
+      js=joy2() & 0x1c; // mask joy up and down
+      if(((game.mode&GMODE_2P_MASK)==0)&&(js==0)) {
+	js=joyk();
       }
-#endif
     } else {
-#if 1
       // chibi totoro
       acc=3;
       if(tcache.ctrl==CTRL_AUTO) {
@@ -352,12 +345,12 @@ void __fastcall__ process_input(void)
 	  else if((totoro[0].xpos.val-totoro[1].xpos.val)<-74) js=0x04;
 	  else js=0;
 	}
-      } else if(tcache.ctrl==CTRL_PLAY) {
-	// 2 player mode
-	js=joy1() & 0x1c; // mask joy up and down
-      } else key=0;
-#endif
+      } else {
+	// not auto mode
+	js=joy1()& 0x1c; // mask joy up and down
+      }
     }
+    //    if(tcache.poison && (js&0x0c)) js^=0x0c;
   } else js=0x08; // simulate 'D'
   
   if(tcache.state!=PSTATE_JUMP) {

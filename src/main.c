@@ -139,6 +139,12 @@ const uint8_t p2_ctrl[4] = {
   CTRL_OFF, CTRL_AUTO, CTRL_PLAY, CTRL_PLAY,
 };
 
+const char * mode_msg[3] = {
+  "1P SOLO",
+  "1P STANDARD",
+  "2P CO-OP",
+};
+
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
@@ -216,32 +222,22 @@ void __fastcall__ _strcpy8f (void)
     _strcpy8f();		   \
   } while (0)
 
-void __fastcall__ wait_for_input(void)
-{
-#ifdef TWO_PLAYER
-    while(!(joy1()||joy2()));
-#else
-    while(!(joy2()||(PEEK(203)!=0x40)));
-#endif
-}
+
 
 void __fastcall__ setup_sid(void)
 {
   //memset(&SID,0,24);
   memset8c(0xd400,0,24); // SID address
   SID.amp = 0x1f; // set volume to 15
-  SID.v1.ad = 0x80;
-  SID.v1.sr = 0xf6;
   track[0].ptr=(uint16_t)track0_data;
   track[0].restart_ptr=(uint16_t)track0_data;
   track[0].track_offset=0;
-  track[0].global_offset=4;
-  track[0].next_offset=4;
+  track[0].global_offset=0;
+  track[0].next_offset=0;
   track[0].timer=0;
   track[0].voice_offset=0;
 
-  SID.v2.ad = 0x40;
-  SID.v2.sr = 0x56;
+  //  SID.v2.pw = 0x82;
   track[1].ptr=(uint16_t)track1_data;
   track[1].restart_ptr=(uint16_t)track1_data;
   track[1].track_offset=0;
@@ -851,6 +847,7 @@ void __fastcall__ game_loop(void)
 int main()
 {
   static uint8_t flag;
+  static uint8_t k_in;
   static uint16_t bonus;
 
   inflatemem (SPR_DATA, sprite_src_data);
@@ -935,8 +932,7 @@ int main()
   }
 #endif
 
-  wait_for_input();
-  //  cgetc();
+  while(joy_any()==0);
 
   inflatemem (COLOR_RAM, color2_data);
   //    cgetc();
@@ -982,7 +978,18 @@ int main()
     delay(VFREQ);
       
     // loop for game selection
-    wait_for_input();
+    do {
+      k_in=joy_any();
+      if(k_in&0x0c) {
+	if(k_in&0x04) game.mode++;
+	else game.mode--;
+	if(game.mode==255) game.mode=0;
+	else if(game.mode==3) game.mode=2;
+	strcpy8f(mode_msg[game.mode]);
+	printat(20,0);
+	delay(VFREQ/3);
+      }
+    } while (k_in!=0x10);
 
     // game init
     game.stage=1;

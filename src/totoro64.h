@@ -28,10 +28,8 @@
 #define STAGE_TIME 60
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
-#define GMODE_STATIC GMODE_1P_SOLO
 
-
-#define VERSION "v0.25"
+#define VERSION "v0.26"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -142,8 +140,9 @@
 #define GMODE_1P_SOLO  0
 #define GMODE_1P_STD   1
 #define GMODE_2P_COOP  2
-//#define GMODE_2P_IND   3
-//#define GMODE_2P_VS    4
+#define GMODE_2P_IND   3
+#define GMODE_2P_VS    4
+#define GMODE_2P_MASK  0xfe
 
 
 union word {
@@ -226,6 +225,12 @@ struct track_t {
   uint16_t restart_ptr;
 };
 
+struct instr_t {
+  uint8_t wf;
+  uint8_t ad;
+  uint8_t sr;
+};
+
 // ASM function prototypes
 void IRQ(void);
 
@@ -260,6 +265,8 @@ void __fastcall__ acorn_add(void);
 void __fastcall__ start_sound(void);
 uint8_t __fastcall__ joy1(void);
 uint8_t __fastcall__ joy2(void);
+uint8_t __fastcall__ joyk(void);
+uint8_t __fastcall__ joy_any(void);
 void __fastcall__ string_pad(int8_t pad);
 
 // zp variables from ASM
