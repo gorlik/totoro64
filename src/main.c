@@ -135,6 +135,10 @@ const uint16_t sound_seq[] = {
   0x2714,
 };
 
+const uint8_t p2_ctrl[4] = {
+  CTRL_OFF, CTRL_AUTO, CTRL_PLAY, CTRL_PLAY,
+};
+
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
@@ -380,17 +384,17 @@ void __fastcall__ acorn_update(void)
   acorn_update_a(6);
   acorn_update_a(7);
 #else
-  __asm__ volatile ("ldy #%b",7*sizeof(struct acorn_t));
+  __asm__ volatile ("lda #%b",8*sizeof(struct acorn_t));
   __asm__("loop:");
-  acorn_update_asm();
-  //  __asm__("jsr _acorn_update_asm");
-  __asm__("tya");
-  __asm__("beq end");
   __asm__("sec");
   __asm__("sbc #%b",sizeof(struct acorn_t));
   __asm__("tay");
-  __asm__("jmp loop");
-  __asm__("end:");
+  //  acorn_update_asm();
+  __asm__("jsr %v",acorn_update_asm);
+  __asm__("tya");
+  __asm__("bne loop");
+  //  __asm__("jmp loop");
+  //  __asm__("end:");
   
 #endif
 }
@@ -476,7 +480,6 @@ void __fastcall__ mode_bitmap(void)
 static void __fastcall__ mode_text(void)
 {
   CIA2.pra|=0x03; // selects vic page 0x0000-0x3fff
-
   VIC.ctrl1=0x1B; // disable bitmap, no extended color, no blank, 25 rows, ypos=3
   VIC.addr= 0x16; // screen base at 0x0400, char def at $0x1400
   VIC.bgcolor[0]=COLOR_WHITE;
@@ -874,7 +877,7 @@ int main()
   spr_mux=0;
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
-  VIC.rasterline=60;
+  VIC.rasterline=1;
   VIC.imr=0x1; // enable raster interrupt
 
   Title_Sprite_Setup();
@@ -964,40 +967,42 @@ int main()
      printat(DEBUG_TXT_X,7);*/
 #endif
 
+#ifdef GMODE STATIC
+  game.mode=GMODE_STATIC
+#else
+  game.mode=GMODE_1P_SOLO;
+#endif
+  
   for(;;) { // main loop
     // game over
 #ifndef SPRITE_MESSAGES
     CLR_TOP();
 #endif
     MESSAGE(11,MSG_GAME_OVER);
-    delay(VFREQ*3);
-
+    delay(VFREQ);
+      
+    // loop for game selection
     wait_for_input();
 
     // game init
+    game.stage=1;
+    game.state=GSTATE_CUT1;
+    
     totoro[0].score=0;
     totoro[1].score=0;
     totoro[0].ctrl=CTRL_PLAY;
-#ifdef TWO_PLAYER
-    totoro[1].ctrl=CTRL_PLAY;
-#else
-    totoro[1].ctrl=CTRL_AUTO;
-#endif
-    game.stage=1;
-    game.state=GSTATE_CUT1;
+    totoro[1].ctrl=p2_ctrl[game.mode];
 
     do {
       // stage init
-      vpb=VPB;
-
       stage_init();
-
+      
       totoro_init(CHU_TOTORO);
       totoro_init(CHIBI_TOTORO);
       acorn_init();
       totoro_set_pos();
       chibi_set_pos();
-
+      
       game_sprite_setup();
 
       get_ready();
@@ -1053,6 +1058,9 @@ int main()
 	game.stage++;
       }
 
+      // reset music speed to normal
+      vpb=VPB;
+      
     } while(flag);
 
   }
