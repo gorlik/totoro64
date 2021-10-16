@@ -38,6 +38,7 @@
 .define SIDRestart  0
 
 .define TRACK_T_SIZE 10
+	
 
 .segment 	"BSS"
 tmp:
@@ -187,6 +188,9 @@ parse_cmd:
 	beq cmd_fe
 	cmp #$fd
 	beq cmd_fd
+	and #$f0
+	cmp #$e0
+	beq cmd_ex
 	jmp next
 
 cmd_ff:	 				; end of stream
@@ -212,6 +216,19 @@ cmd_fd:	 			; change track offset
 	jsr inc_track_ptr
 	jmp next
 
+cmd_ex:	 			; change sid register
+	lda tmp
+	and #$0f
+	sta tmp
+	lda _track+SID_OFF,x
+	clc
+	adc tmp
+	tax
+	lda (_track_ptr),y
+	sta SID,x
+	jsr inc_track_ptr
+	jmp next
+	
 .endproc
 
 .proc inc_track_ptr: near
