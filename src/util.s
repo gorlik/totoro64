@@ -21,6 +21,8 @@
 
 .export    _joy1
 .export    _joy2
+.export    _joyk
+.export    _joy_any
 .export    _utoa10
 .importzp  sreg
 .importzp  _temp_ptr
@@ -30,9 +32,43 @@
 __dectab:
 	.byte '0', '1', '2', '3', '4'
 	.byte '5', '6', '7', '8', '9'
+
+.segment        "BSS"
+anytmp:
+	.res 1
 	
 .segment        "CODE"
-
+.proc _joy_any: near
+	jsr _joy1
+	sta anytmp
+	jsr _joy2
+	ora anytmp
+	sta anytmp
+	jsr _joyk
+	ora anytmp
+	rts
+.endproc
+	
+.proc _joyk: near
+	lda #0
+	ldx 203
+	cpx #10
+	bne skip1
+	ora #$04
+skip1:	cpx #18
+	bne skip2
+	ora #$08
+skip2:	tay
+	lda 653
+	and #$01
+	tax
+	tya
+	cpx #1
+	bne end
+	ora #$10
+end:	rts
+.endproc
+	
 .proc _joy1: near
 	lda     #$7F
         sei
