@@ -31,9 +31,9 @@
 
 // co-op
 #define P1_X          0
-#define P1_SCORETXT_X 5
-#define P1_SCOREVAL_X 5
-#define P1_BAR_X      11
+#define P1_SCORETXT_X 4
+#define P1_SCOREVAL_X 4
+#define P1_BAR_X      10
 
 #define TIME_ICON_X   13
 #define TIMEVAL_X     15
@@ -44,8 +44,8 @@
 #define P1_BONUSTXT_X 21
 #define P1_BONUSVAL_X 21
 
-#define P2_BAR_X      28
-#define P2_X          29
+#define P2_BAR_X      29
+#define P2_X          30
 #define P2_SCORETXT_X (P1_SCORETXT_X+P2_X)
 #define P2_SCOREVAL_X (P1_SCOREVAL_X+P2_X)
 
@@ -81,6 +81,7 @@
 #define AT(r,c) (TXT_PTR+40*r+c)
 
 void __fastcall__ CLR_TOP(void);
+void __fastcall__ CLR_CENTER(void);
 
 #if (DEBUG & DEBUG_TIMING)
 #define DEBUG_BORDER(a) VIC.bordercolor=a
@@ -90,6 +91,10 @@ void __fastcall__ CLR_TOP(void);
 #define DEBUG_BORDER_INC()
 #endif
 
+#define BAR_BASIC 0
+#define BAR_PLAY  1
+#define BAR_BONUS 2
+
 extern const unsigned char present_txt[];
 extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
@@ -97,7 +102,8 @@ extern const unsigned char license_txt[];
   
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
-const unsigned char txt_catch[]  = "CATCH    ACORNS";
+//const unsigned char txt_catch[]  = "CATCH    ACORNS";
+const unsigned char txt_catch[]  = "CATCH";
 const unsigned char txt_stage[]  = "STAGE";
 #ifdef SPRITE_MESSAGES
 #define MSG_READY     SPR_TXT_READY
@@ -110,7 +116,8 @@ const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[]   = " SET ";
 const unsigned char txt_go[]    = " GO ";
 const unsigned char txt_game_over[] = "GAME OVER";
-const unsigned char txt_clear[]  = "STAGE CLEAR";
+//const unsigned char txt_clear[]  = "STAGE CLEAR";
+const unsigned char txt_clear[]  = "GREAT!";
 #define MSG_READY     txt_ready
 #define MSG_SET       txt_set
 #define MSG_GO        txt_go
@@ -140,9 +147,9 @@ const uint8_t p2_ctrl[4] = {
 };
 
 const char * mode_msg[3] = {
-  "1P SOLO",
+  "1P SOLO    ",
   "1P STANDARD",
-  "2P CO-OP",
+  "2P CO-OP   ",
 };
 
 #define ACC(a) ((a*50)/VFREQ)
@@ -176,7 +183,7 @@ const struct stage_t stage[] = {
 #define MESSAGE(p,m)  sprite_message2(m)
 #else
 #define MESSAGEP(p,m) do { strcpy8f(m); convprint_big(p); delay(VFREQ/3); } while (0)
-#define MESSAGE(p,m)  do { strcpy8f(m); convprint_big(p); } while (0)
+#define MESSAGE(p,m)  do { CLR_CENTER(); strcpy8f(m); convprint_big(p); } while (0)
 #endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
@@ -652,31 +659,35 @@ void __fastcall__ update_top_bar(void)
 
 void __fastcall__ setup_top_bar(uint8_t flag)
 {
-  CLR_TOP();
+  //  if(flag&0x80) CLR_TOP();
 
   print_p(P1_X);
   print_p(P2_X);
-  print_hourglass(TIME_ICON_X);
   print_col(P1_BAR_X|COL_R);
   print_col(P2_BAR_X|COL_L);
-  
-  if(flag==0) {
-    print_acorn(P1_ICON_X);
-  } else {
-    strcpy8f(txt_bonus);
-    printat(P1_BONUSTXT_X,0);
-  }
-  
-  strcpy8f(txt_score);
-  printat(P1_SCORETXT_X,0);
 
-  if(totoro[1].ctrl==CTRL_PLAY) {
-    printat(P2_SCORETXT_X,0);
-  }  
+  if(flag) {
+    CLR_CENTER();
+    print_hourglass(TIME_ICON_X);
+
+    if(flag==BAR_PLAY) {
+      print_acorn(P1_ICON_X);
+    } else {
+      strcpy8f(txt_bonus);
+      printat(P1_BONUSTXT_X,0);
+    }
   
-  for(game.counter=(flag)?4:0;game.counter<9;game.counter++)
+    strcpy8f(txt_score);
+    printat(P1_SCORETXT_X,0);
+
+    if(totoro[1].ctrl==CTRL_PLAY) {
+      printat(P2_SCORETXT_X,0);
+    }
+  
+    for(game.counter=(flag)?4:0;game.counter<9;game.counter++)
       update_top_bar();
-  game.counter=0;
+    game.counter=0;
+  }
 }
 
 void __fastcall__ game_sprite_setup(void)
@@ -759,28 +770,37 @@ void __fastcall__ get_ready(void)
 {
   static uint8_t offset;
   offset=(game.stage>9)?0:1;
-  CLR_TOP();
+  CLR_CENTER();
 
   // "STAGE XX"
+  //  PRINT_STRING_AT(12+offset,txt_stage);
+  //  PRINT_NUMBER_AT(24+offset,game.stage);
   PRINT_STRING_AT(12+offset,txt_stage);
   PRINT_NUMBER_AT(24+offset,game.stage);
   delay(VFREQ);
 
   // "CATCH XX ACORNS"
-  PRINT_STRING_AT(6,txt_catch);
-  PRINT_NUMBER_AT(18,game.acorns);
+  CLR_CENTER();
+  strcpy8f(txt_catch);
+  printat(12,0);
+  utoa10(game.acorns);
+  printat(18,0);
+  PRINT_STRING_AT(11, txt_catch);
+  PRINT_NUMBER_AT(23 ,game.acorns);
+  print_acorn(27);
   delay(VFREQ);
+  CLR_CENTER();
 
-  CLR_TOP();
 #ifdef SPRITE_MESSAGES
-  setup_top_bar(0);
+  //  setup_top_bar(BAR_PLAY);
 #endif
   MESSAGEP(15,MSG_READY);
   MESSAGEP(15,MSG_SET);
   MESSAGEP(16,MSG_GO);
 #ifndef SPRITE_MESSAGES
-  setup_top_bar(0);
+  //  setup_top_bar(BAR_PLAY);
 #endif
+    setup_top_bar(BAR_PLAY);
 }
 
 void __fastcall__ game_loop(void)
@@ -971,26 +991,23 @@ int main()
   
   for(;;) { // main loop
     // game over
-#ifndef SPRITE_MESSAGES
-    CLR_TOP();
-#endif
     MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ);
-      
+    setup_top_bar(BAR_BASIC);    
     // loop for game selection
     do {
+      strcpy8f(mode_msg[game.mode]);
+      printat(15,0);
       k_in=joy_any();
       if(k_in&0x0c) {
 	if(k_in&0x04) game.mode++;
 	else game.mode--;
 	if(game.mode==255) game.mode=0;
 	else if(game.mode==3) game.mode=2;
-	strcpy8f(mode_msg[game.mode]);
-	printat(20,0);
-	delay(VFREQ/3);
+	delay(VFREQ/6);
       }
     } while (k_in!=0x10);
-
+    
     // game init
     game.stage=1;
     game.state=GSTATE_CUT1;
@@ -1026,10 +1043,7 @@ int main()
       if(game.acorns==0) {
 	flag=1;
 	track[0].next_offset=rand()&0xe;
-#ifndef SPRITE_MESSAGES
-	CLR_TOP();
-#endif
-	MESSAGE(9,MSG_STAGE_CLR);
+	MESSAGE(14,MSG_STAGE_CLR);
       } else {
 	flag=0;
       }
@@ -1042,7 +1056,7 @@ int main()
 
       if(flag) {
 	bonus=0;
-	setup_top_bar(1);
+	setup_top_bar(BAR_BONUS);
 	do {
 	  PRINT_NUMBERP_AT(TIMEVAL_X,game.time,2);
 	  utoa10(bonus);

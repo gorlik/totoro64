@@ -29,7 +29,7 @@
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
 
-#define VERSION "v0.26"
+#define VERSION "v0.27"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
