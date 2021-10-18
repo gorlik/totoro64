@@ -8,13 +8,13 @@
 ;*  the Free Software Foundation, either version 3 of the License, or         *
 ;*  (at your option) any later version.                                       *
 ;*                                                                            *
-;*  GTERM is distributed in the hope that it will be useful,                  *
+;*  TOTORO64 is distributed in the hope that it will be useful,               *
 ;*  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
 ;*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
 ;*  GNU General Public License for more details.                              *
 ;*                                                                            *
 ;*  You should have received a copy of the GNU General Public License         *
-;*  along with GTERM.  If not, see <http://www.gnu.org/licenses/>.            *
+;*  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
 ;*                                                                            *
 ;******************************************************************************
 .include "totoro64.inc"
@@ -23,6 +23,7 @@
 
 .export _PutLine
 .export _CLR_TOP
+.export _CLR_CENTER
 .export _print_acorn
 .export _print_hourglass
 .export _print_p
@@ -95,6 +96,22 @@ end:
 	rts
 .endproc
 
+.proc _CLR_CENTER: near
+	ldx #144
+	lda #0
+@loopb: sta _BITMAP_BASE+88-1,x
+	sta _BITMAP_BASE+320+88-1,x
+	dex
+	bne @loopb
+	ldx #18
+	lda #1 			; COLOR_WHITE
+@loopc:	sta $d800+11-1,x
+	sta $d800+40+11-1,x
+	dex
+	bne @loopc
+	rts
+.endproc
+
 
 .segment	"BSS"
 
@@ -126,7 +143,7 @@ skip:	stx     _STR_BUF
 	rts
 .endproc
 
-	
+
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_acorn (unsigned char)
 ; ---------------------------------------------------------------
@@ -157,7 +174,7 @@ skip:	stx     _STR_BUF
 	ldy     #$2E
 	jmp     print_color_char
 .endproc
-	
+
 .proc	print_color_char: near
 ;;  char in y
 ;; pos in a and cpos
@@ -175,11 +192,11 @@ skip:	stx     _STR_BUF
 	sta     $D829,y
 	rts
 	.endproc
-	
+
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ string_pad (unsigned char)
 ; ---------------------------------------------------------------
-	
+
 .segment	"BSS"
 pad:
 	.res	1,$00
@@ -187,7 +204,7 @@ pad:
 .segment	"CODE"
 
 .proc	_string_pad: near
-	
+
 	sta pad
 	tay
 	ldx #$FF
