@@ -235,29 +235,20 @@ void __fastcall__ _strcpy8f (void)
 
 void __fastcall__ setup_sid(void)
 {
-  //memset(&SID,0,24);
   memset8c(0xd400,0,24); // SID address
-  SID.amp = 0x1f; // set volume to 15
-  track[0].ptr=(uint16_t)track0_data;
-  track[0].restart_ptr=(uint16_t)track0_data;
-  track[0].track_offset=0;
-  track[0].global_offset=0;
-  track[0].next_offset=0;
-  track[0].timer=0;
-  track[0].voice_offset=0;
+  SID.amp = 0x1f;        // set volume to 15
+  
+  memset8s(track,0,sizeof(struct track_t)*2);
 
-  //  SID.v2.pw = 0x82;
-  track[1].ptr=(uint16_t)track1_data;
-  track[1].restart_ptr=(uint16_t)track1_data;
-  track[1].track_offset=0;
-  track[1].global_offset=0;
-  track[1].next_offset=0;
-  track[1].timer=0;
+  track[0].ptr = track[0].restart_ptr = (uint16_t)track0_data;
+  //  track[0].voice_offset=0;
+
+  track[1].ptr = track[1].restart_ptr = (uint16_t)track1_data;
   track[1].voice_offset=7;
 
   vpb = VPB;
 
-  //  SID.v3.ctrl= 0x20;
+  //  sound effects
   SID.v3.ad = 0x00;
   SID.v3.sr = 0xa9;
 }
