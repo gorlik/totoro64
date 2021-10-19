@@ -820,8 +820,8 @@ void __fastcall__ game_loop(void)
   //  VIC.bordercolor=COLOR_BLACK;
 
   // process input, move player and perform collision detection
-  if(totoro[0].ctrl) totoro_update_m(CHU_TOTORO);
-  if(totoro[1].ctrl) totoro_update_m(CHIBI_TOTORO);
+  totoro_update_m(CHU_TOTORO);
+  totoro_update_m(CHIBI_TOTORO);
   DEBUG_BORDER(COLOR_GREEN);
 
   // other screen updates

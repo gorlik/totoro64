@@ -248,6 +248,7 @@ void __fastcall__ chibi_set_pos(void)
 void __fastcall__ totoro_update(void)
 {
   tcache_load();
+  if(tcache.ctrl==0) return;
   
   process_input();
   //  VIC.bordercolor=COLOR_YELLOW;
