@@ -24,9 +24,11 @@
 .export    _joyk
 .export    _joy_any
 .export    _utoa10
+.export    _delay	
 .importzp  sreg
 .importzp  _temp_ptr
 .import    _STR_BUF
+.import    _waitvsync
 
 .segment        "RODATA"
 __dectab:
@@ -92,6 +94,14 @@ end:	rts
 	cli
 	and #$1F
 	eor #$1F
+	rts
+.endproc
+
+.proc _delay: near
+	tax
+loop:	jsr _waitvsync
+	dex
+	bne loop
 	rts
 .endproc
 

@@ -209,6 +209,7 @@ uint8_t cr;
 uint16_t last_rand;
 
 int __fastcall__ utoa10 (uint16_t val);
+int __fastcall__ delay  (uint8_t t);
 
 #define totoro_update_m(p) \
   do { p_idx=p;\
@@ -730,12 +731,6 @@ void __fastcall__ process_sound(void)
     if(sound.index>=(sizeof(sound_seq)/2)) sound.index=0;
     sound.index++;
     sound.timer--;
-}
-
-void __fastcall__ delay(uint8_t f)
-{
-  while(f--)
-    waitvsync();
 }
 
 #ifdef SPRITE_MESSAGES
