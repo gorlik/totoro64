@@ -125,14 +125,15 @@ const unsigned char txt_clear[]  = "GREAT!";
 #define MSG_STAGE_CLR txt_clear
 #endif
 
-#define scr_strcpy8(dst,src)    \
+#define scr_strcpy8(dst,src)  do {		\
   __asm__("ldx #$FF");          \
   __asm__("ls%v: inx",src);			\
   __asm__("lda %v,x",src);			\
   __asm__("beq fs%v",src);			\
   __asm__("sta %w,x",dst);			\
   __asm__("bne ls%v",src);			\
-  __asm__("fs%v:",src);
+    __asm__("fs%v:",src);			\
+  } while (0)
 
 const uint16_t sound_seq[] = {
   0x22d0,
