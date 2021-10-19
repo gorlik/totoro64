@@ -110,6 +110,13 @@ void __fastcall__ totoro_init(uint8_t p)
 
 #define same_direction(a,b) (!((a^b)&0x80))
 
+static void __fastcall__ totoro_sprite(uint8_t v)
+{
+  SPR_PTR[2]=v;
+  SPR_PTR[3]=v+1;
+  SPR_PTR[4]=v+2;
+}
+
 void __fastcall__ totoro_set_pos(void)
 {
   static uint8_t anim_idx;
@@ -138,47 +145,31 @@ void __fastcall__ totoro_set_pos(void)
 
   switch(totoro[0].state) {
   case PSTATE_IDLE:
+    totoro_sprite(SPR_CHU_IDLE);
     if(totoro[0].blink)   SPR_PTR[2]=SPR_CHU_BLINK;
-    else   SPR_PTR[2]=SPR_CHU_IDLE;
-    SPR_PTR[3]=SPR_CHU_IDLE+1;
-    SPR_PTR[4]=SPR_CHU_IDLE+2;
     break;
   case PSTATE_RUN:
     if(totoro[0].xv>0) {
-      SPR_PTR[2]=run_seq[anim_idx];
-      SPR_PTR[3]=run_seq[anim_idx]+1;
-      SPR_PTR[4]=run_seq[anim_idx]+2;
+      totoro_sprite(run_seq[anim_idx]);
     } else {
-      SPR_PTR[2]=run_seq[anim_idx+4];
-      SPR_PTR[3]=run_seq[anim_idx+4]+1;
-      SPR_PTR[4]=run_seq[anim_idx+4]+2;
+      totoro_sprite(run_seq[anim_idx+4]);
     }
     break;
   case PSTATE_BRAKE:
     if(totoro[0].xv>0) {
-      SPR_PTR[2]=SPR_CHU_BR;
-      SPR_PTR[3]=SPR_CHU_BR+1;
-      SPR_PTR[4]=SPR_CHU_BR+2;
+      totoro_sprite(SPR_CHU_BR);
     } else {
-      SPR_PTR[2]=SPR_CHU_BL;
-      SPR_PTR[3]=SPR_CHU_BL+1;
-      SPR_PTR[4]=SPR_CHU_BL+2;
+      totoro_sprite(SPR_CHU_BL);
     }
     break;
   case PSTATE_JUMP:
     if(totoro[0].xv>0) {
-      SPR_PTR[2]=run_seq[0];
-      SPR_PTR[3]=run_seq[0]+1;
-      SPR_PTR[4]=run_seq[0]+2;
+      totoro_sprite(run_seq[0]);
     } else if (totoro[0].xv<0) {
-      SPR_PTR[2]=run_seq[4];
-      SPR_PTR[3]=run_seq[4]+1;
-      SPR_PTR[4]=run_seq[4]+2;
+      totoro_sprite(run_seq[4]);
     } else {
+      totoro_sprite(SPR_CHU_IDLE);
       // add eye movement based on up or down
-      SPR_PTR[2]=SPR_CHU_IDLE;
-      SPR_PTR[3]=SPR_CHU_IDLE+1;
-      SPR_PTR[4]=SPR_CHU_IDLE+2;
     }
     break;
   }
