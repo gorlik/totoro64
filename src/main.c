@@ -692,8 +692,6 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 
 void __fastcall__ game_sprite_setup(void)
 {
-  VIC.spr_ena=0;
-
   VIC.spr_color[5]=COLOR_BLACK;
   SPR_PTR[5]=SPR_SPIN;
 
@@ -701,8 +699,18 @@ void __fastcall__ game_sprite_setup(void)
   VIC.spr_exp_x=0x1C;
   VIC.spr_exp_y=0x1C;
 
-  if(totoro[0].ctrl) VIC.spr_ena|=0x1c;
-  if(totoro[1].ctrl) VIC.spr_ena|=0x03;
+  //  VIC.spr_ena=0;
+  //  if(totoro[0].ctrl) VIC.spr_ena|=0x1c;
+  //  if(totoro[1].ctrl) VIC.spr_ena|=0x03;
+ 
+  __asm__("lda #0");
+  __asm__("ldx %v+%b+%b",totoro,0*sizeof(struct player_t),offsetof(struct player_t,ctrl));
+  __asm__("beq skip1");
+  __asm__("ora #$1c");
+  __asm__("skip1: ldx %v+%b+%b",totoro,1*sizeof(struct player_t),offsetof(struct player_t,ctrl));
+  __asm__("beq skip2");
+  __asm__("ora #$03");
+  __asm__("skip2: sta $d015");
 }
 
 void __fastcall__ start_sound(void)
