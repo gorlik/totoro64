@@ -890,10 +890,10 @@ int main()
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
   VIC.rasterline=1;
   VIC.imr=0x1; // enable raster interrupt
+  VIC.bgcolor[0]=COLOR_WHITE;
 
   Title_Sprite_Setup();
   //  mode_text();
-  VIC.bgcolor[0]=COLOR_WHITE;
   VIC.spr_ena=0x0f;
 
   scr_strcpy8(AT(5,16),present_txt);
@@ -903,8 +903,7 @@ int main()
   scr_strcpy8(AT(11,33),version_txt);
   scr_strcpy8(AT(14,0),intro_txt);
 #if (DEBUG==0)
-  //  memcpy((uint8_t *)(0x400+40*16),license_txt,7*40+8);
-  memcpy((uint8_t *)(0x400+40*18),license_txt,2*40);
+  scr_strcpy8(AT(18,0),license_txt);
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);
