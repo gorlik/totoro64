@@ -49,6 +49,8 @@
 #define P2_SCORETXT_X (P1_SCORETXT_X+P2_X)
 #define P2_SCOREVAL_X (P1_SCOREVAL_X+P2_X)
 
+#define TOP_BAR_Y     64
+
 // vs.
 /*
 #define P1_X          0
@@ -134,6 +136,12 @@ const unsigned char txt_clear[]  = "GREAT!";
   __asm__("bne ls%v",src);			\
     __asm__("fs%v:",src);			\
   } while (0)
+
+#define wait_line(l)	do {	     \
+    __asm__("l1: lda $d012");	     \
+    __asm__("cmp #%b",(uint8_t)l);   \
+    __asm__("bcc l1");		     \
+  } while(0)
 
 const uint16_t sound_seq[] = {
   0x22d0,
@@ -537,11 +545,10 @@ void __fastcall__ Title_Sprite_Setup(void)
   __asm__("bne cloop");
 }
 
-void __fastcall__ wait_line(uint8_t l)
+
+void __fastcall__ wait_top_bar()
 {
-  //  VIC.bordercolor=COLOR_WHITE;
-  while(VIC.rasterline<=l) {};
-  //  VIC.bordercolor=COLOR_BLACK;
+  wait_line(TOP_BAR_Y);
 }
 
 void __fastcall__ update_top_bar(void)
@@ -560,7 +567,7 @@ void __fastcall__ update_top_bar(void)
       convert_big();
       break;
     case 2:
-      wait_line(60);
+      wait_top_bar();
       printbigat(P1_ACORNVAL_X);
       break;
     case 4:
@@ -571,7 +578,7 @@ void __fastcall__ update_top_bar(void)
       convert_big();
       break;
     case 6:
-      wait_line(60);
+      wait_top_bar();
       printbigat(TIMEVAL_X);
       break;
     case 7:
@@ -579,7 +586,7 @@ void __fastcall__ update_top_bar(void)
       string_pad(5);
       break;
     case 8:
-      wait_line(60);
+      wait_top_bar();
       printat(P1_SCOREVAL_X,1);
       break;
     case 9:
@@ -588,7 +595,7 @@ void __fastcall__ update_top_bar(void)
       break;
     case 10:
       if(totoro[1].ctrl==CTRL_PLAY) {
-	wait_line(60);
+	wait_top_bar();
 	printat(P2_SCOREVAL_X,1);
       }
       break;
@@ -599,7 +606,7 @@ void __fastcall__ update_top_bar(void)
       sprintf(STR_BUF,"ST:%2d IDX:%2d", game.stage, game.stage_idx);
       break;
     case 11:
-      wait_line(60);
+      wait_top_bar();
       DEBUG_BORDER_INC();
       printat(DEBUG_TXT_X,2);
       break;
@@ -608,7 +615,7 @@ void __fastcall__ update_top_bar(void)
       sprintf(STR_BUF,"ML:%2d SPD:%2d", loop1, game.accel);
       break;
     case 13:
-      wait_line(60);
+      wait_top_bar();
       DEBUG_BORDER_INC();
       printat(DEBUG_TXT_X,3);
       break;
