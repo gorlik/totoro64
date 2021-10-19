@@ -89,8 +89,10 @@ end:
 	dex
 	bne @loopb
 	ldx #80
-	lda #1 			; COLOR_WHITE
-@loopc:	sta $d800-1,x
+@loopc:	lda #1 			; COLOR_WHITE
+	sta $d800-1,x
+	lda #$78                ; YELLOW and ORANGE
+	sta _SCREEN_BASE-1,x
 	dex
 	bne @loopc
 	rts

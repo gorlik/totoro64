@@ -21,10 +21,9 @@
 .autoimport 	on
 .importzp	sp
 
-; from C files
-;.import         _charset	
+; from C files	
 
 .importzp       _line_ptr
 
-.import _SCR_BASE
+.import _SCREEN_BASE
 .import _STR_BUF

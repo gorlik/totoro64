@@ -914,10 +914,9 @@ int main()
 #endif
 
   inflatemem (BITMAP_BASE, bitmap_data);
-  // for(temp_ptr=(uint8_t *)0x6000;temp_ptr!=(uint8_t *)0x8000;temp_ptr++)
-  //	*(temp_ptr)=0;
   inflatemem (SCREEN_BASE, color1_data);
-  memset8s(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
+  CLR_TOP();
+  //  memset8s(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
 
 
 #if 0
