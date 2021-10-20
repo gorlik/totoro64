@@ -464,7 +464,7 @@ void __fastcall__ acorn_add(void)
 	acorn[0].spr_ptr=SPR_BERRY;
 	acorn[0].spr_color=COLOR_BLUE;
 	acorn[0].en=OBJ_BERRY;
-      } else if((game.apples) && (((last_rand>>8)&0x3f)==25) ) {
+      } else if((game.apples) && (((last_rand>>8)&0x3f)==25) && (game.time<30) ) {
 	game.apples--;
 	acorn[0].spr_ptr=SPR_APPLE;
 	acorn[0].spr_color=COLOR_LIGHTRED;
