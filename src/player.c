@@ -122,11 +122,11 @@ void __fastcall__ totoro_set_pos(void)
   static uint8_t anim_idx;
 
   if(totoro[0].poison) {
-    anim_idx=(game.counter&0xF)>>2;
+    anim_idx=(game.counter&0x1F)>>3;
     VIC.spr_color[2] = COLOR_BLUE;
     totoro[0].poison--;
   } else {
-    anim_idx=(game.counter&0x1F)>>3;
+    anim_idx=(game.counter&0xF)>>2;
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
   
