@@ -155,7 +155,7 @@ const uint8_t p2_ctrl[4] = {
   CTRL_OFF, CTRL_AUTO, CTRL_PLAY, CTRL_PLAY,
 };
 
-const char * mode_msg[3] = {
+const char * const mode_msg[3] = {
   "1P SOLO    ",
   "1P STANDARD",
   "2P CO-OP   ",
