@@ -29,7 +29,7 @@
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
 
-#define VERSION "v0.27"
+#define VERSION "v0.28"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -195,6 +195,13 @@ struct acorn_t {
   uint8_t spr_color;
 };
 
+struct spin_top_t {
+  uint8_t en;
+  word_t  xpos;
+  uint8_t ypos;
+  int8_t  xv;
+};
+
 struct player_t {
   uint8_t  ctrl;
   uint16_t score;
@@ -300,6 +307,7 @@ extern uint8_t STR_BUF[64];
 extern struct  game_state_t game;
 extern struct  player_t totoro[2];
 extern struct  acorn_t acorn[MAX_ACORNS];
+extern struct  spin_top_t spin_top;
 
 // irq player interface
 extern const   uint8_t track0_data[];

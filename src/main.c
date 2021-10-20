@@ -164,9 +164,10 @@ const char * const mode_msg[3] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
-#ifndef TESTING
-  { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
-  { STAGE_TIME, 15, 0, ACC(10), SF_BERRIES },
+#ifdef TESTING
+  { STAGE_TIME, 45, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_SPIN | SF_DBL_ACORN },
+  { STAGE_TIME, 30, 2, ACC(23), SF_BERRIES | SF_WIND1 | SF_SPIN | SF_DBL_ACORN },
+  { STAGE_TIME, 15, 0, ACC(10), SF_SPIN },
   { STAGE_TIME, 25, 3, ACC(6),  SF_WIND1 },
   { STAGE_TIME, 30, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_DBL_ACORN },
 #endif
@@ -182,9 +183,9 @@ const struct stage_t stage[] = {
   { STAGE_TIME, 55, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
   { STAGE_TIME, 60, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
   { STAGE_TIME, 65, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
-  { STAGE_TIME, 70, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
-  { STAGE_TIME, 80, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
-  { STAGE_TIME, 90, 1, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN },
+  { STAGE_TIME, 70, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN | SF_SPIN },
+  { STAGE_TIME, 80, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN | SF_SPIN },
+  { STAGE_TIME, 90, 1, ACC(23), SF_WIND1 | SF_BERRIES | SF_DBL_ACORN | SF_SPIN },
 };
 
 #ifdef SPRITE_MESSAGES
@@ -204,6 +205,7 @@ const struct stage_t stage[] = {
 struct game_state_t game;
 
 struct acorn_t acorn[MAX_ACORNS];
+struct spin_top_t spin_top;
 struct sound_t sound;
 
 struct track_t track[2];
@@ -279,6 +281,8 @@ void __fastcall__ stage_init()
   game.wind_dir=0;
   game.field=0;
   game.counter=0;
+
+  spin_top.en=0;
 }
 
 static void __fastcall__ kiki_update()
@@ -296,17 +300,25 @@ static void __fastcall__ kiki_update()
   VIC.spr_ena=0xff;
 }
 
-static void __fastcall__ spin_update()
+static void __fastcall__ spin_top_update()
 {
-  static uint16_t spin_x;
-  spin_x+=2;
+  if(spin_top.en) {
+    VIC.spr_ena|=0x20;
+    spin_top.xpos.val+=spin_top.xv;
+    //    spin_top.xpos.val=0xb0;
   
-  if(spin_x>400) spin_x=0;
-  VIC.spr_pos[5].y=GROUND_Y;
-  VIC.spr_pos[5].x=spin_x;
-  if(spin_x>255) VIC.spr_hi_x|=0x20;
-  else VIC.spr_hi_x&=0xdf;
-  //  VIC.spr_ena=0xff;
+    VIC.spr_pos[5].y=spin_top.ypos;
+    VIC.spr_pos[5].x=spin_top.xpos.lo;
+    if(spin_top.xpos.hi) VIC.spr_hi_x|=0x20;
+    else VIC.spr_hi_x&=0xdf;
+
+    if((spin_top.xpos.val<3) || (spin_top.xpos.val>400)) {
+      spin_top.en=0;
+    } 
+  } else {
+    //    VIC.bordercolor=COLOR_RED;
+    VIC.spr_ena&=0xdf;
+  }
 }
 
 #define acorn_update_a(idx) do {	       \
@@ -461,6 +473,23 @@ void __fastcall__ acorn_add(void)
 	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
 	acorn[0].spr_color=COLOR_ORANGE;
 	acorn[0].en=OBJ_ACORN;
+      }
+    }
+
+    if((game.flags&SF_SPIN)&&((game.counter&0xf)==13)&&(spin_top.en==0)) {
+      // add a spin top
+      if(((last_rand>>8)&0xf0)==0x60) {
+	if(last_rand&0x10) {
+	  //	  VIC.bordercolor=COLOR_GREEN;
+	  spin_top.xpos.val=380;
+	  spin_top.xv=-2;
+	} else {
+	  //	  VIC.bordercolor=COLOR_YELLOW;
+	  spin_top.xpos.val=20;
+	  spin_top.xv=2;
+	}
+        spin_top.ypos=GROUND_Y;
+	spin_top.en=1;
       }
     }
   }
@@ -862,7 +891,7 @@ void __fastcall__ game_loop(void)
   acorn_update();
   acorn_add();
   //  kiki_update();
-  //  spin_update();
+  spin_top_update();
   DEBUG_BORDER(COLOR_BLACK);
 }
 

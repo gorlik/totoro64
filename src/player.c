@@ -450,6 +450,26 @@ void __fastcall__ check_collision(void)
       }
     }
   }
+
+  if(spin_top.en) {
+    if( ((spin_top.ypos)>ty1)   &&
+	((spin_top.ypos)<ty2)   &&
+	((spin_top.xpos.uval)>tx1) &&
+	((spin_top.xpos.uval)<tx2) ) {
+      //   VIC.bordercolor=COLOR_BLUE;
+      tcache.state=PSTATE_JUMP;
+      tcache.yv.val=-(2*JUMP_V)/3;
+      if((spin_top.xpos.uval-tx1)>25) { // this is valid for chu totoro
+	tcache.xv=-MAX_XV;
+      } else {
+	tcache.xv=MAX_XV;
+      }
+      //      tcache.ypos.hi--;
+    } else {
+      //   VIC.bordercolor=COLOR_BLACK;
+    }
+    
+  }
   //  VIC.bordercolor=COLOR_BLUE;
   //  if(p_idx) VIC.bordercolor=color;
 }
