@@ -2,21 +2,15 @@
 ; Startup code for cc65 (C64 version)
 ;
 
-        .export         _exit
-        .export         __STARTUP__ : absolute = 1      ; Mark as startup
-        .import         initlib, donelib
-        .import         zerobss, callmain
-	.import	     	pushax
-        .import         BSOUT
-        .import         __INTERRUPTOR_COUNT__
-        .import         __RAM_START__, __RAM_SIZE__	; Linker generated
+.export         __STARTUP__ : absolute = 1      ; Mark as startup
+.import         _main
+.import         BSOUT
+.import         __RAM_START__, __RAM_SIZE__	; Linker generated
 
-	.import		_cgetc, _puts, _memcpy
+.import		__DATA_LOAD__, __DATA_RUN__, __DATA_SIZE__
 
-	.import		__DATA_LOAD__, __DATA_RUN__, __DATA_SIZE__
-
-        .include        "zeropage.inc"
-        .include        "c64.inc"
+.include        "zeropage.inc"
+.include        "c64.inc"
 
 .segment	"HEADERDATA"
 
@@ -79,68 +73,20 @@ Start:
 	lda	#>($D000)
        	sta	sp+1   		; Set argument stack ptr
 
-; If we have IRQ functions, chain our stub into the IRQ vector
 
-;        lda     #<__INTERRUPTOR_COUNT__
-;      	beq	NoIRQ1
-;      	lda	IRQVec
-;       	ldx	IRQVec+1
-;      	sta	IRQInd+1
-;      	stx	IRQInd+2
-;      	lda	#<IRQStub
-;      	ldx	#>IRQStub
-;      	sei
-;      	sta	IRQVec
-;      	stx	IRQVec+1
-;      	cli
-
-NoIRQ1:
-	lda	#<__DATA_RUN__
-	ldx	#>__DATA_RUN__
-	jsr	pushax
-	lda	#<__DATA_LOAD__
-	ldx	#>__DATA_LOAD__
-	jsr	pushax
-	lda	#<__DATA_SIZE__
-	ldx	#>__DATA_SIZE__
-	jsr	_memcpy
+	ldy #<__DATA_SIZE__
+dloop:	
+	lda __DATA_LOAD__-1,y
+	sta __DATA_RUN__-1,y
+	dey
+	bne dloop
 
 ; Switch to second charset
-
 	lda	#14
 	jsr	BSOUT
 
-; Call module constructors
-
-        jsr     initlib
-
 ; Clear the BSS data.
+;        jsr     zerobss
 
-        jsr     zerobss
-
-        jsr     callmain
-
-; Back from main() [this is also the exit() entry]. Run the module destructors.
-
-_exit:  jsr	donelib
-
-
-; Reset the IRQ vector if we chained it.
-
-;        ;pha  			; Save the return code on stack
-;	lda     #<__INTERRUPTOR_COUNT__
-;	beq	NoIRQ2
-;	lda	IRQInd+1
-;	ldx	IRQInd+2
-;	sei
-;	sta	IRQVec
-;	stx	IRQVec+1
-;	cli
-
-
-NoIRQ2:
-;	lda	#<exitmsg
-;	ldx	#>exitmsg
-;	jsr	_puts
-;	jsr	_cgetc
-	jmp	64738		;Kernal reset address
+; Jump to main
+        jmp     _main

@@ -5,7 +5,6 @@
 .export         __STARTUP__ : absolute = 1      ; Mark as startup
 ;.import         zerobss
 .import         _main
-;.import	     	pushax
 .import         BSOUT
 .import         __RAM_START__, __RAM_SIZE__	; Linker generated
 
@@ -49,9 +48,6 @@ dloop:
 ; Switch to second charset
 	lda	#14
 	jsr	BSOUT
-
-; Call module constructors
-;        jsr     initlib
 
 ; Clear the BSS data.
 ;        jsr     zerobss
