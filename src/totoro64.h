@@ -112,9 +112,9 @@
 
 // stage flags
 #define SF_BERRIES    0x01
-#define SF_WIND1      0x02
-#define SF_WIND2      0x04
-#define SF_KIKI       0x08
+#define SF_BERRIES_ALT 0x02
+#define SF_WIND1       0x04
+#define SF_WIND2       0x08
 #define SF_DBL_ACORN  0x10
 #define SF_SPIN       0x20
 

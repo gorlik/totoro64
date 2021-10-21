@@ -434,17 +434,27 @@ unsigned char __fastcall__ acorn_free_slot(void)
   return 0;
 }
 
+void __fastcall__ new_acorn()
+{
+  acorn[0].spr_ptr=(last_rand&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+  acorn[0].spr_color=COLOR_ORANGE;
+  acorn[0].en=OBJ_ACORN;
+}
+
 void __fastcall__ acorn_add(void)
 {
   static unsigned int oldr=0;
   static unsigned int r;
+  static uint8_t  alt;
 
   if(STATE_PLAY_DEMO() 
      && ( ((game.counter&0x40)==0x40) || (game.flags & SF_DBL_ACORN))
      )  {
     // new acorn
+    alt=last_rand&0x80;
     r=last_rand&0x3f;
-    if((r>=36) || (abs(r-oldr)<8) ) return;
+    //    if((r>=36) || (abs(r-oldr)<8) ) return;
+    if((r>=36) ) return;
     oldr=r;
     
     r<<=3;
@@ -466,17 +476,19 @@ void __fastcall__ acorn_add(void)
 
       if((game.flags&SF_BERRIES) && (((last_rand>>8)&0x6)==4) ) {
 	acorn[0].spr_ptr=SPR_BERRY;
-	acorn[0].spr_color=COLOR_BLUE;
-	acorn[0].en=OBJ_BERRY;
+	acorn[0].en=OBJ_BERRY|alt;
+	if(alt) {
+	  if(game.flags&SF_BERRIES_ALT) acorn[0].spr_color=COLOR_VIOLET;
+	  else new_acorn();
+	} else acorn[0].spr_color=COLOR_BLUE;
+
       } else if((game.apples) && (((last_rand>>8)&0x3f)==25) && (game.time<30) ) {
 	game.apples--;
 	acorn[0].spr_ptr=SPR_APPLE;
 	acorn[0].spr_color=COLOR_LIGHTRED;
 	acorn[0].en=OBJ_APPLE;
       } else {
-	acorn[0].spr_ptr=(r&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
-	acorn[0].spr_color=COLOR_ORANGE;
-	acorn[0].en=OBJ_ACORN;
+	new_acorn();
       }
     }
 
