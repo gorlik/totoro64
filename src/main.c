@@ -164,7 +164,7 @@ const char * const mode_msg[3] = {
 #define ACC(a) ((a*50)/VFREQ)
 
 const struct stage_t stage[] = {
-#ifdef TESTING
+#ifndef TESTING
   { STAGE_TIME, 45, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_SPIN | SF_DBL_ACORN },
   { STAGE_TIME, 30, 2, ACC(23), SF_BERRIES | SF_WIND1 | SF_SPIN | SF_DBL_ACORN },
   { STAGE_TIME, 15, 0, ACC(10), SF_SPIN },
@@ -304,6 +304,9 @@ static void __fastcall__ spin_top_update()
 {
   if(spin_top.en) {
     VIC.spr_ena|=0x20;
+    SPR_PTR[5]=SPR_SPIN+spin_top.idx;
+    spin_top.idx++;
+    if(spin_top.idx>4) spin_top.idx=0;
     spin_top.xpos.val+=spin_top.xv;
     //    spin_top.xpos.val=0xb0;
   
@@ -488,6 +491,7 @@ void __fastcall__ acorn_add(void)
 	  spin_top.xpos.val=20;
 	  spin_top.xv=2;
 	}
+	spin_top.idx=0;
         spin_top.ypos=GROUND_Y;
 	spin_top.en=1;
       }
@@ -722,7 +726,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_color[5]=COLOR_BLACK;
-  SPR_PTR[5]=SPR_SPIN;
+  //  SPR_PTR[5]=SPR_SPIN;
 
   VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
   VIC.spr_exp_x=0x1C;
