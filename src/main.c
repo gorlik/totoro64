@@ -278,8 +278,9 @@ void __fastcall__ stage_init()
   __asm__("cpy #%b",sizeof(struct stage_t));
   __asm__("bne stl");
 
+  game.field=VFREQ;
+
   game.wind_dir=0;
-  game.field=0;
   game.counter=0;
 
   spin_top.en=0;
@@ -726,7 +727,6 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 void __fastcall__ game_sprite_setup(void)
 {
   VIC.spr_color[5]=COLOR_BLACK;
-  //  SPR_PTR[5]=SPR_SPIN;
 
   VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
   VIC.spr_exp_x=0x1C;
@@ -865,10 +865,10 @@ void __fastcall__ game_loop(void)
   // time
   game.counter++;
   //  game.anim_idx=(game.counter&0xF)>>2;
-  game.field++;
-  if(game.field==VFREQ) {
+  game.field--;
+  if(game.field==0) {
     if(STATE_PLAY_DEMO()) game.time--;
-    game.field=0;
+    game.field=VFREQ;
   }
 
   if(game.flags&SF_WIND1) {
