@@ -43,8 +43,8 @@ background: artwork/background.s tools
 	cd src; zopfli --i100 --deflate background-color2.bin
 
 	utils/bin_to_c src/background-bitmap.bin.deflate bitmap_data ZDATA  >src/bitmap.c
-	utils/bin_to_c src/background-color1.bin.deflate color1_data ZDATA  >src/color1.c
-	utils/bin_to_c src/background-color2.bin.deflate color2_data ZDATA  >src/color2.c
+	utils/bin_to_c src/background-color1.bin.deflate color1_data ZDATA  >>src/bitmap.c
+	utils/bin_to_c src/background-color2.bin.deflate color2_data ZDATA  >>src/bitmap.c
 
 test: all
 	x64 -cart16 build-c64/game64.bin
