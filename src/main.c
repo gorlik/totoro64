@@ -163,6 +163,8 @@ const char * const mode_msg[3] = {
 
 #define ACC(a) ((a*50)/VFREQ)
 
+#define OBJECT_PERIOD 80
+
 const struct stage_t stage[] = {
 #ifndef TESTING
   { STAGE_TIME, 45, 2, ACC(21), SF_BERRIES | SF_WIND1 | SF_SPIN | SF_DBL_ACORN },
@@ -282,6 +284,7 @@ void __fastcall__ stage_init()
 
   game.wind_dir=0;
   game.counter=0;
+  game.acorn_cnt=0;
 
   spin_top.en=0;
 }
@@ -443,14 +446,20 @@ void __fastcall__ new_acorn()
 
 void __fastcall__ acorn_add(void)
 {
-  static unsigned int oldr=0;
-  static unsigned int r;
+  static uint16_t oldr=0;
+  static uint16_t r;
   static uint8_t  alt;
 
+  game.acorn_cnt+=game.accel;
+
   if(STATE_PLAY_DEMO() 
-     && ( ((game.counter&0x40)==0x40) || (game.flags & SF_DBL_ACORN))
+     //   && ( ((game.counter&0x3f)==0x20) || (game.flags & SF_DBL_ACORN))
+     && ( ( game.acorn_cnt>OBJECT_PERIOD ) )
      )  {
     // new acorn
+    //    VIC.bordercolor++;
+
+    game.acorn_cnt-=OBJECT_PERIOD;
     alt=last_rand&0x80;
     r=last_rand&0x3f;
     //    if((r>=36) || (abs(r-oldr)<8) ) return;
