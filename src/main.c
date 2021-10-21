@@ -1027,6 +1027,8 @@ int main()
     MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ);
     setup_top_bar(BAR_BASIC);    
+    CLR_CENTER();
+
     // loop for game selection
     do {
       strcpy8f(mode_msg[game.mode]);
@@ -1035,8 +1037,8 @@ int main()
       if(k_in&0x0c) {
 	if(k_in&0x04) game.mode++;
 	else game.mode--;
-	if(game.mode==255) game.mode=0;
-	else if(game.mode==3) game.mode=2;
+	if(game.mode==255) game.mode=2;
+	else if(game.mode==3) game.mode=0;
 	delay(VFREQ/6);
       }
     } while (k_in!=0x10);
