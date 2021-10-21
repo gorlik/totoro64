@@ -29,7 +29,7 @@
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
 
-#define VERSION "v0.28"
+#define VERSION "v0.29"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -49,27 +49,10 @@
 #define VFREQ 50
 #endif
 
-// (SPR_DATA-VIC_BASE)/64
-#define SPR_DATA_OFFSET   16
 
 // indexes in the sprite data
-#define SPR_ACORN_LG      (36+SPR_DATA_OFFSET)
-#define SPR_ACORN_SM      (37+SPR_DATA_OFFSET)
-#define SPR_BERRY         (38+SPR_DATA_OFFSET)
-#define SPR_APPLE         (39+SPR_DATA_OFFSET)
-
-
-#define SPR_GGLABS_1      (43+SPR_DATA_OFFSET)
-#define SPR_TITLE_BOLD_1  (47+SPR_DATA_OFFSET)
-#define SPR_64            (50+SPR_DATA_OFFSET)
-#define SPR_TITLE_MOVIE_1 (51+SPR_DATA_OFFSET)
-
-#define SPR_TXT_GAME_OVER (54+SPR_DATA_OFFSET)
-#define SPR_TXT_READY     (56+SPR_DATA_OFFSET)
-#define SPR_TXT_SET       (58+SPR_DATA_OFFSET)
-#define SPR_TXT_GO        (60+SPR_DATA_OFFSET)
-#define SPR_TXT_STAGE_CLR (62+SPR_DATA_OFFSET)
-#define SPR_TXT_GO2       (69+SPR_DATA_OFFSET)
+// (SPR_DATA-VIC_BASE)/64
+#define SPR_DATA_OFFSET   16
 
 #define SPR_CHU_IDLE      (0+SPR_DATA_OFFSET)
 #define SPR_CHU_BLINK     (3+SPR_DATA_OFFSET)
@@ -88,9 +71,27 @@
 #define SPR_CHIBI_RR      (30+SPR_DATA_OFFSET)
 #define SPR_CHIBI_RL      (33+SPR_DATA_OFFSET)
 
-#define SPR_SPIN          (64+SPR_DATA_OFFSET)
-#define SPR_KIKI_R        (71+SPR_DATA_OFFSET)
-#define SPR_KIKI_L        (73+SPR_DATA_OFFSET)
+#define SPR_ACORN_LG      (36+SPR_DATA_OFFSET)
+#define SPR_ACORN_SM      (37+SPR_DATA_OFFSET)
+#define SPR_BERRY         (38+SPR_DATA_OFFSET)
+#define SPR_APPLE         (39+SPR_DATA_OFFSET)
+#define SPR_CHERRY        (40+SPR_DATA_OFFSET)
+
+#define SPR_SPIN          (44+SPR_DATA_OFFSET)
+
+#define SPR_TXT_GAME_OVER (49+SPR_DATA_OFFSET)
+#define SPR_TXT_READY     (51+SPR_DATA_OFFSET)
+#define SPR_TXT_SET       (53+SPR_DATA_OFFSET)
+#define SPR_TXT_GO        (55+SPR_DATA_OFFSET)
+#define SPR_TXT_STAGE_CLR (57+SPR_DATA_OFFSET)
+
+
+#define SPR_GGLABS_1      (64+SPR_DATA_OFFSET)
+#define SPR_TITLE_BOLD_1  (68+SPR_DATA_OFFSET)
+#define SPR_64            (71+SPR_DATA_OFFSET)
+#define SPR_TITLE_MOVIE_1 (72+SPR_DATA_OFFSET)
+
+
 
 // the following need to be kept in sync with the assembly code
 #define MAX_ACORNS 8

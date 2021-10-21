@@ -29,7 +29,7 @@ charset: tools artwork/totoro-charset.bin
 	utils/bin_to_c src/charset.bin.deflate charset_data ZDATA >src/charset.c
 
 sprites: prg_studio_project/sprites.bin tools
-	cp prg_studio_project/sprites.bin src
+	cat prg_studio_project/game_sprites.bin prg_studio_project/title_sprites.bin >src/sprites.bin
 	cd src; zopfli --i100 --deflate sprites.bin
 	utils/bin_to_c src/sprites.bin.deflate sprite_src_data ZDATA >src/sprites.c
 
