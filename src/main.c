@@ -906,24 +906,24 @@ int main()
   static uint16_t bonus;
 
   inflatemem (SPR_DATA, sprite_src_data);
-#if 0
-  memcpy((uint8_t *)(0x4000-64*8),VIC_BASE+SPR_GGLABS_1*64,64*8);
-#else
+
   __asm__("ldy #0");
-  __asm__("loop: lda %w-1,y",(0x4000+SPR_GGLABS_1*64));
+  __asm__("loop:");
+  __asm__("lda %w-1,y",(0x4000+SPR_GGLABS_1*64));
   __asm__("sta %w-1,y",0x4000-64*8);
 
-  __asm__("lda %w-1,y",0x4000+SPR_GGLABS_1*64+256);
+  __asm__("lda %w-1,y",(0x4000+SPR_TITLE_BOLD_1*64));
+#ifdef MOVIE_TITLE
+  __asm__("cpy #192");
+  __asm__("bcs skip");
+  __asm__("lda %w-1,y",(0x4000+SPR_TITLE_MOVIE_1*64));
+  __asm__("skip:");
+#endif
   __asm__("sta %w-1,y",0x4000-64*4);
 
   __asm__("dey");
   __asm__("bne loop");
-#endif
   
-  // movie style title
-#ifdef MOVIE_TITLE
-  memcpy((uint8_t *)(0x4000-64*4),VIC_BASE+SPR_TITLE_MOVIE_1*64,64*3);
-#endif
   setup_sid();
   
   spr_mux=0;
