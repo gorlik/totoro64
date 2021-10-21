@@ -6,7 +6,7 @@ c64: artwork
 	cd build-c64n; TV=NTSC make -f ../Makefile.c64
 	mkdir -p build-c64
 	cd build-c64; TV=PAL make -f ../Makefile.c64
-	grep ^RODATA build-c64/game.map
+	grep ^ZDATA build-c64/game.map
 
 #c128:
 #	mkdir -p build-c128
@@ -26,12 +26,12 @@ artwork: charset sprites background
 charset: tools artwork/totoro-charset.bin
 	utils/make_font_table artwork/totoro-charset.bin >src/charset.bin
 	cd src; zopfli --i100 --deflate charset.bin
-	utils/bin_to_c src/charset.bin.deflate charset_data  >src/charset.c
+	utils/bin_to_c src/charset.bin.deflate charset_data ZDATA >src/charset.c
 
 sprites: prg_studio_project/sprites.bin tools
 	cp prg_studio_project/sprites.bin src
 	cd src; zopfli --i100 --deflate sprites.bin
-	utils/bin_to_c src/sprites.bin.deflate sprite_src_data  >src/sprites.c
+	utils/bin_to_c src/sprites.bin.deflate sprite_src_data ZDATA >src/sprites.c
 
 background: artwork/background.s tools
 	utils/asm_to_bin artwork/background.s 4 8000 >src/background-bitmap.bin
@@ -42,9 +42,9 @@ background: artwork/background.s tools
 	cd src; zopfli --i100 --deflate background-color1.bin
 	cd src; zopfli --i100 --deflate background-color2.bin
 
-	utils/bin_to_c src/background-bitmap.bin.deflate bitmap_data   >src/bitmap.c
-	utils/bin_to_c src/background-color1.bin.deflate color1_data   >src/color1.c
-	utils/bin_to_c src/background-color2.bin.deflate color2_data   >src/color2.c
+	utils/bin_to_c src/background-bitmap.bin.deflate bitmap_data ZDATA  >src/bitmap.c
+	utils/bin_to_c src/background-color1.bin.deflate color1_data ZDATA  >src/color1.c
+	utils/bin_to_c src/background-color2.bin.deflate color2_data ZDATA  >src/color2.c
 
 test: all
 	x64 -cart16 build-c64/game64.bin
