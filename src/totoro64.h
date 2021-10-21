@@ -25,11 +25,12 @@
 
 // user modifiable compile time options
 //#define NTSC
-#define STAGE_TIME 60
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
+#define STAGE_TIME 60
+#define POISON_TIME 5
 
-#define VERSION "v0.29"
+#define VERSION "v0.30"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -93,7 +94,7 @@
 
 
 
-// the following need to be kept in sync with the assembly code
+// the following must be kept in sync with the assembly code
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2
 
@@ -109,6 +110,7 @@
 #define CHU_TOTORO   0
 #define CHIBI_TOTORO sizeof(struct player_t)
 
+// stage flags
 #define SF_BERRIES    0x01
 #define SF_WIND1      0x02
 #define SF_WIND2      0x04
@@ -119,26 +121,33 @@
 #define COL_R 0x00
 #define COL_L 0x80
 
+// player control modes
 #define CTRL_OFF  0x00
 #define CTRL_AUTO 0x01
 #define CTRL_PLAY 0x02
 
-#define OBJ_ACORN 0x1
-#define OBJ_BERRY 0x2
-#define OBJ_APPLE 0x3
+// falling object types
+#define OBJ_TYPE_MASK 0x0F
+#define OBJ_ACORN  0x1
+#define OBJ_BERRY  0x2
+#define OBJ_APPLE  0x3
+
 
 #define stop_sound() \
   do { SID.v3.ctrl=0x20; } while(0)
 
+// player states
 #define PSTATE_IDLE  0
 #define PSTATE_JUMP  1
 #define PSTATE_RUN   2
 #define PSTATE_BRAKE 3
 
+// game states
 #define GSTATE_PLAY 0
 #define GSTATE_DEMO 1
 #define GSTATE_CUT1 2
 
+// game modes
 #define GMODE_1P_SOLO  0
 #define GMODE_1P_STD   1
 #define GMODE_2P_COOP  2
@@ -172,7 +181,7 @@ struct game_state_t {
   uint8_t  mode;
   uint8_t  state;
   uint8_t  stage;     // current stage
-  uint8_t  field;     // 0 to VFREQ
+  uint8_t  field;     // 0 to VFREQ - used to decrement the game time
   uint8_t  counter;   // free running
   //  struct stage_t st;
   uint8_t  time;      // remaining stage time in secons
@@ -184,6 +193,8 @@ struct game_state_t {
   uint8_t  wind_sp;   // vblanks between updates
   uint8_t  wind_cnt;  // update counter
   int8_t   wind_dir;  // 0, 1, -1
+  // acorn firing counter
+  uint8_t  acorn_cnt;
   // misc
   uint16_t hi_score;
 };

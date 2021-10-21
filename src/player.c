@@ -56,7 +56,7 @@ void __fastcall__ totoro_move(void);
 void __fastcall__ tcache_load(void)
 {
   __asm__("ldx %v",p_idx);
-  __asm__("ldy #0"); 
+  __asm__("ldy #0");
   __asm__("tc_load_loop:");
   __asm__("lda %v,x",totoro);
   __asm__("sta %v,y",tcache);
@@ -69,7 +69,7 @@ void __fastcall__ tcache_load(void)
 void __fastcall__ tcache_save(void)
 {
   __asm__("ldx %v",p_idx);
-  __asm__("ldy #0"); 
+  __asm__("ldy #0");
   __asm__("tc_save_loop:");
   __asm__("lda %v,y",tcache);
   __asm__("sta %v,x",totoro);
@@ -83,7 +83,7 @@ void __fastcall__ totoro_init(uint8_t p)
 {
   p_idx=p;
   tcache_load();
-  
+
   tcache.xv=0;
   tcache.yv.val=0;
   tcache.state=PSTATE_IDLE;
@@ -104,7 +104,7 @@ void __fastcall__ totoro_init(uint8_t p)
     VIC.spr_color[3]=COLOR_BLACK;
     VIC.spr_color[4]=COLOR_WHITE;
   }
-  
+
   tcache_save();
 }
 
@@ -124,12 +124,17 @@ void __fastcall__ totoro_set_pos(void)
   if(totoro[0].poison) {
     anim_idx=(game.counter&0x1F)>>3;
     VIC.spr_color[2] = COLOR_BLUE;
+
     totoro[0].poison--;
+    //__asm__("lda %v+%b", totoro, 11); // offsetof(struct player_t,poison));
+    //__asm__("bne skip");
+    //__asm__("dec %v+%b+1",totoro,11);  // offsetof(struct player_t,poison));
+    //__asm__("skip: dec %v+%b",totoro,11); // offsetof(struct player_t,poison));
   } else {
     anim_idx=(game.counter&0xF)>>2;
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
-  
+
   /*  VIC.spr_pos[2].x   = totoro[0].xpos.lo;
   VIC.spr_pos[3].x   = totoro[0].xpos.lo;
   VIC.spr_pos[4].x   = totoro[0].xpos.lo;*/
@@ -139,7 +144,7 @@ void __fastcall__ totoro_set_pos(void)
   VIC.spr_pos[3].y   = totoro[0].ypos.hi;
   VIC.spr_pos[4].y   = totoro[0].ypos.hi;*/
   VIC.spr_pos[2].y   = VIC.spr_pos[3].y   = VIC.spr_pos[4].y   = totoro[0].ypos.hi;
-  
+
   if(totoro[0].xpos.hi)   VIC.spr_hi_x |=0x1C;
   else VIC.spr_hi_x &= 0xE3;
 
@@ -188,14 +193,13 @@ void __fastcall__ chibi_set_pos(void)
   } else {
     tcolor = COLOR_WHITE;
   }
-  
+
   VIC.spr_pos[0].x  = VIC.spr_pos[1].x   = totoro[1].xpos.lo;
   VIC.spr_pos[0].y  = VIC.spr_pos[1].y   = totoro[1].ypos.hi;
-  
+
   if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x03;
   else VIC.spr_hi_x &= 0xFC;
-  
-  
+
   if (totoro[1].state==PSTATE_IDLE) {
     if(totoro[1].blink) {
       SPR_PTR[0]=SPR_CHIBI_IDLE+1;
@@ -240,7 +244,7 @@ void __fastcall__ totoro_update(void)
 {
   tcache_load();
   if(tcache.ctrl==0) return;
-  
+
   process_input();
   //  VIC.bordercolor=COLOR_YELLOW;
   totoro_move();
@@ -259,7 +263,7 @@ void __fastcall__ totoro_move()
 {
   static uint8_t r;
   static uint8_t ground;
-  static uint16_t max_x; 
+  static uint16_t max_x;
 
   tcache.xpos.val+=(tcache.xv>>2);
 
@@ -268,8 +272,6 @@ void __fastcall__ totoro_move()
   } else {
     max_x=(p_idx)?MAX_X:MAX_PX;
   }
-    
-
 
   if(tcache.xpos<MIN_X) {
     tcache.xpos.val=MIN_X;
@@ -314,7 +316,7 @@ void __fastcall__ process_input(void)
 {
   static uint8_t js;
   static uint8_t acc;
-  
+ 
   if(game.state==GSTATE_PLAY) {
     if(p_idx==0) {
       // chu totoro
@@ -390,7 +392,7 @@ void __fastcall__ process_input(void)
   
     if(tcache.poison) {
       if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
-      if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;    
+      if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;
     }
   }
 }
@@ -401,7 +403,7 @@ void __fastcall__ check_collision(void)
   register struct acorn_t *a;
   static uint8_t ty1, ty2;
   static int16_t tx1, tx2;
-  
+
   ty1=tcache.ypos.hi-20;
   tx1=tcache.xpos.uval-15;
   if(p_idx) {
@@ -420,10 +422,10 @@ void __fastcall__ check_collision(void)
 	  ((a->xpos.uval)>tx1) &&
 	  ((a->xpos.uval)<tx2) ) {
 	#if 1
-	switch(a->en) {
+	switch((a->en)&OBJ_TYPE_MASK) {
 	case OBJ_ACORN:
 	  start_sound();
-	  
+
 	  if(p_idx) {
 	    if(tcache.ctrl==CTRL_AUTO)
 	      totoro[0].score+=10+(GROUND_Y-tcache.ypos.hi);
@@ -432,12 +434,12 @@ void __fastcall__ check_collision(void)
 	  } else {
 	  tcache.score+=10+(PGROUND_Y-tcache.ypos.hi);
 	  }
-	  
+
 	  if(game.acorns) game.acorns--;
 	  break;
 	case OBJ_BERRY:
           // FIXME: start error sound
-	  tcache.poison+=250;
+	  tcache.poison+=(POISON_TIME*VFREQ);
 	  break;
 	case OBJ_APPLE:
 	  // FIXME: bonus sound
@@ -468,7 +470,7 @@ void __fastcall__ check_collision(void)
     } else {
       //   VIC.bordercolor=COLOR_BLACK;
     }
-    
+
   }
   //  VIC.bordercolor=COLOR_BLUE;
   //  if(p_idx) VIC.bordercolor=color;
