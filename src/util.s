@@ -30,11 +30,6 @@
 .import    _STR_BUF
 .import    _waitvsync
 
-.segment        "RODATA"
-__dectab:
-	.byte '0', '1', '2', '3', '4'
-	.byte '5', '6', '7', '8', '9'
-
 .segment        "BSS"
 anytmp:
 	.res 1
@@ -131,8 +126,8 @@ L6:     asl     sreg
 L7:     dey
         bne     L6
 
-        tay                     ; get remainder into y
-        lda     __dectab,y      ; get dec character
+	clc
+	adc #48			; add offset into char table
         pha                     ; save char value on stack
 
         lda     sreg
