@@ -22,6 +22,7 @@
 .import _charset
 
 .export _PutLine
+.export _PutBigLine
 .export _CLR_TOP
 .export _CLR_CENTER
 .export _print_acorn
@@ -32,9 +33,34 @@
 .segment "BSS"
 t1:
 	.res 1
-
+line1:
+	.res 1
 
 .segment	"CODE"
+
+; ****************** SetLinePtr *********************
+;  Put a character
+.proc SetLinePtr: near
+	;; a: char position
+	rol
+	rol
+	rol
+	tay			; save the partial rorate in y
+	and #$f8		; mask lsb
+	tax			; save lsb in x
+	tya
+	rol			; rotate one more time (carry bit)
+	and #$03 		; mask msb
+	tay			; save msb in y
+	clc
+	txa 			;
+	adc _line		; add lsb and store to _line_ptr
+	sta _line_ptr 		;
+	tya
+	adc _line+1		; add msb and store to _line_ptr+1
+	sta _line_ptr+1
+	rts
+.endproc
 
 ; ****************** PutChar *********************
 ;  Put a character
@@ -63,19 +89,64 @@ no_carry:
 	;; t1: counter for next char to write
 .proc _PutLine: near
 	ldy #$FF
-start:	iny
+loop:	iny
 	sty t1
 	ldx _STR_BUF,y		; next char to print
 	beq end			; test for null terminator
 	jsr _PutCharHR		; char to print is in X
-        lda t1
-	cmp #40
-	beq end			; max 40 characters
-	tay
-	jmp start
+	ldy t1
+	cpy #40
+	bne loop			; max 40 characters
+end: 	rts
+.endproc
+
+; ****************** PutBigLine *********************
+;  Put a line of big text
+	;; t1: counter for next char to write
+.proc _PutBigLine: near
+	clc
+	lda _line_ptr
+	adc #64
+	sta _temp_ptr
+	lda _line_ptr+1
+	adc #1
+	sta _temp_ptr+1
+	ldy #$0
+	sty line1
+	dey ; loop needs $ff to start
+loop:	iny
+	sty t1
+	lda _STR_BUF,y		; next char to print
+	beq end			; test for null terminator
+	sec
+	sbc #192		; subtract the char offset
+	asl a			; multiply by 4
+	asl a
+	tax
+	lda line1
+	beq skip	; branch if first line
+	inx		; else increment the char twice
+	inx
+skip:
+	jsr _PutCharHR		; char to print is in X
+	inx
+	jsr _PutCharHR		; char to print is in X	
+	ldy t1
+	cpy #20
+	bne loop			; max 20 characters
 end:
+	lda line1
+	bne ret
+	inc line1
+	lda _temp_ptr
+	sta _line_ptr
+	lda _temp_ptr+1
+	sta _line_ptr+1
+	ldy #$ff
+	bne loop ; branch always
+ret:
  	rts
-	.endproc
+.endproc
 
 ; ****************** clr top *********************
 ;  Clear top 2 lines of screen
@@ -141,7 +212,8 @@ skip:	stx     _STR_BUF
 	stx     _STR_BUF+1
 	ldx     #0
 	stx     _STR_BUF+2
-	jsr     _convprint_big	; position is still in a
+	jsr     SetLinePtr
+	jsr     _PutBigLine	; position is still in a
 	rts
 .endproc
 
@@ -185,7 +257,8 @@ skip:	stx     _STR_BUF
 	ldy     #$00
 	sty     _STR_BUF+1
 	;; 	lda     temp_b
-	jsr     _convprint_big
+	jsr     SetLinePtr
+	jsr     _PutBigLine
 	ldy     cpos
 	lda     ccolor
 	sta     $D800,y

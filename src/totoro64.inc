@@ -24,6 +24,7 @@
 ; from C files	
 
 .importzp       _line_ptr
+.importzp       _temp_ptr
 
 .import _SCREEN_BASE
 .import _STR_BUF

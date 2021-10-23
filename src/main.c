@@ -210,15 +210,15 @@ const struct stage_t stage[] = {
 #define MESSAGEP(p,m) sprite_message2p(m)
 #define MESSAGE(p,m)  sprite_message2(m)
 #else
-#define MESSAGEP(p,m) do { strcpy8f(m); convprint_big(p); delay(VFREQ/3); } while (0)
-#define MESSAGE(p,m)  do { CLR_CENTER(); strcpy8f(m); convprint_big(p); } while (0)
+#define MESSAGEP(p,m) do { strcpy8f(m); printbigat(p); delay(VFREQ/3); } while (0)
+#define MESSAGE(p,m)  do { CLR_CENTER(); strcpy8f(m); printbigat(p); } while (0)
 #endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
 
-#define PRINT_STRING_AT(p,m)    do { strcpy8f(m); convprint_big(p); } while (0)
-#define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); convprint_big(p); } while (0)
-#define PRINT_NUMBER_AT(p,n)    do { utoa10(n); convprint_big(p); } while (0)
+#define PRINT_STRING_AT(p,m)    do { strcpy8f(m); printbigat(p); } while (0)
+#define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); printbigat(p); } while (0)
+#define PRINT_NUMBER_AT(p,n)    do { utoa10(n); printbigat(p); } while (0)
 
 struct game_state_t game;
 
@@ -635,7 +635,7 @@ void __fastcall__ update_top_bar(void)
       string_pad(2);
       break;
     case 1:
-      convert_big();
+      //      convert_big();
       break;
     case 2:
       wait_top_bar();
@@ -646,7 +646,7 @@ void __fastcall__ update_top_bar(void)
       string_pad(2);
       break;
     case 5:
-      convert_big();
+      //      convert_big();
       break;
     case 6:
       wait_top_bar();

@@ -260,11 +260,12 @@ void __fastcall__ SetColor(uint8_t c);
 void __fastcall__ ClrLine(uint8_t l);
 
 void __fastcall__ PutLine(void);
+void __fastcall__ PutBigLine(void);
 void __fastcall__ PutCharHR(void);
-void __fastcall__ printat(uint8_t x, uint8_t y);
+//void __fastcall__ printat(uint8_t x, uint8_t y);
 void __fastcall__ convprint_big(uint8_t x);
 void __fastcall__ convert_big(void);
-void __fastcall__ printbigat(uint8_t x);
+//void __fastcall__ printbigat(uint8_t x);
 void __fastcall__ print_acorn(uint8_t c);
 void __fastcall__ print_hourglass(uint8_t c);
 void __fastcall__ print_col(uint8_t c);
@@ -307,6 +308,7 @@ extern const uint8_t sprite_src_data[];
 extern const uint8_t bitmap_data[];
 extern const uint8_t color1_data[];
 extern const uint8_t color2_data[];
+extern unsigned char * const line[];
 
 // base pointers for screen data
 extern uint8_t charset[];    // uncompressed charset
@@ -345,4 +347,15 @@ extern uint8_t p_idx;
   __asm__("dex"); \
   __asm__("bne @l22");
 
+
+#define printat(x,y) do {			\
+    line_ptr=(line[y]+(x<<3));			\
+    PutLine();					\
+} while (0)
+
+#define printbigat(x) do {			\
+    line_ptr=(line[0]+(x<<3));			\
+    PutBigLine();				\
+} while (0) 
+    
 #endif

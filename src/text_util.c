@@ -86,48 +86,17 @@ void __fastcall__ print_col(uint8_t pos)
   __asm__("sta %w,y",0xd800+40);
 }
 
-void __fastcall__ printat(uint8_t x, uint8_t y)
+/*
+static void __fastcall__ printat(uint8_t x, uint8_t y)
 {
   line_ptr=(line[y]+(x<<3));
   PutLine();
 }
 
-void __fastcall__ convprint_big(uint8_t x)
+
+static void __fastcall__ printbigat(uint8_t x)
 {
-  convert_big();
-  printbigat(x);
+  line_ptr=(line[0]+(x<<3));
+  PutBigLine();
 }
-
-void __fastcall__ convert_big(void)
-{
-   static uint8_t j,idx;
-
-   for(j=0;STR_BUF[j];j++) {
-     STR_BUF[j+41]=(STR_BUF[j]-192)<<2;
-   }
-   STR_BUF[j+41]=0;
-}
-
-void __fastcall__ printbigat(uint8_t x)
-{
-  static uint8_t j,k;
-
-  for(k=0,j=41;STR_BUF[j];j++) {
-    STR_BUF[k]=(STR_BUF[j])+0;
-    k++;
-    STR_BUF[k]=((STR_BUF[j])+1);
-    k++;
-  }
-  STR_BUF[k]=0;
-  printat(x,0);
-
-  for(k=0,j=41;STR_BUF[j];j++) {
-    STR_BUF[k]=(STR_BUF[j])+2;
-    k++;
-    STR_BUF[k]=((STR_BUF[j])+3);
-    k++;
-  }
-  STR_BUF[k]=0;
-  printat(x,1);
-
-}
+*/
