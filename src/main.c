@@ -144,12 +144,12 @@ const unsigned char txt_clear[]  = "GREAT!";
 #endif
 
 #define scr_strcpy8(dst,src)  do {		\
-  __asm__("ldx #$FF");          \
-  __asm__("ls%v: inx",src);			\
-  __asm__("lda %v,x",src);			\
-  __asm__("beq fs%v",src);			\
-  __asm__("sta %w,x",dst);			\
-  __asm__("bne ls%v",src);			\
+    __asm__("ldx #$FF");			\
+    __asm__("ls%v: inx",src);			\
+    __asm__("lda %v,x",src);			\
+    __asm__("beq fs%v",src);			\
+    __asm__("sta %w,x",dst);			\
+    __asm__("bne ls%v",src);			\
     __asm__("fs%v:",src);			\
   } while (0)
 
@@ -629,42 +629,36 @@ void __fastcall__ update_top_bar(void)
   if(STATE_PLAY_DEMO())
 #endif
 #if 1
-    switch(game.counter&0x0F) {
+    switch(game.counter&0x07) {
     case 0:
       utoa10(game.acorns);
       string_pad(2);
       break;
     case 1:
-      //      convert_big();
-      break;
-    case 2:
       wait_top_bar();
       printbigat(P1_ACORNVAL_X);
       break;
-    case 4:
+    case 2:
       utoa10(game.time);
       string_pad(2);
       break;
-    case 5:
-      //      convert_big();
-      break;
-    case 6:
+    case 3:
       wait_top_bar();
       printbigat(TIMEVAL_X);
       break;
-    case 7:
+    case 4:
       utoa10(totoro[0].score);
       string_pad(5);
       break;
-    case 8:
+    case 5:
       wait_top_bar();
       printat(P1_SCOREVAL_X,1);
       break;
-    case 9:
+    case 6:
       utoa10(totoro[1].score);
       string_pad(5);
       break;
-    case 10:
+    case 7:
       if(totoro[1].ctrl==CTRL_PLAY) {
 	wait_top_bar();
 	printat(P2_SCOREVAL_X,1);
@@ -694,7 +688,7 @@ void __fastcall__ update_top_bar(void)
     default:
       DEBUG_BORDER_INC();
       break;
-      }
+    }
 #else
     sprintf(STR_BUF,"%04x %02x %02x ", track[0].ptr, *(uint8_t *)(track[0].ptr),
 	    *(uint8_t *)(track[0].ptr+1));
@@ -901,7 +895,6 @@ void __fastcall__ game_loop(void)
 
   // time
   game.counter++;
-  //  game.anim_idx=(game.counter&0xF)>>2;
   game.field--;
   if(game.field==0) {
     if(STATE_PLAY_DEMO()) game.time--;
