@@ -102,6 +102,22 @@ extern const unsigned char intro_txt[];
 extern const unsigned char version_txt[];
 extern const unsigned char license_txt[];
   
+// map space
+#pragma charmap(32,192)
+// map numbers
+#pragma charmap(48,230)
+#pragma charmap(49,231)
+#pragma charmap(50,232)
+#pragma charmap(51,233)
+#pragma charmap(52,234)
+#pragma charmap(53,235)
+#pragma charmap(54,236)
+#pragma charmap(55,237)
+#pragma charmap(56,238)
+#pragma charmap(57,239)
+// map symbols
+#pragma charmap(45,220) // '-'
+
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
 //const unsigned char txt_catch[]  = "CATCH    ACORNS";

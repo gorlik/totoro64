@@ -132,12 +132,12 @@ ccolor:
 
 .segment	"CODE"
 
-	ldx     #'1' 		; '
+	ldx     #231 		; '1'
 	cmp     #$15		; a>20 ?
 	bcc     skip
 	inx			; '1'+1 = '2'
 skip:	stx     _STR_BUF
-	ldx     #$D0
+	ldx     #'P'
 	stx     _STR_BUF+1
 	ldx     #0
 	stx     _STR_BUF+2
@@ -158,7 +158,7 @@ skip:	stx     _STR_BUF
 	sta     cpos
 	ldy     #$09		; BROWN
 	sty     ccolor
-	ldy     #$2F
+	ldy     #223
 	jmp     print_color_char
 .endproc
 
@@ -173,7 +173,7 @@ skip:	stx     _STR_BUF
 	sta     cpos
 	ldy     #$03		; CYAN
 	sty     ccolor
-	ldy     #$2E
+	ldy     #222
 	jmp     print_color_char
 .endproc
 
@@ -223,7 +223,8 @@ cloop1:
 	dey
 	dex
 	bpl cloop1
-	lda #' '
+	;; lda #' '
+	lda #192
 cloop2: sta _STR_BUF,y
 	dey
 	bpl cloop2

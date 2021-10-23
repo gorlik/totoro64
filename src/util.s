@@ -127,7 +127,7 @@ L7:     dey
         bne     L6
 
 	clc
-	adc #48			; add offset into char table
+	adc #230		; add offset into char table
         pha                     ; save char value on stack
 
         lda     sreg
