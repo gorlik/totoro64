@@ -23,8 +23,8 @@ bin: all
 
 artwork: charset sprites background
 
-charset: tools artwork/totoro-charset.bin
-	utils/make_font_table artwork/totoro-charset.bin >src/charset.bin
+charset: tools artwork/totoro_mc-charset.bin
+	utils/make_font_table artwork/totoro_mc-charset.bin >src/charset.bin
 	cd src; zopfli --i100 --deflate charset.bin
 	utils/bin_to_c src/charset.bin.deflate charset_data ZDATA >src/charset.c
 
