@@ -19,21 +19,29 @@
 ;******************************************************************************
 .include "c64.inc"
 
-.export    _joy1
-.export    _joy2
-.export    _joyk
-.export    _joy_any
-.export    _utoa10
-.export    _delay	
 .importzp  sreg
 .importzp  _temp_ptr
 .import    _STR_BUF
 .import    _waitvsync
 
+.export    _joy1
+.export    _joy2
+.export    _joyk
+.export    _joy_any
+.export    _delay
+.export    _string_pad
+.export    _utoa10
+
+
 .segment        "BSS"
 anytmp:
 	.res 1
-	
+
+; ---------------------------------------------------------------
+; uint8_t __near__ __fastcall__ joy_any (void)
+; 
+; returns any joystick or keyboard movement
+
 .segment        "CODE"
 .proc _joy_any: near
 	jsr _joy1
@@ -45,7 +53,11 @@ anytmp:
 	ora anytmp
 	rts
 .endproc
-	
+
+; ---------------------------------------------------------------
+; uint8_t __near__ __fastcall__ joyk (void)
+; 
+; returns keyboard presses as a joystick
 .proc _joyk: near
 	lda #0
 	ldx 203
@@ -65,7 +77,11 @@ skip2:	tay
 	ora #$10
 end:	rts
 .endproc
-	
+
+; ---------------------------------------------------------------
+; uint8_t __near__ __fastcall__ joy1 (void)
+; 
+; returns port 1 joystick
 .proc _joy1: near
 	lda     #$7F
         sei
@@ -77,7 +93,10 @@ end:	rts
         rts
 .endproc
 
-	
+;  --------------------------------------------------------------- 
+; uint8_t __near__ __fastcall__ joy2 (void)
+; 
+; returns port 2 joystick
 .proc _joy2: near
 	ldx #0
 	lda #$E0
@@ -92,6 +111,10 @@ end:	rts
 	rts
 .endproc
 
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ delay (uint8_t b)
+; 
+; delays b fields
 .proc _delay: near
 	tax
 loop:	jsr _waitvsync
@@ -100,8 +123,47 @@ loop:	jsr _waitvsync
 	rts
 .endproc
 
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ string_pad (unsigned char n)
+; ---------------------------------------------------------------
+; pad string with leading spaces to length n
+.segment	"BSS"
+pad:
+	.res	1,$00
 
-; int utoa (unsigned value)
+.segment	"CODE"
+
+.proc	_string_pad: near
+
+	sta pad
+	tay
+	ldx #$FF
+lloop:	inx
+	lda _STR_BUF,x
+	bne lloop
+
+	cpx pad
+	beq end
+	;;  	ldy pad
+cloop1:
+	lda _STR_BUF,x
+	sta _STR_BUF,y
+	dey
+	dex
+	bpl cloop1
+	;; lda #' '
+	lda #192
+cloop2: sta _STR_BUF,y
+	dey
+	bpl cloop2
+end:	rts
+
+.endproc
+
+; ---------------------------------------------------------------
+; int __near__ __fastcall__ utoa10 (unsigned int x)
+;
+; convert x into a string in _STR_BUF and returns the lenght
 ; adapted from cc65 library code
 _utoa10:
 	sta sreg

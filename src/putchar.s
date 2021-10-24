@@ -35,7 +35,6 @@
 .export   _print_acorn
 .export   _print_hourglass
 .export   _print_p
-.export   _string_pad
 
 .segment "BSS"
 t1:
@@ -279,41 +278,4 @@ skip:	stx     _STR_BUF
 	sta _SCREEN_BASE+40,y
 	sta _SCREEN_BASE+41,y
 	rts
-.endproc
-
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ string_pad (unsigned char)
-; ---------------------------------------------------------------
-
-.segment	"BSS"
-pad:
-	.res	1,$00
-
-.segment	"CODE"
-
-.proc	_string_pad: near
-
-	sta pad
-	tay
-	ldx #$FF
-lloop:	inx
-	lda _STR_BUF,x
-	bne lloop
-
-	cpx pad
-	beq end
-	;;  	ldy pad
-cloop1:
-	lda _STR_BUF,x
-	sta _STR_BUF,y
-	dey
-	dex
-	bpl cloop1
-	;; lda #' '
-	lda #192
-cloop2: sta _STR_BUF,y
-	dey
-	bpl cloop2
-end:	rts
-
 .endproc
