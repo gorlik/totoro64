@@ -20,6 +20,9 @@
 
 .exportzp       _line_ptr
 .exportzp       _temp_ptr
+.exportzp       _zptmp1
+.exportzp       _zptmp2
+
 
 .export _VIC_BASE
 .export _BITMAP_BASE

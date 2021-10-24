@@ -87,7 +87,6 @@
 #define SPR_TXT_GO        (61+SPR_DATA_OFFSET)
 
 
-
 #define SPR_GGLABS_1      (64+SPR_DATA_OFFSET)
 #define SPR_TITLE_BOLD_1  (68+SPR_DATA_OFFSET)
 #define SPR_64            (71+SPR_DATA_OFFSET)
@@ -293,15 +292,14 @@ uint8_t __fastcall__ joy_any(void);
 void __fastcall__ string_pad(int8_t pad);
 
 // zp variables from ASM
-extern uint16_t itmp;
-#pragma zpsym("itmp")
 extern uint8_t * line_ptr;
 #pragma zpsym("line_ptr")
+// temp_ptr and zptmpx share the same location
 extern uint8_t * temp_ptr;
 #pragma zpsym("temp_ptr")
-extern uint8_t c1,ctmp;
-#pragma zpsym("c1")
-#pragma zpsym("ctmp")
+extern uint8_t zptmp1,zptmp2;
+#pragma zpsym("zptmp1")
+#pragma zpsym("zptmp2")
 
 // compressed data
 extern const uint8_t charset_data[];
