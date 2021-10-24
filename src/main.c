@@ -182,7 +182,7 @@ const char * const mode_msg[3] = {
 #define OBJECT_PERIOD 80
 
 const struct stage_t stage[] = {
-#ifndef TESTING
+#ifdef TESTING
   { STAGE_TIME, 45, 2, ACC(21), SF_BERRIES | SF_BERRIES_ALT | SF_WIND1 | SF_SPIN },
   { STAGE_TIME, 30, 2, ACC(23), SF_BERRIES | SF_WIND1 | SF_SPIN },
   { STAGE_TIME, 15, 0, ACC(10), SF_SPIN },
@@ -337,10 +337,10 @@ static void __fastcall__ spin_top_update()
 
     if((spin_top.xpos.val<3) || (spin_top.xpos.val>400)) {
       spin_top.en=0;
+      VIC.spr_ena&=0xdf;
     } 
   } else {
     //    VIC.bordercolor=COLOR_RED;
-    VIC.spr_ena&=0xdf;
   }
 }
 
@@ -809,20 +809,29 @@ static void __fastcall__ sprite_message2(uint8_t msg)
 {
   spr_mux=0;
   waitvsync();
-
-  SPR_PTR[6]=msg;
-  SPR_PTR[7]=msg+1;
+  
+  SPR_PTR[5]=msg;
+  SPR_PTR[6]=msg+1;
+  SPR_PTR[7]=msg+2;
+  VIC.spr_color[5]=COLOR_BLACK;
   VIC.spr_color[6]=COLOR_BLACK;
   VIC.spr_color[7]=COLOR_BLACK;
-  VIC.spr_pos[6].x=SPR_CENTER_X-48;
-  VIC.spr_pos[7].x=SPR_CENTER_X;
+  VIC.spr_pos[5].x=SPR_CENTER_X-36;
+  VIC.spr_pos[6].x=SPR_CENTER_X-12;
+  VIC.spr_pos[7].x=SPR_CENTER_X+12;
+  VIC.spr_pos[5].y=120;
   VIC.spr_pos[6].y=120;
   VIC.spr_pos[7].y=120;
-  VIC.spr_exp_x |= 0xc0;
-  VIC.spr_exp_y |= 0xc0;
-  VIC.spr_hi_x  &= 0x3f;
-  VIC.spr_mcolor |= 0xc0;
-  VIC.spr_ena |= 0xc0;
+  VIC.spr_exp_x &= 0x1f;
+
+  if(msg<SPR_TXT_READY)
+    VIC.spr_exp_y |= 0xe0;
+  else
+    VIC.spr_exp_y &= 0x1f;
+  
+  VIC.spr_hi_x  &= 0x1f;
+  VIC.spr_mcolor |= 0xe0;
+  VIC.spr_ena |= 0xe0;
 }
 
 static void __fastcall__ sprite_message2p(uint8_t msg)

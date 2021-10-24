@@ -30,7 +30,7 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.31"
+#define VERSION "v0.32"
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02
@@ -81,10 +81,11 @@
 #define SPR_SPIN          (44+SPR_DATA_OFFSET)
 
 #define SPR_TXT_GAME_OVER (49+SPR_DATA_OFFSET)
-#define SPR_TXT_READY     (51+SPR_DATA_OFFSET)
-#define SPR_TXT_SET       (53+SPR_DATA_OFFSET)
-#define SPR_TXT_GO        (55+SPR_DATA_OFFSET)
-#define SPR_TXT_STAGE_CLR (57+SPR_DATA_OFFSET)
+#define SPR_TXT_STAGE_CLR (52+SPR_DATA_OFFSET)
+#define SPR_TXT_READY     (55+SPR_DATA_OFFSET)
+#define SPR_TXT_SET       (58+SPR_DATA_OFFSET)
+#define SPR_TXT_GO        (61+SPR_DATA_OFFSET)
+
 
 
 #define SPR_GGLABS_1      (64+SPR_DATA_OFFSET)
@@ -263,8 +264,8 @@ void __fastcall__ PutLine(void);
 void __fastcall__ PutBigLine(void);
 void __fastcall__ PutCharHR(void);
 //void __fastcall__ printat(uint8_t x, uint8_t y);
-void __fastcall__ convprint_big(uint8_t x);
-void __fastcall__ convert_big(void);
+//void __fastcall__ convprint_big(uint8_t x);
+//void __fastcall__ convert_big(void);
 //void __fastcall__ printbigat(uint8_t x);
 void __fastcall__ print_acorn(uint8_t c);
 void __fastcall__ print_hourglass(uint8_t c);

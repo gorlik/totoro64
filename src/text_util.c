@@ -29,7 +29,7 @@ const uint8_t hexdigit[] = {
 };
 #endif
 
-static unsigned char * const line[] = {
+unsigned char * const line[] = {
   BITMAP_BASE+0,
   BITMAP_BASE+320*1,
 #if (DEBUG)	
