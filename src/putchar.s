@@ -17,18 +17,25 @@
 ;*  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
 ;*                                                                            *
 ;******************************************************************************
-.include "totoro64.inc"
+.setcpu		"6502"
+;.autoimport 	on
 
-.import _charset
+.importzp _line_ptr
+.importzp _temp_ptr
+.import   _charset
+.import   _SCREEN_BASE
+.import   _BITMAP_BASE	
+.import   _STR_BUF
+.import   _line
 
-.export _PutLine
-.export _PutBigLine
-.export _CLR_TOP
-.export _CLR_CENTER
-.export _print_acorn
-.export _print_hourglass
-.export _print_p
-.export _string_pad
+.export   _PutLine
+.export   _PutBigLine
+.export   _CLR_TOP
+.export   _CLR_CENTER
+.export   _print_acorn
+.export   _print_hourglass
+.export   _print_p
+.export   _string_pad
 
 .segment "BSS"
 t1:
