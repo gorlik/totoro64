@@ -34,23 +34,26 @@
 
 
 .segment        "BSS"
-anytmp:
+anyjtmp:
 	.res 1
+padtmp:
+	.res	1,$00
+
+.segment	"CODE"
+
 
 ; ---------------------------------------------------------------
 ; uint8_t __near__ __fastcall__ joy_any (void)
 ; 
 ; returns any joystick or keyboard movement
-
-.segment        "CODE"
 .proc _joy_any: near
 	jsr _joy1
-	sta anytmp
+	sta anyjtmp
 	jsr _joy2
-	ora anytmp
-	sta anytmp
+	ora anyjtmp
+	sta anyjtmp
 	jsr _joyk
-	ora anytmp
+	ora anyjtmp
 	rts
 .endproc
 
@@ -127,22 +130,16 @@ loop:	jsr _waitvsync
 ; void __near__ __fastcall__ string_pad (unsigned char n)
 ; ---------------------------------------------------------------
 ; pad string with leading spaces to length n
-.segment	"BSS"
-pad:
-	.res	1,$00
-
-.segment	"CODE"
-
 .proc	_string_pad: near
 
-	sta pad
+	sta padtmp
 	tay
 	ldx #$FF
 lloop:	inx
 	lda _STR_BUF,x
 	bne lloop
 
-	cpx pad
+	cpx padtmp
 	beq end
 	;;  	ldy pad
 cloop1:
