@@ -17,23 +17,28 @@
 ;*  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
 ;*                                                                            *
 ;******************************************************************************
-
 .include "c64.inc"
 
 .define IPDebug     0
 .include "macros.inc"
 
-
-.export   _IRQ
-.export   color_save
-
 .import   _spr_mux
 .import   spr_mux_irq
 .import   play_track
 
+.export   _IRQ
+.export   color_save
+.exportzp itmp1, itmp2
+
 ; must be equal to sizeof(struct track_t)
 .define   TRACK_T_SIZE 10
 
+;  zero page temporary storage for irq use
+.segment "ZP_2" : zeropage
+itmp1:
+	.res 1
+itmp2:
+	.res 1
 
 .segment 	"BSS"
 color_save:

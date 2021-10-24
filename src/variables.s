@@ -20,8 +20,6 @@
 
 .exportzp       _line_ptr
 .exportzp       _temp_ptr
-.exportzp       itmp1
-.exportzp       itmp2
 
 .export _VIC_BASE
 .export _BITMAP_BASE
@@ -32,13 +30,15 @@
 
 .segment "ZP_2" : zeropage
 ;;  ZP_2 range 0xF7-0xFE
+;; points to netx location to write in the bitpam
 _line_ptr:
 	.res 2
+
+;; temporary zero page storage
 _temp_ptr:
-	.res 2
-itmp1:
+_zptmp1:
 	.res 1
-itmp2:
+_zptmp2:
 	.res 1
 
 
