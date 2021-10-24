@@ -179,5 +179,5 @@ IRQ7:
 	jsr irq_body
 restore_irq:
 	ldx #0			; vector back to _IRQ
-	lda #40			; rasterline 56-LINES_EARLY
+	lda #20			; rasterline 56-LINES_EARLY
 	jmp set_next_raster
