@@ -117,6 +117,7 @@ extern const unsigned char license_txt[];
 #pragma charmap(57,239)
 // map symbols
 #pragma charmap(45,220) // '-'
+#pragma charmap(33,229) // '!'
 
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
@@ -132,7 +133,7 @@ const unsigned char txt_stage[]  = "STAGE";
 #else
 const unsigned char txt_ready[] = "READY";
 const unsigned char txt_set[]   = " SET ";
-const unsigned char txt_go[]    = " GO ";
+const unsigned char txt_go[]    = " GO! ";
 const unsigned char txt_game_over[] = "GAME OVER";
 //const unsigned char txt_clear[]  = "STAGE CLEAR";
 const unsigned char txt_clear[]  = "GREAT!";
@@ -265,7 +266,7 @@ void __fastcall__ setup_sid(void)
 {
   memset8c(0xd400,0,24); // SID address
   SID.amp = 0x1f;        // set volume to 15
-  
+
   memset8s(track,0,sizeof(struct track_t)*2);
 
   track[0].ptr = track[0].restart_ptr = (uint16_t)track0_data;
@@ -284,11 +285,34 @@ void __fastcall__ setup_sid(void)
 void __fastcall__ stage_init()
 {
   static uint8_t stage_idx;
-  stage_idx=((game.stage>LAST_STAGE_IDX()) ?
-	     LAST_STAGE_IDX() : game.stage-1 ) * sizeof(struct stage_t);
+
+#if 0
+  stage_idx=game.stage-1;
+  if(stage_idx>LAST_STAGE_IDX())
+    stage_idx=LAST_STAGE_IDX();
+  stage_idx*=sizeof(struct stage_t);
+
+  __asm__("ldx %v",stage_idx);
+#else
+  __asm__("ldx %v+%b",game,offsetof(struct game_state_t,stage));
+  __asm__("dex");                       // make index zero based
+  __asm__("cpx #%b",LAST_STAGE_IDX());
+  __asm__("bmi skip");
+  __asm__("ldx #%b",LAST_STAGE_IDX());
+  __asm__("skip:");
+  __asm__("stx %v",stage_idx);
+  __asm__("txa");
+#if (sizeof(struct stage_t)!=5)
+#error "sizeof(struct stage_t) must be 5 to use this code"
+#endif
+  __asm__("asl");             // multiply by 5
+  __asm__("asl");
+  __asm__("clc");
+  __asm__("adc %v",stage_idx);
+  __asm__("tax");
+#endif
 
   __asm__("ldy #0");
-  __asm__("ldx %v",stage_idx);
   __asm__("stl: lda %v,x",stage);
   __asm__("sta %v+%b,y",game,offsetof(struct game_state_t,time));
   __asm__("inx");
@@ -329,7 +353,7 @@ static void __fastcall__ spin_top_update()
     if(spin_top.idx>4) spin_top.idx=0;
     spin_top.xpos.val+=spin_top.xv;
     //    spin_top.xpos.val=0xb0;
-  
+
     VIC.spr_pos[5].y=spin_top.ypos;
     VIC.spr_pos[5].x=spin_top.xpos.lo;
     if(spin_top.xpos.hi) VIC.spr_hi_x|=0x20;
@@ -432,9 +456,6 @@ void __fastcall__ acorn_update(void)
   __asm__("jsr %v",acorn_update_asm);
   __asm__("tya");
   __asm__("bne loop");
-  //  __asm__("jmp loop");
-  //  __asm__("end:");
-  
 #endif
 }
 
@@ -468,7 +489,7 @@ void __fastcall__ acorn_add(void)
 
   game.acorn_cnt+=game.accel;
 
-  if(STATE_PLAY_DEMO() 
+  if(STATE_PLAY_DEMO()
      //   && ( ((game.counter&0x3f)==0x20) || (game.flags & SF_DBL_ACORN))
      && ( ( game.acorn_cnt>OBJECT_PERIOD ) )
      )  {
@@ -481,12 +502,12 @@ void __fastcall__ acorn_add(void)
     //    if((r>=36) || (abs(r-oldr)<8) ) return;
     if((r>=36) ) return;
     oldr=r;
-    
+
     r<<=3;
     r+=MIN_X;
     if(acorn_free_slot()) {
       // VIC.bordercolor=COLOR_YELLOW;
-      // shift acorn data 
+      // shift acorn data
       __asm__("sei");
       __asm__("ldx #(%b*%b)",MAX_ACORNS-1,sizeof(struct acorn_t));
       __asm__("loop1: lda %v-1,x",acorn);
@@ -494,7 +515,7 @@ void __fastcall__ acorn_add(void)
       __asm__("dex");
       __asm__("bne loop1");
       __asm__("cli");
-      
+
       acorn[0].xpos.val=r;
       acorn[0].ypos.val=ACORN_START_Y<<8;
       acorn[0].yv.val=4;
@@ -582,7 +603,7 @@ static const uint8_t tcol[8] = {
   COLOR_BLACK,
   COLOR_RED,
 };
-  
+
 void __fastcall__ Title_Sprite_Setup(void)
 {
   VIC.spr_ena=0;       // disable all sprites
@@ -664,7 +685,7 @@ void __fastcall__ update_top_bar(void)
 	printat(P2_SCOREVAL_X,1);
       }
       break;
-      
+
 #if (DEBUG&DEBUG_INFO)
     case 10:
       DEBUG_BORDER_INC();
@@ -741,14 +762,14 @@ void __fastcall__ setup_top_bar(uint8_t flag)
       strcpy8f(txt_bonus);
       printat(P1_BONUSTXT_X,0);
     }
-  
+
     strcpy8f(txt_score);
     printat(P1_SCORETXT_X,0);
 
     if(totoro[1].ctrl==CTRL_PLAY) {
       printat(P2_SCORETXT_X,0);
     }
-  
+
     for(game.counter=(flag)?4:0;game.counter<9;game.counter++)
       update_top_bar();
     game.counter=0;
@@ -766,7 +787,7 @@ void __fastcall__ game_sprite_setup(void)
   //  VIC.spr_ena=0;
   //  if(totoro[0].ctrl) VIC.spr_ena|=0x1c;
   //  if(totoro[1].ctrl) VIC.spr_ena|=0x03;
- 
+
   __asm__("lda #0");
   __asm__("ldx %v+%b+%b",totoro,0*sizeof(struct player_t),offsetof(struct player_t,ctrl));
   __asm__("beq skip1");
@@ -809,7 +830,7 @@ static void __fastcall__ sprite_message2(uint8_t msg)
 {
   spr_mux=0;
   waitvsync();
-  
+
   SPR_PTR[5]=msg;
   SPR_PTR[6]=msg+1;
   SPR_PTR[7]=msg+2;
@@ -828,7 +849,7 @@ static void __fastcall__ sprite_message2(uint8_t msg)
     VIC.spr_exp_y |= 0xe0;
   else
     VIC.spr_exp_y &= 0x1f;
-  
+
   VIC.spr_hi_x  &= 0x1f;
   VIC.spr_mcolor |= 0xe0;
   VIC.spr_ena |= 0xe0;
@@ -962,9 +983,9 @@ int main()
 
   __asm__("dey");
   __asm__("bne loop");
-  
+
   setup_sid();
-  
+
   spr_mux=0;
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
@@ -1060,12 +1081,12 @@ int main()
 #else
   game.mode=GMODE_1P_SOLO;
 #endif
-  
+
   for(;;) { // main loop
     // game over
     MESSAGE(11,MSG_GAME_OVER);
     delay(VFREQ);
-    setup_top_bar(BAR_BASIC);    
+    setup_top_bar(BAR_BASIC);
     CLR_CENTER();
 
     // loop for game selection
@@ -1081,11 +1102,11 @@ int main()
 	delay(VFREQ/6);
       }
     } while (k_in!=0x10);
-    
+
     // game init
     game.stage=1;
     game.state=GSTATE_CUT1;
-    
+
     totoro[0].score=0;
     totoro[1].score=0;
     totoro[0].ctrl=CTRL_PLAY;
@@ -1094,13 +1115,13 @@ int main()
     do {
       // stage init
       stage_init();
-      
+
       totoro_init(CHU_TOTORO);
       totoro_init(CHIBI_TOTORO);
       acorn_init();
       totoro_set_pos();
       chibi_set_pos();
-      
+
       game_sprite_setup();
 
       get_ready();
@@ -1155,7 +1176,7 @@ int main()
 
       // reset music speed to normal
       vpb=VPB;
-      
+
     } while(flag);
 
   }
