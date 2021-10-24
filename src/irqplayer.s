@@ -25,8 +25,6 @@
 
 .export   play_track
 
-.importzp _track_ptr
-
 .import   _vpb
 .import   _track
 
@@ -40,7 +38,10 @@
 .define SIDRestart  0
 
 .define TRACK_T_SIZE 10
-	
+
+.segment "ZP_2" : zeropage
+track_ptr:
+	.res 2
 
 .segment 	"BSS"
 tmp:
@@ -78,9 +79,9 @@ SID_offset:
 .macro load_track_state
 	stx trk_offset
 	lda _track+TRACK_PTR0,x
-	sta _track_ptr
+	sta track_ptr
 	lda _track+TRACK_PTR1,x
-	sta _track_ptr+1
+	sta track_ptr+1
 
 	lda _track+TIMER,x
 	sta timer
@@ -98,9 +99,9 @@ SID_offset:
 .macro save_track_state
 				;.local loop
 	ldx trk_offset
-	lda _track_ptr
+	lda track_ptr
 	sta _track+0,x
-	lda _track_ptr+1
+	lda track_ptr+1
 	sta _track+1,x
 
 	lda timer
@@ -120,7 +121,7 @@ SID_offset:
 	bne timer_dec		; timer not expired
 next:
 	ldy #0
-	lda (_track_ptr),y
+	lda (track_ptr),y
 	sta tmp
 	jsr inc_track_ptr 	; _track_ptr point to the next byte
 	and #$f0
@@ -143,7 +144,7 @@ add_more:
 
 	ldx SID_offset
 	ldy #0
-	lda (_track_ptr),y	; get the note
+	lda (track_ptr),y	; get the note
 	bne not_pause
 	lda instr      ; get the instrument
 	sta SID_Ctl1,x
@@ -197,16 +198,16 @@ parse_cmd:
 
 cmd_ff:	 				; end of stream
 	lda _track+START_PTR0,x		; restart_ptr
-	sta _track_ptr
+	sta track_ptr
 	lda _track+START_PTR1,x
-	sta _track_ptr+1		; point to the beginning of the stream
+	sta track_ptr+1			; point to the beginning of the stream
 	lda _track+NEXT_OFF,x		; next offset
 	sta _track+GLB_OFF,x	        ; set the new global offset
 	sta global_offset
 	jmp next
 
 cmd_fe:				; change instrument from table	
-	lda (_track_ptr),y	; instrument index
+	lda (track_ptr),y	; instrument index
 	tay                     ; intrument indexd in Y
 	lda _itable,y
 	sta instr
@@ -218,7 +219,7 @@ cmd_fe:				; change instrument from table
 	jmp inc_track_next
 
 cmd_fd:	 			; change track offset
-	lda (_track_ptr),y
+	lda (track_ptr),y
 	sta _track+TRACK_OFF,x
 	sta track_offset
 	jmp inc_track_next
@@ -232,24 +233,24 @@ cmd_ex:	 			; change sid register
 	clc
 	adc tmp
 	tax
-	lda (_track_ptr),y
+	lda (track_ptr),y
 	sta SID,x
 	jmp inc_track_next
 
 
 	
 inc_track_next:
-	inc _track_ptr
-	bne inc_end
-	inc _track_ptr+1
-inc_end:
+	jsr inc_track_ptr
+;	inc track_ptr
+; 	bne inc_end
+;	inc track_ptr+1
 	jmp next
 .endproc
 	
 .proc inc_track_ptr: near
-	inc _track_ptr
+	inc track_ptr
 	bne inc_end
-	inc _track_ptr+1
+	inc track_ptr+1
 inc_end:
 	rts
 .endproc

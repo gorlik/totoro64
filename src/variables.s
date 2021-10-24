@@ -18,11 +18,21 @@
 ;*                                                                            *
 ;******************************************************************************
 
+.exportzp       _line_ptr
+.exportzp       _temp_ptr
+.exportzp       itmp1
+.exportzp       itmp2
+
+.export _VIC_BASE
+.export _BITMAP_BASE
+.export _SCREEN_BASE
+.export _SPR_DATA
+.export _SPR_PTR
+.export _charset
+
 .segment "ZP_2" : zeropage
 ;;  ZP_2 range 0xF7-0xFE
 _line_ptr:
-	.res 2
-_track_ptr:
 	.res 2
 _temp_ptr:
 	.res 2
@@ -32,23 +42,9 @@ itmp2:
 	.res 1
 
 
-.exportzp       _line_ptr
-.exportzp       _track_ptr
-.exportzp       _temp_ptr
-.exportzp       itmp1
-.exportzp       itmp2
-
 _VIC_BASE    = $4000
 _BITMAP_BASE = _VIC_BASE   + $2000
 _SCREEN_BASE = _VIC_BASE
 _SPR_PTR     = _SCREEN_BASE + $3f8
 _SPR_DATA    = _VIC_BASE + $400
-
-_charset    = $c000
-
-.export _VIC_BASE
-.export _BITMAP_BASE
-.export _SCREEN_BASE
-.export _SPR_DATA
-.export _SPR_PTR
-.export _charset
+_charset     = $c000
