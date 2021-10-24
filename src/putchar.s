@@ -120,8 +120,8 @@ loop:	iny
 	beq end			; test for null terminator
 	sec
 	sbc #192		; subtract the char offset
-	asl a			; multiply by 4
-	asl a
+	asl			; multiply by 4
+	asl
 	tax
 	lda line1
 	beq skip	; branch if first line
@@ -162,7 +162,8 @@ ret:
 	ldx #80
 @loopc:	lda #1 			; COLOR_WHITE
 	sta $d800-1,x
-	lda #$78                ; YELLOW and ORANGE
+	;	lda #$78                ; YELLOW and ORANGE
+	lda #$FB 		; light gray and dark gray
 	sta _SCREEN_BASE-1,x
 	dex
 	bne @loopc
@@ -177,9 +178,12 @@ ret:
 	dex
 	bne @loopb
 	ldx #18
-	lda #1 			; COLOR_WHITE
-@loopc:	sta $d800+11-1,x
+@loopc:	lda #1 			; COLOR_WHITE
+	sta $d800+11-1,x
 	sta $d800+40+11-1,x
+	lda #$FB
+	sta _SCREEN_BASE-1,x
+	sta _SCREEN_BASE+40-1,x
 	dex
 	bne @loopc
 	rts
@@ -217,7 +221,6 @@ skip:	stx     _STR_BUF
 	rts
 .endproc
 
-
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_acorn (unsigned char)
 ; ---------------------------------------------------------------
@@ -225,8 +228,6 @@ skip:	stx     _STR_BUF
 .segment	"CODE"
 
 .proc	_print_acorn: near
-
-
 	sta     cpos
 	ldy     #$09		; BROWN
 	sty     ccolor
@@ -265,8 +266,13 @@ skip:	stx     _STR_BUF
 	sta     $D801,y
 	sta     $D828,y
 	sta     $D829,y
+	lda #$78
+	sta _SCREEN_BASE,y
+	sta _SCREEN_BASE+1,y
+	sta _SCREEN_BASE+40,y
+	sta _SCREEN_BASE+41,y
 	rts
-	.endproc
+.endproc
 
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ string_pad (unsigned char)
