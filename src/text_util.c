@@ -67,15 +67,18 @@ void __fastcall__ print_col(uint8_t pos)
   (void)pos;
   //      c=pos;
   //      STR_BUF[0]=(c&COL_L)?7:6;
-  __asm__("ldx #147");
+  __asm__("ldx #146");
   __asm__("sta %v",c);
+  __asm__("tay"); // force evaluation of flags
   __asm__("bpl skip"); // COL_L is the sign bit
+  __asm__("dex");
   __asm__("dex");
   __asm__("skip: stx %v",STR_BUF);
     
   STR_BUF[1]=0;
   c&=0x7f;
   printat(c,0);
+  STR_BUF[0]++;
   printat(c,1);
 
   //  POKE(COLOR_RAM+c,COLOR_BROWN);
@@ -84,6 +87,10 @@ void __fastcall__ print_col(uint8_t pos)
   __asm__("lda #%b",COLOR_BROWN);
   __asm__("sta %w,y",0xd800);
   __asm__("sta %w,y",0xd800+40);
+  __asm__("lda #%b",0x78);
+  __asm__("sta %w,y",0x4000);
+  __asm__("sta %w,y",0x4000+40);
+
 }
 
 /*
