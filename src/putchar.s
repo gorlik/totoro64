@@ -22,11 +22,11 @@
 
 .importzp _line_ptr
 .importzp _temp_ptr
-.import   _charset
+.import   _CHARSET
 .import   _SCREEN_BASE
 .import   _BITMAP_BASE
+.import   _COLOR_BASE
 .import   _STR_BUF
-.import   _line
 
 .export   _PutLine
 .export   _PutBigLine
@@ -86,10 +86,10 @@ next_line:
 	tay			; save msb in y
 	clc
 	txa 			;
-	adc _line		; add lsb and store to _line_ptr
+	adc #<_BITMAP_BASE	; add lsb and store to _line_ptr
 	sta _line_ptr 		;
 	tya
-	adc _line+1		; add msb and store to _line_ptr+1
+	adc #>_BITMAP_BASE	; add msb and store to _line_ptr+1
 	sta _line_ptr+1
 	rts
 .endproc
@@ -100,7 +100,7 @@ next_line:
 	;; X: input char
 	ldy #$00
 .repeat 8,cline
-	lda _charset+cline*256,x	;
+	lda _CHARSET+cline*256,x	;
 	sta (_line_ptr),y
 	iny
 .endrepeat
@@ -176,42 +176,50 @@ ret:
 .proc _CLR_TOP: near
 	ldx #160
 	lda #0
-@loopb: sta _BITMAP_BASE-1,x
+loopb: sta _BITMAP_BASE-1,x
 	sta _BITMAP_BASE+160-1,x
 	sta _BITMAP_BASE+320-1,x
 	sta _BITMAP_BASE+480-1,x
 	dex
-	bne @loopb
+	bne loopb
 	ldx #80
-@loopc:	lda #1 			; COLOR_WHITE
-	sta $d800-1,x
+loopc:	lda #$FB 		; light gray and dark gray
 	;	lda #$78                ; YELLOW and ORANGE
-	lda #$FB 		; light gray and dark gray
 	sta _SCREEN_BASE-1,x
+	lda #1 			; COLOR_WHITE
+	sta _COLOR_BASE-1,x
 	dex
-	bne @loopc
+	bne loopc
 	rts
 .endproc
 
 .proc _CLR_CENTER: near
 	ldx #144
 	lda #0
-@loopb: sta _BITMAP_BASE+88-1,x
+loopb:  sta _BITMAP_BASE+88-1,x
 	sta _BITMAP_BASE+320+88-1,x
 	dex
-	bne @loopb
+	bne loopb
 	ldx #18
-@loopc:	lda #1 			; COLOR_WHITE
-	sta $d800+11-1,x
-	sta $d800+40+11-1,x
-	lda #$FB
+loopc:	lda #$FB 		; light gray and dark gray
 	sta _SCREEN_BASE+11-1,x
 	sta _SCREEN_BASE+40+11-1,x
+	lda #1 			; COLOR_WHITE
+	sta _COLOR_BASE+11-1,x
+	sta _COLOR_BASE+40+11-1,x
 	dex
-	bne @loopc
+	bne loopc
 	rts
 .endproc
 
+color_column:	
+	sta _COLOR_BASE,y
+	sta _COLOR_BASE+40,y
+	lda #$78
+	sta _SCREEN_BASE,y
+	sta _SCREEN_BASE+40,y
+	rts
+	
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_col(unsigned char)
 ; ---------------------------------------------------------------
@@ -234,11 +242,7 @@ skip:	stx _STR_BUF
 	jsr _PutLine
 	ldy cpos
 	lda #$09		; BROWN
-	sta $D800,y
-	sta $D800+40,y
-	lda #$78
-	sta _SCREEN_BASE,y
-	sta _SCREEN_BASE+40,y
+	jsr color_column
 	rts
 .endproc
 
@@ -297,15 +301,10 @@ skip:	stx     _STR_BUF
 	jsr     SetLinePtr
 	jsr     _PutBigLine
 	ldy     cpos
-	lda     ccolor
-	sta     $D800,y
-	sta     $D801,y
-	sta     $D828,y
-	sta     $D829,y
-	lda #$78
-	sta _SCREEN_BASE,y
-	sta _SCREEN_BASE+1,y
-	sta _SCREEN_BASE+40,y
-	sta _SCREEN_BASE+41,y
+	lda ccolor
+	jsr color_column
+	iny
+	lda ccolor
+	jsr color_column
 	rts
 .endproc

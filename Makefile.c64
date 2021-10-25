@@ -8,7 +8,7 @@ SYS_INCLUDE=../src
 
 CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -O -t $(TARGET) -D${TV}
 
-OBJECTS=  player.o variables.o sprites.o charset.o text_util.o \
+OBJECTS=  player.o variables.o sprites.o charset.o \
           irq.o irqplayer.o irqmux.o putchar.o util.o \
 	  bitmap.o music.o intro_text.o
 

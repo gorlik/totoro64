@@ -29,11 +29,12 @@
 .export _SCREEN_BASE
 .export _SPR_DATA
 .export _SPR_PTR
-.export _charset
+.export _CHARSET
+.export _COLOR_BASE
 
 .segment "ZP_2" : zeropage
 ;;  ZP_2 range 0xF7-0xFE
-;; points to netx location to write in the bitpam
+;; points to netx location to write in the bitmap
 _line_ptr:
 	.res 2
 
@@ -48,6 +49,8 @@ _zptmp2:
 _VIC_BASE    = $4000
 _BITMAP_BASE = _VIC_BASE   + $2000
 _SCREEN_BASE = _VIC_BASE
+_COLOR_BASE  = $d800
 _SPR_PTR     = _SCREEN_BASE + $3f8
 _SPR_DATA    = _VIC_BASE + $400
-_charset     = $c000
+_CHARSET     = $c000
+

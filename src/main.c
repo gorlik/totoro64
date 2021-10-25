@@ -329,21 +329,6 @@ void __fastcall__ stage_init()
   spin_top.en=0;
 }
 
-static void __fastcall__ kiki_update()
-{
-  static uint16_t kiki_x;
-  kiki_x+=2;
-  if(game.counter&1) {
-    SPR_PTR[5]=SPR_PTR[5]^1;
-  } 
-  if(kiki_x>400) kiki_x=0;
-  VIC.spr_pos[5].y=110;
-  VIC.spr_pos[5].x=kiki_x;
-  if(kiki_x>255) VIC.spr_hi_x|=0x20;
-  else VIC.spr_hi_x&=0xdf;
-  VIC.spr_ena=0xff;
-}
-
 static void __fastcall__ spin_top_update()
 {
   if(spin_top.en) {
@@ -892,31 +877,18 @@ void __fastcall__ get_ready(void)
   __asm__("lda #192");     // replace null with space to concatenate the strings
   __asm__("sta %v+%b",STR_BUF,sizeof(txt_stage)-1);
 
-  set_line_ptr(12,0);
+  if(game.stage<10) {
+    printbigat(13);
+  } else {
+    printbigat(12);
+  }
 
-  // add 1 character space to keep the message centered
-  // if(game.stage<10) line_ptr+=8;
-  __asm__("lda %v+%b",game,offsetof(struct game_state_t,stage));
-  __asm__("cmp #10");
-  __asm__("bcs skip");
-  __asm__("lda %v",line_ptr);
-  __asm__("adc #8");
-  __asm__("sta %v",line_ptr);
-  __asm__("bcc skip");
-  __asm__("inc %v+1",line_ptr);
-  __asm__("skip:");
-
-  PutBigLine();
 #endif
 
   delay(VFREQ);
 
   // "CATCH XX ACORNS"
   CLR_CENTER();
-  strcpy8f(txt_catch);
-  printat(12,0);
-  utoa10(game.acorns);
-  printat(18,0);
   PRINT_STRING_AT(11, txt_catch);
   PRINT_NUMBER_AT(23 ,game.acorns);
   print_acorn(27);
@@ -1034,7 +1006,7 @@ int main()
   VIC.spr_ena=0x0f;
 
   scr_strcpy8(AT(5,16),present_txt);
-  inflatemem (charset, charset_data);
+  inflatemem (CHARSET, charset_data);
   VIC.spr_ena=0xff;
 
   scr_strcpy8(AT(11,33),version_txt);
@@ -1083,7 +1055,7 @@ int main()
 
   while(joy_any()==0);
 
-  inflatemem (COLOR_RAM, color2_data);
+  inflatemem (COLOR_BASE, color2_data);
   //    cgetc();
   mode_bitmap();
 

@@ -265,8 +265,6 @@ void __fastcall__ PutLine(void);
 void __fastcall__ PutBigLine(void);
 void __fastcall__ PutCharHR(void);
 //void __fastcall__ printat(uint8_t x, uint8_t y);
-//void __fastcall__ convprint_big(uint8_t x);
-//void __fastcall__ convert_big(void);
 //void __fastcall__ printbigat(uint8_t x);
 void __fastcall__ print_acorn(uint8_t c);
 void __fastcall__ print_hourglass(uint8_t c);
@@ -309,15 +307,15 @@ extern const uint8_t sprite_src_data[];
 extern const uint8_t bitmap_data[];
 extern const uint8_t color1_data[];
 extern const uint8_t color2_data[];
-extern unsigned char * const line[];
 
 // base pointers for screen data
-extern uint8_t charset[];    // uncompressed charset
-extern uint8_t BITMAP_BASE[];   // screen base
-extern uint8_t SCREEN_BASE[]; // color base
-extern uint8_t SPR_DATA[];   // sprite data
-extern uint8_t SPR_PTR[];    // sprite pointers
-extern uint8_t VIC_BASE[];
+extern uint8_t BITMAP_BASE[];  // bitmap base
+extern uint8_t SCREEN_BASE[];  // character screen base
+extern uint8_t COLOR_BASE[];   // color ram
+extern uint8_t CHARSET[];      // uncompressed charset
+extern uint8_t SPR_DATA[];     // sprite data
+extern uint8_t SPR_PTR[];      // sprite pointers
+extern uint8_t VIC_BASE[];     // base pointer of VIC memory
 
 // global variables
 extern uint8_t STR_BUF[64];
