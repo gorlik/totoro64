@@ -24,7 +24,7 @@
 .importzp _temp_ptr
 .import   _charset
 .import   _SCREEN_BASE
-.import   _BITMAP_BASE	
+.import   _BITMAP_BASE
 .import   _STR_BUF
 .import   _line
 
@@ -35,6 +35,7 @@
 .export   _print_acorn
 .export   _print_hourglass
 .export   _print_p
+.export   _print_col
 
 .segment "BSS"
 ;;  can't put these in zptmp because printbig uses temp_ptr
@@ -155,7 +156,7 @@ loop:	iny
 skip:
 	jsr _PutCharHR		; char to print is in X
 	inx
-	jsr _PutCharHR		; char to print is in X	
+	jsr _PutCharHR		; char to print is in X
 	ldy t1
 	cpy #20
 	bne loop			; max 20 characters
@@ -211,6 +212,35 @@ ret:
 	rts
 .endproc
 
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_col(unsigned char)
+; ---------------------------------------------------------------
+.proc	_print_col: near
+	ldx #146
+        tay             ; forces evaluation of flags on A
+	bpl skip
+	dex
+        dex
+skip:	stx _STR_BUF
+	ldx #0
+	stx _STR_BUF+1
+	and #$7f
+	sta cpos
+	jsr SetLinePtr
+	jsr save_line_ptr
+	jsr _PutLine
+	jsr next_line
+	inc _STR_BUF
+	jsr _PutLine
+	ldy cpos
+	lda #$09		; BROWN
+	sta $D800,y
+	sta $D800+40,y
+	lda #$78
+	sta _SCREEN_BASE,y
+	sta _SCREEN_BASE+40,y
+	rts
+.endproc
 
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_p (unsigned char)
