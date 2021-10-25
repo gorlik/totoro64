@@ -119,10 +119,10 @@ static void __fastcall__ totoro_sprite(uint8_t v)
 
 void __fastcall__ totoro_set_pos(void)
 {
-  static uint8_t anim_idx;
+  static uint8_t chu_anim_idx;
 
   if(totoro[0].poison) {
-    anim_idx=(game.counter&0x1F)>>3;
+    chu_anim_idx=(game.counter&0x1F)>>3;
     VIC.spr_color[2] = COLOR_BLUE;
 
     totoro[0].poison--;
@@ -131,7 +131,7 @@ void __fastcall__ totoro_set_pos(void)
     //__asm__("dec %v+%b+1",totoro,11);  // offsetof(struct player_t,poison));
     //__asm__("skip: dec %v+%b",totoro,11); // offsetof(struct player_t,poison));
   } else {
-    anim_idx=(game.counter&0xF)>>2;
+    chu_anim_idx=(game.counter&0xF)>>2;
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
 
@@ -155,9 +155,9 @@ void __fastcall__ totoro_set_pos(void)
     break;
   case PSTATE_RUN:
     if(totoro[0].xv>0) {
-      totoro_sprite(run_seq[anim_idx]);
+      totoro_sprite(run_seq[chu_anim_idx]);
     } else {
-      totoro_sprite(run_seq[anim_idx+4]);
+      totoro_sprite(run_seq[chu_anim_idx+4]);
     }
     break;
   case PSTATE_BRAKE:
@@ -184,14 +184,14 @@ void __fastcall__ totoro_set_pos(void)
 void __fastcall__ chibi_set_pos(void)
 {
   //  static uint8_t run_offset;
-  static uint8_t anim_idx;
-  static uint8_t tcolor;
+  static uint8_t chibi_anim_idx;
+  static uint8_t chibi_color;
 
   if(totoro[1].poison) {
-    tcolor = COLOR_BLUE;
+    chibi_color = COLOR_BLUE;
     totoro[1].poison--;
   } else {
-    tcolor = COLOR_WHITE;
+    chibi_color = COLOR_WHITE;
   }
 
   VIC.spr_pos[0].x  = VIC.spr_pos[1].x   = totoro[1].xpos.lo;
@@ -204,34 +204,34 @@ void __fastcall__ chibi_set_pos(void)
     if(totoro[1].blink) {
       SPR_PTR[0]=SPR_CHIBI_IDLE+1;
       SPR_PTR[1]=SPR_CHIBI_IDLE;
-      VIC.spr_color[0]=tcolor;
+      VIC.spr_color[0]=chibi_color;
       VIC.spr_color[1]=COLOR_BLACK;
     } else {
       SPR_PTR[0]=SPR_CHIBI_IDLE;
       SPR_PTR[1]=SPR_CHIBI_IDLE+1;
       VIC.spr_color[0]=COLOR_BLACK;
-      VIC.spr_color[1]=tcolor;
+      VIC.spr_color[1]=chibi_color;
     }
   } else {
     switch(totoro[1].state) {
     case PSTATE_RUN:
-      if(totoro[1].poison) anim_idx=(game.counter>>2)&1;
-      else anim_idx=(game.counter>>1)&1;
+      if(totoro[1].poison) chibi_anim_idx=(game.counter>>2)&1;
+      else chibi_anim_idx=(game.counter>>1)&1;
       break;
     case PSTATE_JUMP:
-      anim_idx=1;
+      chibi_anim_idx=1;
       break;
     case PSTATE_BRAKE:
-      anim_idx=0;
+      chibi_anim_idx=0;
       break;
     }
     VIC.spr_color[0]=COLOR_BLACK;
-    VIC.spr_color[1]=tcolor;
+    VIC.spr_color[1]=chibi_color;
     if(totoro[1].xv>0) {
-      SPR_PTR[0]=SPR_CHIBI_RR+anim_idx;
+      SPR_PTR[0]=SPR_CHIBI_RR+chibi_anim_idx;
       SPR_PTR[1]=SPR_CHIBI_RR+2;
     } else if (totoro[1].xv<0) {
-      SPR_PTR[0]=SPR_CHIBI_RL+anim_idx;
+      SPR_PTR[0]=SPR_CHIBI_RL+chibi_anim_idx;
       SPR_PTR[1]=SPR_CHIBI_RL+2;
     } else {
       SPR_PTR[0]=SPR_CHIBI_IDLE;
@@ -261,9 +261,9 @@ void __fastcall__ totoro_update(void)
 
 void __fastcall__ totoro_move()
 {
-  static uint8_t r;
-  static uint8_t ground;
   static uint16_t max_x;
+  static uint8_t ground;
+  static uint8_t r;
 
   tcache.xpos.val+=(tcache.xv>>2);
 
@@ -315,19 +315,19 @@ void __fastcall__ totoro_move()
 void __fastcall__ process_input(void)
 {
   static uint8_t js;
-  static uint8_t acc;
+  static uint8_t t_accel;
  
   if(game.state==GSTATE_PLAY) {
     if(p_idx==0) {
       // chu totoro
-      acc=2;
+      t_accel=2;
       js=joy2() & 0x1c; // mask joy up and down
       if(((game.mode&GMODE_2P_MASK)==0)&&(js==0)) {
 	js=joyk();
       }
     } else {
       // chibi totoro
-      acc=3;
+      t_accel=3;
       if(tcache.ctrl==CTRL_AUTO) {
 	// follow mode
 	if(((totoro[0].state==PSTATE_JUMP) && (totoro[1].state!=PSTATE_JUMP))
@@ -351,7 +351,7 @@ void __fastcall__ process_input(void)
     
     if(js&0x04) {
       if(tcache.xv>-MAX_XV) {
-	tcache.xv-=acc;
+	tcache.xv-=t_accel;
 	if(tcache.xv>0) {
 	  tcache.state=PSTATE_BRAKE;
 	} else {
@@ -362,7 +362,7 @@ void __fastcall__ process_input(void)
     
     if(js&0x08) {
       if(tcache.xv<MAX_XV) {
-	tcache.xv+=acc;
+	tcache.xv+=t_accel;
 	if(tcache.xv<0) {
 	  tcache.state=PSTATE_BRAKE;
 	} else {
