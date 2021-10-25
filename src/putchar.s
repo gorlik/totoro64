@@ -188,8 +188,8 @@ ret:
 	sta $d800+11-1,x
 	sta $d800+40+11-1,x
 	lda #$FB
-	sta _SCREEN_BASE-1,x
-	sta _SCREEN_BASE+40-1,x
+	sta _SCREEN_BASE+11-1,x
+	sta _SCREEN_BASE+40+11-1,x
 	dex
 	bne @loopc
 	rts
