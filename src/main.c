@@ -864,15 +864,17 @@ static void __fastcall__ sprite_message2p(uint8_t msg)
 
 void __fastcall__ get_ready(void)
 {
-  static uint8_t offset;
-  offset=(game.stage>9)?0:1;
   CLR_CENTER();
 
   // "STAGE XX"
-  //  PRINT_STRING_AT(12+offset,txt_stage);
-  //  PRINT_NUMBER_AT(24+offset,game.stage);
-  PRINT_STRING_AT(12+offset,txt_stage);
-  PRINT_NUMBER_AT(24+offset,game.stage);
+  if(game.stage<10) {
+    PRINT_STRING_AT(13,txt_stage);
+    PRINT_NUMBER_AT(25,game.stage);
+  } else {
+    PRINT_STRING_AT(12,txt_stage);
+    PRINT_NUMBER_AT(24,game.stage);
+  }
+
   delay(VFREQ);
 
   // "CATCH XX ACORNS"

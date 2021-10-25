@@ -348,14 +348,20 @@ extern uint8_t p_idx;
   __asm__("dex"); \
   __asm__("bne @l22");
 
+#define set_line_ptr(x,y) do {			\
+    __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\
+    __asm__("sta %v",line_ptr);		\
+    __asm__("lda #>(_BITMAP_BASE+%w)", (y*320+x*8) );	\
+    __asm__("sta %v+1",line_ptr);					\
+  } while (0)
 
 #define printat(x,y) do {			\
-    line_ptr=(line[y]+(x<<3));			\
+    set_line_ptr(x,y);				\
     PutLine();					\
 } while (0)
 
 #define printbigat(x) do {			\
-    line_ptr=(line[0]+(x<<3));			\
+    set_line_ptr(x,0);				\
     PutBigLine();				\
 } while (0) 
     
