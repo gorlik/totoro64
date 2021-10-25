@@ -30,7 +30,9 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.32"
+#define VERSION "v0.33"
+
+#define USE_ZP
 
 #define DEBUG_TIMING 0x01
 #define DEBUG_INFO   0x02

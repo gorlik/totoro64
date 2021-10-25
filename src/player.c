@@ -119,7 +119,11 @@ static void __fastcall__ totoro_sprite(uint8_t v)
 
 void __fastcall__ totoro_set_pos(void)
 {
+#ifdef USE_ZP
+#define chu_anim_idx  zptmp1
+#else
   static uint8_t chu_anim_idx;
+#endif
 
   if(totoro[0].poison) {
     chu_anim_idx=(game.counter&0x1F)>>3;
@@ -183,9 +187,14 @@ void __fastcall__ totoro_set_pos(void)
 
 void __fastcall__ chibi_set_pos(void)
 {
+#ifdef USE_ZP
+#define chibi_anim_idx  zptmp1
+#define chibi_color     zptmp2
+#else
   //  static uint8_t run_offset;
   static uint8_t chibi_anim_idx;
   static uint8_t chibi_color;
+#endif
 
   if(totoro[1].poison) {
     chibi_color = COLOR_BLUE;
@@ -261,9 +270,14 @@ void __fastcall__ totoro_update(void)
 
 void __fastcall__ totoro_move()
 {
-  static uint16_t max_x;
+#ifdef USE_ZP
+#define ground zptmp1
+#define r      zptmp2
+#else
   static uint8_t ground;
   static uint8_t r;
+#endif
+  static uint16_t max_x;
 
   tcache.xpos.val+=(tcache.xv>>2);
 
@@ -314,8 +328,13 @@ void __fastcall__ totoro_move()
 
 void __fastcall__ process_input(void)
 {
+#ifdef USE_ZP
+#define js      zptmp1
+#define t_accel zptmp2
+#else
   static uint8_t js;
   static uint8_t t_accel;
+#endif
  
   if(game.state==GSTATE_PLAY) {
     if(p_idx==0) {
