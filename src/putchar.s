@@ -37,12 +37,37 @@
 .export   _print_p
 
 .segment "BSS"
+;;  can't put these in zptmp because printbig uses temp_ptr
 t1:
 	.res 1
 line1:
 	.res 1
+cpos:
+	.res	1,$00
+ccolor:
+	.res	1,$00
+save_ptr:
+	.res 2
 
 .segment	"CODE"
+
+save_line_ptr:
+	lda _line_ptr
+	sta save_ptr
+	lda _line_ptr+1
+	sta save_ptr+1
+	rts
+
+next_line:
+	clc
+	lda save_ptr
+	adc #64
+	sta _line_ptr
+	lda save_ptr+1
+	adc #1
+	sta _line_ptr+1
+	rts
+
 
 ; ****************** SetLinePtr *********************
 ;  Put a character
@@ -110,13 +135,7 @@ end: 	rts
 ;  Put a line of big text
 	;; t1: counter for next char to write
 .proc _PutBigLine: near
-	clc
-	lda _line_ptr
-	adc #64
-	sta _temp_ptr
-	lda _line_ptr+1
-	adc #1
-	sta _temp_ptr+1
+	jsr save_line_ptr
 	ldy #$0
 	sty line1
 	dey ; loop needs $ff to start
@@ -144,10 +163,7 @@ end:
 	lda line1
 	bne ret
 	inc line1
-	lda _temp_ptr
-	sta _line_ptr
-	lda _temp_ptr+1
-	sta _line_ptr+1
+	jsr next_line
 	ldy #$ff
 	bne loop ; branch always
 ret:
@@ -196,23 +212,10 @@ ret:
 .endproc
 
 
-.segment	"BSS"
-
-cpos:
-	.res	1,$00
-ccolor:
-	.res	1,$00
-
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_p (unsigned char)
 ; ---------------------------------------------------------------
-
-.segment	"CODE"
-
 .proc	_print_p: near
-
-.segment	"CODE"
-
 	ldx     #231 		; '1'
 	cmp     #$15		; a>20 ?
 	bcc     skip
@@ -230,9 +233,6 @@ skip:	stx     _STR_BUF
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_acorn (unsigned char)
 ; ---------------------------------------------------------------
-
-.segment	"CODE"
-
 .proc	_print_acorn: near
 	sta     cpos
 	ldy     #$09		; BROWN
@@ -244,9 +244,6 @@ skip:	stx     _STR_BUF
 ; ---------------------------------------------------------------
 ; void __near__ __fastcall__ print_hourglass (unsigned char)
 ; ---------------------------------------------------------------
-
-.segment	"CODE"
-
 .proc	_print_hourglass: near
 
 	sta     cpos
@@ -256,14 +253,17 @@ skip:	stx     _STR_BUF
 	jmp     print_color_char
 .endproc
 
+; ---------------------------------------------------------------
+; print_color_char
+; ---------------------------------------------------------------
+; char to print in Y
+; position in A and cpos
+; color in ccolor
+; ---------------------------------------------------------------
 .proc	print_color_char: near
-;;  char in y
-;; pos in a and cpos
-;;;  color in ccolor
 	sty     _STR_BUF
 	ldy     #$00
 	sty     _STR_BUF+1
-	;; 	lda     temp_b
 	jsr     SetLinePtr
 	jsr     _PutBigLine
 	ldy     cpos
