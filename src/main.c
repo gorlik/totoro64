@@ -867,6 +867,7 @@ void __fastcall__ get_ready(void)
   CLR_CENTER();
 
   // "STAGE XX"
+#if 0
   if(game.stage<10) {
     PRINT_STRING_AT(13,txt_stage);
     PRINT_NUMBER_AT(25,game.stage);
@@ -874,6 +875,39 @@ void __fastcall__ get_ready(void)
     PRINT_STRING_AT(12,txt_stage);
     PRINT_NUMBER_AT(24,game.stage);
   }
+#else
+  // concatenate txt_stage and game.stage
+  utoa10(game.stage);
+
+  //  STR_BUF[sizeof(txt_stage)]=STR_BUF[0];
+  //  STR_BUF[sizeof(txt_stage)+1]=STR_BUF[1];
+  //  STR_BUF[sizeof(txt_stage)+2]=STR_BUF[2];
+  __asm__("ldx #$ff");
+  __asm__("xloop: inx");
+  __asm__("lda %v,x",STR_BUF);
+  __asm__("sta %v+%b,x",STR_BUF,sizeof(txt_stage));
+  __asm__("bne xloop");
+
+  strcpy8f(txt_stage);
+  __asm__("lda #192");     // replace null with space to concatenate the strings
+  __asm__("sta %v+%b",STR_BUF,sizeof(txt_stage)-1);
+
+  set_line_ptr(12,0);
+
+  // add 1 character space to keep the message centered
+  // if(game.stage<10) line_ptr+=8;
+  __asm__("lda %v+%b",game,offsetof(struct game_state_t,stage));
+  __asm__("cmp #10");
+  __asm__("bcs skip");
+  __asm__("lda %v",line_ptr);
+  __asm__("adc #8");
+  __asm__("sta %v",line_ptr);
+  __asm__("bcc skip");
+  __asm__("inc %v+1",line_ptr);
+  __asm__("skip:");
+
+  PutBigLine();
+#endif
 
   delay(VFREQ);
 
