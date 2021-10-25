@@ -207,19 +207,19 @@ const struct stage_t stage[] = {
   { STAGE_TIME, 90, 1, ACC(23), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT | SF_SPIN },
 };
 
+#define PRINT_STRING_AT(p,m)    do { strcpy8f(m); printbigat(p); } while (0)
+#define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); printbigat(p); } while (0)
+#define PRINT_NUMBER_AT(p,n)    do { utoa10(n); printbigat(p); } while (0)
+
 #ifdef SPRITE_MESSAGES
 #define MESSAGEP(p,m) sprite_message2p(m)
 #define MESSAGE(p,m)  sprite_message2(m)
 #else
-#define MESSAGEP(p,m) do { strcpy8f(m); printbigat(p); delay(VFREQ/3); } while (0)
-#define MESSAGE(p,m)  do { CLR_CENTER(); strcpy8f(m); printbigat(p); } while (0)
+#define MESSAGEP(p,m) do { PRINT_STRING_AT(p,m); delay(VFREQ/3); } while (0)
+#define MESSAGE(p,m)  do { CLR_CENTER(); PRINT_STRING_AT(p,m);  } while (0)
 #endif
 
 #define LAST_STAGE_IDX() ((sizeof(stage)/sizeof(struct stage_t))-1)
-
-#define PRINT_STRING_AT(p,m)    do { strcpy8f(m); printbigat(p); } while (0)
-#define PRINT_NUMBERP_AT(p,n,l) do { utoa10(n); string_pad(l); printbigat(p); } while (0)
-#define PRINT_NUMBER_AT(p,n)    do { utoa10(n); printbigat(p); } while (0)
 
 struct game_state_t game;
 
@@ -250,13 +250,13 @@ void __fastcall__ _strcpy8f (void)
 {
   __asm__("ldy #$FF");
   __asm__("strloop: iny");
-  __asm__("lda (_temp_ptr),y");
-  __asm__("sta _STR_BUF,y");
+  __asm__("lda (%v),y",temp_ptr);
+  __asm__("sta %v,y",STR_BUF);
   __asm__("bne strloop");
 }
 
-#define strcpy8f(a) do {           \
-    temp_ptr=(unsigned char *)a;   \
+#define strcpy8f(src) do {           \
+    temp_ptr=(unsigned char *)src;   \
     _strcpy8f();		   \
   } while (0)
 
