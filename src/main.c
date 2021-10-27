@@ -17,13 +17,12 @@
  *  along with TOTORO64.  If not, see <http://www.gnu.org/licenses/>.         *
  *                                                                            *
  ******************************************************************************/
-#include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <string.h>
 #include <peekpoke.h>
-#include <c64.h>
 #include <zlib.h>
+#include <c64.h>
 
 #include "totoro64.h"
 
@@ -79,12 +78,6 @@
 #define DEBUG_TXT_LEN 12
 #define DEBUG_TXT_X   (40-DEBUG_TXT_LEN)
 
-#define TXT_PTR 0x400
-#define AT(r,c) (TXT_PTR+40*r+c)
-
-void __fastcall__ CLR_TOP(void);
-void __fastcall__ CLR_CENTER(void);
-
 #if (DEBUG & DEBUG_TIMING)
 #define DEBUG_BORDER(a) VIC.bordercolor=a
 #define DEBUG_BORDER_INC() VIC.bordercolor++
@@ -97,11 +90,6 @@ void __fastcall__ CLR_CENTER(void);
 #define BAR_PLAY  1
 #define BAR_BONUS 2
 
-extern const unsigned char present_txt[];
-extern const unsigned char intro_txt[];
-extern const unsigned char version_txt[];
-extern const unsigned char license_txt[];
-  
 // map space
 #pragma charmap(32,192)
 // map numbers
@@ -144,16 +132,6 @@ const unsigned char txt_clear[]  = "GREAT!";
 #define MSG_STAGE_CLR txt_clear
 #endif
 
-#define scr_strcpy8(dst,src)  do {		\
-    __asm__("ldx #$FF");			\
-    __asm__("ls%v: inx",src);			\
-    __asm__("lda %v,x",src);			\
-    __asm__("beq fs%v",src);			\
-    __asm__("sta %w,x",dst);			\
-    __asm__("bne ls%v",src);			\
-    __asm__("fs%v:",src);			\
-  } while (0)
-
 #define wait_line(l)	do {	     \
     __asm__("l1: lda $d012");	     \
     __asm__("cmp #%b",(uint8_t)l);   \
@@ -168,14 +146,15 @@ const uint16_t sound_seq[] = {
   0x2714,
 };
 
-const uint8_t p2_ctrl[4] = {
-  CTRL_OFF, CTRL_AUTO, CTRL_PLAY, CTRL_PLAY,
+const uint8_t p2_ctrl[] = {
+  CTRL_OFF, CTRL_AUTO, CTRL_PLAY /*, CTRL_PLAY, */
 };
 
-const char * const mode_msg[3] = {
+const char * const mode_msg[] = {
   "1P SOLO    ",
   "1P STANDARD",
   "2P CO-OP   ",
+  /*  "2P VS      ", */
 };
 
 #define ACC(a) ((a*50)/VFREQ)
@@ -196,15 +175,15 @@ const struct stage_t stage[] = {
   { STAGE_TIME, 25, 1, ACC(10), SF_WIND1 },
   { STAGE_TIME, 30, 1, ACC(12), SF_WIND1 },
   { STAGE_TIME, 35, 1, ACC(14), SF_WIND1 },
-  { STAGE_TIME, 40, 2, ACC(16), SF_WIND1 | SF_BERRIES },
-  { STAGE_TIME, 45, 2, ACC(18), SF_WIND1 | SF_BERRIES },
-  { STAGE_TIME, 50, 2, ACC(21), SF_WIND1 | SF_BERRIES },
-  { STAGE_TIME, 55, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT },
-  { STAGE_TIME, 60, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT },
-  { STAGE_TIME, 65, 3, ACC(22), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT },
-  { STAGE_TIME, 70, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT | SF_SPIN },
-  { STAGE_TIME, 80, 2, ACC(23), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT | SF_SPIN },
-  { STAGE_TIME, 90, 1, ACC(23), SF_WIND1 | SF_BERRIES | SF_BERRIES_ALT | SF_SPIN },
+  { STAGE_TIME, 40, 2, ACC(16), SF_WIND1 | SF_SPIN },
+  { STAGE_TIME, 45, 2, ACC(18), SF_WIND1 | SF_SPIN },
+  { STAGE_TIME, 50, 2, ACC(21), SF_WIND1 | SF_SPIN },
+  { STAGE_TIME, 55, 3, ACC(22), SF_WIND1 | SF_SPIN | SF_BERRIES },
+  { STAGE_TIME, 60, 3, ACC(22), SF_WIND1 | SF_SPIN | SF_BERRIES },
+  { STAGE_TIME, 65, 3, ACC(22), SF_WIND1 | SF_SPIN | SF_BERRIES },
+  { STAGE_TIME, 70, 2, ACC(23), SF_WIND1 | SF_SPIN | SF_BERRIES | SF_BERRIES_ALT },
+  { STAGE_TIME, 80, 2, ACC(23), SF_WIND1 | SF_SPIN | SF_BERRIES | SF_BERRIES_ALT },
+  { STAGE_TIME, 90, 1, ACC(23), SF_WIND1 | SF_SPIN | SF_BERRIES | SF_BERRIES_ALT },
 };
 
 #define PRINT_STRING_AT(p,m)    do { strcpy8f(m); printbigat(p); } while (0)
@@ -230,18 +209,13 @@ struct sound_t sound;
 struct track_t track[2];
 uint8_t vpb;
 
-
 uint8_t STR_BUF[64];
 
 uint8_t spr_mux;
-uint8_t cr;
 
-int __fastcall__ utoa10 (uint16_t val);
-int __fastcall__ delay  (uint8_t t);
-
-#define totoro_update_m(p) \
-  do { p_idx=p;\
-  totoro_update(); \
+#define totoro_update_m(p)			\
+  do { p_idx=p;					\
+    totoro_update();				\
   } while (0)
 
 void __fastcall__ _strcpy8f (void)
@@ -255,30 +229,10 @@ void __fastcall__ _strcpy8f (void)
 
 #define strcpy8f(src) do {           \
     temp_ptr=(unsigned char *)src;   \
-    _strcpy8f();		   \
+    _strcpy8f();		     \
   } while (0)
 
 
-
-void __fastcall__ setup_sid(void)
-{
-  memset8c(0xd400,0,24); // SID address
-  SID.amp = 0x1f;        // set volume to 15
-
-  memset8s(track,0,sizeof(struct track_t)*2);
-
-  track[0].ptr = track[0].restart_ptr = (uint16_t)track0_data;
-  //  track[0].voice_offset=0;
-
-  track[1].ptr = track[1].restart_ptr = (uint16_t)track1_data;
-  track[1].voice_offset=7;
-
-  vpb = VPB;
-
-  //  sound effects
-  SID.v3.ad = 0x00;
-  SID.v3.sr = 0xa9;
-}
 
 void __fastcall__ stage_init()
 {
@@ -442,11 +396,12 @@ void __fastcall__ acorn_update(void)
 #endif
 }
 
-void __fastcall__ acorn_init(void)
-{
-  // init data
-  memset8s(acorn,0,sizeof(acorn));
-}
+#define acorn_init() memset8s(acorn,0,sizeof(acorn))
+
+//void __fastcall__ acorn_init(void)
+//{
+//  memset8s(acorn,0,sizeof(acorn));
+//}
 
 unsigned char __fastcall__ acorn_free_slot(void)
 {
@@ -546,8 +501,9 @@ void __fastcall__ mode_bitmap(void)
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
 
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
-  //  VIC.addr =0x78; // screen at base +0x1c00, bitmap at base + 0x2000
+  //  VIC.addr = ((SCREEN_BASE-VIC_BASE)>>7)|((BITMAP_BASE-VIC_BASE)>>11);
   VIC.addr =0x08; // screen at base +0x0000, bitmap at base + 0x2000
+  
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
   VIC.bgcolor[0]=COLOR_BLACK;
   VIC.spr_ena=0;
@@ -563,63 +519,6 @@ static void __fastcall__ mode_text(void)
   VIC.addr= 0x16; // screen base at 0x0400, char def at $0x1400
   VIC.bgcolor[0]=COLOR_WHITE;
 }
-
-static const uint8_t tpos[17] = {
-  SPR_CENTER_X-48, 60,
-  SPR_CENTER_X-24, 60,
-  SPR_CENTER_X,    60,
-  SPR_CENTER_X+24, 60,
-  SPR_CENTER_X-96, 105,
-  SPR_CENTER_X-48, 105,
-  SPR_CENTER_X,    105,
-  SPR_CENTER_X+48, 105,
-  0, // VIC.spr_hi_x
-};
-
-static const uint8_t tcol[8] = {
-  COLOR_RED,
-  COLOR_RED,
-  COLOR_RED,
-  COLOR_RED,
-  COLOR_BLACK,
-  COLOR_BLACK,
-  COLOR_BLACK,
-  COLOR_RED,
-};
-
-void __fastcall__ Title_Sprite_Setup(void)
-{
-  VIC.spr_ena=0;       // disable all sprites
-  VIC.spr_mcolor=0x00; // all no multicolor
-
-  VIC.spr_exp_x=0xf0;  // totoro64 exp x
-  VIC.spr_exp_y=0xf0;  // totoro64 exp y
-
-  // setup sprite pointers for the title screen
-  //  for(i=0;i<8;i++) POKE(0x7f8+i,248+i);
-  __asm__("ldx #248");
-  __asm__("loopt: txa");
-  __asm__("sta $7f8-248,x");
-  __asm__("inx");
-  __asm__("bne loopt");
-
-  // setup sprite position
-  //  memcpy(0xd000,tpos,sizeof(tpos));
-  __asm__("ldy #%b",sizeof(tpos));
-  __asm__("loop: lda %v-1,y",tpos);
-  __asm__("sta %w-1,y",0xd000);
-  __asm__("dey");
-  __asm__("bne loop");
-
-  //  setup sprite colors
-  //  memcpy(0xd027,tpos,sizeof(tcol));
-  __asm__("ldy #%b",sizeof(tcol));
-  __asm__("cloop: lda %v-1,y",tcol);
-  __asm__("sta %w-1,y",0xd027);
-  __asm__("dey");
-  __asm__("bne cloop");
-}
-
 
 void __fastcall__ wait_top_bar()
 {
@@ -809,23 +708,46 @@ void __fastcall__ process_sound(void)
 }
 
 #ifdef SPRITE_MESSAGES
+
+static const uint8_t msg_pos[] = {
+  SPR_CENTER_X-36, 120,
+  SPR_CENTER_X-12, 120,
+  SPR_CENTER_X+12, 120,
+};
+
+
 static void __fastcall__ sprite_message2(uint8_t msg)
 {
   spr_mux=0;
   waitvsync();
 
-  SPR_PTR[5]=msg;
-  SPR_PTR[6]=msg+1;
-  SPR_PTR[7]=msg+2;
-  VIC.spr_color[5]=COLOR_BLACK;
-  VIC.spr_color[6]=COLOR_BLACK;
-  VIC.spr_color[7]=COLOR_BLACK;
-  VIC.spr_pos[5].x=SPR_CENTER_X-36;
-  VIC.spr_pos[6].x=SPR_CENTER_X-12;
-  VIC.spr_pos[7].x=SPR_CENTER_X+12;
-  VIC.spr_pos[5].y=120;
-  VIC.spr_pos[6].y=120;
-  VIC.spr_pos[7].y=120;
+  // setup sprite pointers and color
+  //    SPR_PTR[5]=msg-2;
+  //    SPR_PTR[6]=msg-1;
+  //    SPR_PTR[7]=msg;
+  //  VIC.spr_color[5]=COLOR_BLACK;
+  //  VIC.spr_color[6]=COLOR_BLACK;
+  //  VIC.spr_color[7]=COLOR_BLACK;
+
+  __A__=msg;
+  __asm__("ldy #2");
+  __asm__("sloop: sta %v+5,y",SPR_PTR);
+  __asm__("tax");
+  __asm__("dex");
+  __asm__("lda #0");
+  __asm__("sta %w+5,y",0xd027);
+  __asm__("txa");
+  __asm__("dey");
+  __asm__("bpl sloop");
+  
+  // setup sprite position
+  //  memcpy(0xd00a,tpos,sizeof(msg_pos));
+  __asm__("ldy #%b",sizeof(msg_pos));
+  __asm__("loop: lda %v-1,y",msg_pos);
+  __asm__("sta %w-1,y",0xd00a); // VIC address
+  __asm__("dey");
+  __asm__("bne loop");
+  
   VIC.spr_exp_x &= 0x1f;
 
   if(msg<SPR_TXT_READY)
@@ -965,96 +887,16 @@ void __fastcall__ game_loop(void)
   DEBUG_BORDER(COLOR_BLACK);
 }
 
-int main()
+void main(void)
 {
   static uint8_t flag;
   static uint8_t k_in;
   static uint16_t bonus;
 
-  inflatemem (SPR_DATA, sprite_src_data);
-
-  __asm__("ldy #0");
-  __asm__("loop:");
-  __asm__("lda %w-1,y",(0x4000+SPR_GGLABS_1*64));
-  __asm__("sta %w-1,y",0x4000-64*8);
-
-  __asm__("lda %w-1,y",(0x4000+SPR_TITLE_BOLD_1*64));
-#ifdef MOVIE_TITLE
-  __asm__("cpy #192");
-  __asm__("bcs skip");
-  __asm__("lda %w-1,y",(0x4000+SPR_TITLE_MOVIE_1*64));
-  __asm__("skip:");
-#endif
-  __asm__("sta %w-1,y",0x4000-64*4);
-
-  __asm__("dey");
-  __asm__("bne loop");
-
-  setup_sid();
-
-  spr_mux=0;
-  CIA1.icr=0x7f; // disable all CIA1 interrupts
-  *((unsigned int *)0x0314)=(unsigned int)IRQ;
-  VIC.rasterline=1;
-  VIC.imr=0x1; // enable raster interrupt
-  VIC.bgcolor[0]=COLOR_WHITE;
-
-  Title_Sprite_Setup();
-  //  mode_text();
-  VIC.spr_ena=0x0f;
-
-  scr_strcpy8(AT(5,16),present_txt);
-  inflatemem (CHARSET, charset_data);
-  VIC.spr_ena=0xff;
-
-  scr_strcpy8(AT(11,33),version_txt);
-  scr_strcpy8(AT(14,0),intro_txt);
-#if (DEBUG==0)
-  scr_strcpy8(AT(18,0),license_txt);
-#endif
-
-  inflatemem (BITMAP_BASE, bitmap_data);
-  inflatemem (SCREEN_BASE, color1_data);
-  CLR_TOP();
-  //  memset8s(SCREEN_BASE,((COLOR_YELLOW<<4)|COLOR_ORANGE),80); // can embed this in the color1_data array
-
-
-#if 0
-  for(flag=0;flag<32;flag++) {
-    switch(flag&3) {
-    case 0:
-      VIC.spr_pos[4].y=120;
-      VIC.spr_pos[5].y=120+21;
-      VIC.spr_pos[6].y=120+21;
-      VIC.spr_exp_y=0x10;
-      break;
-    case 1:
-      VIC.spr_pos[4].y=120+21;
-      VIC.spr_pos[5].y=120;
-      VIC.spr_pos[6].y=120+21;
-      VIC.spr_exp_y=0x20;
-      break;
-    case 2:
-      VIC.spr_pos[4].y=120+21;
-      VIC.spr_pos[5].y=120+21;
-      VIC.spr_pos[6].y=120;
-      VIC.spr_exp_y=0x40;
-      break;
-    case 3:
-      VIC.spr_pos[4].y=120+21;
-      VIC.spr_pos[5].y=120+21;
-      VIC.spr_pos[6].y=120+21;
-      VIC.spr_exp_y=0x00;
-      break;
-    }
-    delay(15);
-  }
-#endif
-
+  setup();
   while(joy_any()==0);
 
   inflatemem (COLOR_BASE, color2_data);
-  //    cgetc();
   mode_bitmap();
 
 #if (DEBUG&DEBUG_INFO)
@@ -1082,11 +924,7 @@ int main()
      printat(DEBUG_TXT_X,7);*/
 #endif
 
-#ifdef GMODE STATIC
-  game.mode=GMODE_STATIC
-#else
   game.mode=GMODE_1P_SOLO;
-#endif
 
   for(;;) { // main loop
     // game over
@@ -1185,8 +1023,5 @@ int main()
       vpb=VPB;
 
     } while(flag);
-
   }
-
-  return 0;
 }

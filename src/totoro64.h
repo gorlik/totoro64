@@ -82,11 +82,11 @@
 
 #define SPR_SPIN          (44+SPR_DATA_OFFSET)
 
-#define SPR_TXT_GAME_OVER (49+SPR_DATA_OFFSET)
-#define SPR_TXT_STAGE_CLR (52+SPR_DATA_OFFSET)
-#define SPR_TXT_READY     (55+SPR_DATA_OFFSET)
-#define SPR_TXT_SET       (58+SPR_DATA_OFFSET)
-#define SPR_TXT_GO        (61+SPR_DATA_OFFSET)
+#define SPR_TXT_GAME_OVER (49+SPR_DATA_OFFSET+2)
+#define SPR_TXT_STAGE_CLR (52+SPR_DATA_OFFSET+2)
+#define SPR_TXT_READY     (55+SPR_DATA_OFFSET+2)
+#define SPR_TXT_SET       (58+SPR_DATA_OFFSET+2)
+#define SPR_TXT_GO        (61+SPR_DATA_OFFSET+2)
 
 
 #define SPR_GGLABS_1      (64+SPR_DATA_OFFSET)
@@ -288,12 +288,18 @@ void __fastcall__ acorn_set_pos(void);
 uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
+// misc
 void __fastcall__ start_sound(void);
 uint8_t __fastcall__ joy1(void);
 uint8_t __fastcall__ joy2(void);
 uint8_t __fastcall__ joyk(void);
 uint8_t __fastcall__ joy_any(void);
 void __fastcall__ string_pad(int8_t pad);
+int __fastcall__ utoa10 (uint16_t val);
+int __fastcall__ delay  (uint8_t t);
+void __fastcall__ setup(void);
+void __fastcall__ CLR_TOP(void);
+void __fastcall__ CLR_CENTER(void);
 
 // zp variables from ASM
 extern uint8_t * line_ptr;
@@ -312,7 +318,7 @@ extern const uint8_t bitmap_data[];
 extern const uint8_t color1_data[];
 extern const uint8_t color2_data[];
 
-// base pointers for screen data
+// base pointers for graphics data
 extern uint8_t BITMAP_BASE[];  // bitmap base
 extern uint8_t SCREEN_BASE[];  // character screen base
 extern uint8_t COLOR_BASE[];   // color ram
@@ -334,7 +340,7 @@ extern const   uint8_t track1_data[];
 extern struct  track_t track[2];
 extern uint8_t vpb;
 extern uint8_t p_idx;
-
+extern uint8_t spr_mux;
 
 #define memset8s(addr, v, c) \
   __asm__("ldx #%b",c);	    \
