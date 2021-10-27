@@ -1142,6 +1142,7 @@ int main()
       for(;game.time&&game.acorns;)
 	game_loop();
 
+      spin_top.en=0;
       game.state=GSTATE_CUT1;
       if(game.acorns==0) {
 	flag=1;
