@@ -27,15 +27,15 @@
 .import   _BITMAP_BASE
 .import   _COLOR_BASE
 .import   _STR_BUF
+.import   cpos
 
 .export   _PutLine
 .export   _PutBigLine
+.export   _printbigat
 .export   _CLR_TOP
 .export   _CLR_CENTER
-.export   _print_acorn
-.export   _print_hourglass
-.export   _print_p
 .export   _print_col
+.export   color_column
 
 .segment "BSS"
 ;;  can't put these in zptmp because printbig uses temp_ptr
@@ -43,14 +43,18 @@ t1:
 	.res 1
 line1:
 	.res 1
-cpos:
-	.res	1,$00
-ccolor:
-	.res	1,$00
 save_ptr:
 	.res 2
 
 .segment	"CODE"
+
+; ****************** printbigat *********************
+;  Put a line of text
+;  a: position
+.proc _printbigat: near
+	jsr     SetLinePtr
+	jmp     _PutBigLine	; position is still in a
+.endproc
 
 save_line_ptr:
 	lda _line_ptr
@@ -118,7 +122,7 @@ no_carry:
 
 ; ****************** PutLine *********************
 ;  Put a line of text
-	;; t1: counter for next char to write
+;  t1: counter for next char to write
 .proc _PutLine: near
 	ldy #$FF
 loop:	iny
@@ -134,7 +138,7 @@ end: 	rts
 
 ; ****************** PutBigLine *********************
 ;  Put a line of big text
-	;; t1: counter for next char to write
+;  t1: counter for next char to write
 .proc _PutBigLine: near
 	jsr save_line_ptr
 	ldy #$0
@@ -176,8 +180,8 @@ ret:
 .proc _CLR_TOP: near
 	ldx #160
 	lda #0
-loopb: sta _BITMAP_BASE-1,x
-	sta _BITMAP_BASE+160-1,x
+loopb:  sta _BITMAP_BASE-1,x
+        sta _BITMAP_BASE+160-1,x
 	sta _BITMAP_BASE+320-1,x
 	sta _BITMAP_BASE+480-1,x
 	dex
@@ -193,6 +197,8 @@ loopc:	lda #$FB 		; light gray and dark gray
 	rts
 .endproc
 
+; ****************** clr center *********************
+;  Clear center area of top bar
 .proc _CLR_CENTER: near
 	ldx #144
 	lda #0
@@ -212,7 +218,13 @@ loopc:	lda #$FB 		; light gray and dark gray
 	rts
 .endproc
 
-color_column:	
+; ---------------------------------------------------------------
+; color_column
+; ---------------------------------------------------------------
+; position in Y
+; color in A
+; ---------------------------------------------------------------
+color_column:
 	sta _COLOR_BASE,y
 	sta _COLOR_BASE+40,y
 	lda #$78
@@ -242,69 +254,7 @@ skip:	stx _STR_BUF
 	jsr _PutLine
 	ldy cpos
 	lda #$09		; BROWN
-	jsr color_column
-	rts
+	jmp color_column
 .endproc
 
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ print_p (unsigned char)
-; ---------------------------------------------------------------
-.proc	_print_p: near
-	ldx     #231 		; '1'
-	cmp     #$15		; a>20 ?
-	bcc     skip
-	inx			; '1'+1 = '2'
-skip:	stx     _STR_BUF
-	ldx     #'P'
-	stx     _STR_BUF+1
-	ldx     #0
-	stx     _STR_BUF+2
-	jsr     SetLinePtr
-	jsr     _PutBigLine	; position is still in a
-	rts
-.endproc
 
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ print_acorn (unsigned char)
-; ---------------------------------------------------------------
-.proc	_print_acorn: near
-	sta     cpos
-	ldy     #$09		; BROWN
-	sty     ccolor
-	ldy     #223
-	jmp     print_color_char
-.endproc
-
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ print_hourglass (unsigned char)
-; ---------------------------------------------------------------
-.proc	_print_hourglass: near
-
-	sta     cpos
-	ldy     #$03		; CYAN
-	sty     ccolor
-	ldy     #222
-	jmp     print_color_char
-.endproc
-
-; ---------------------------------------------------------------
-; print_color_char
-; ---------------------------------------------------------------
-; char to print in Y
-; position in A and cpos
-; color in ccolor
-; ---------------------------------------------------------------
-.proc	print_color_char: near
-	sty     _STR_BUF
-	ldy     #$00
-	sty     _STR_BUF+1
-	jsr     SetLinePtr
-	jsr     _PutBigLine
-	ldy     cpos
-	lda ccolor
-	jsr color_column
-	iny
-	lda ccolor
-	jsr color_column
-	rts
-.endproc
