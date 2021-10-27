@@ -30,7 +30,7 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.33"
+#define VERSION "v0.34"
 
 #define USE_ZP
 
@@ -144,6 +144,10 @@
 #define PSTATE_RUN   2
 #define PSTATE_BRAKE 3
 
+// poison types
+#define PTYPE_SLOW   0x01
+#define PTYPE_INVERT 0x02
+
 // game states
 #define GSTATE_PLAY 0
 #define GSTATE_DEMO 1
@@ -221,15 +225,15 @@ struct spin_top_t {
 struct player_t {
   uint8_t  ctrl;
   uint16_t score;
-  word_t  xpos;
-  word_t  ypos;
-  int8_t  xv;
-  word_t  yv;    // 8.8 format
-  uint8_t blink;
-  uint16_t poison;
+  word_t   xpos;
+  word_t   ypos;
+  int8_t   xv;
+  word_t   yv;       // 8.8 format
+  uint8_t  blink;    // blink counter
+  uint16_t poison;   // poison counter
+  uint8_t  ptype;    // poison type
   //  enum t_state  state;
-  uint8_t  state;
-  //  enum t_dir    dir;
+  uint8_t  state;    // player state
 };
 
 struct sound_t {
@@ -264,8 +268,7 @@ void __fastcall__ ClrLine(uint8_t l);
 void __fastcall__ PutLine(void);
 void __fastcall__ PutBigLine(void);
 void __fastcall__ PutCharHR(void);
-//void __fastcall__ printat(uint8_t x, uint8_t y);
-//void __fastcall__ printbigat(uint8_t x);
+void __fastcall__ printbigat(uint8_t x);
 void __fastcall__ print_acorn(uint8_t c);
 void __fastcall__ print_hourglass(uint8_t c);
 void __fastcall__ print_col(uint8_t c);
@@ -346,21 +349,12 @@ extern uint8_t p_idx;
   __asm__("dex"); \
   __asm__("bne @l22");
 
-#define set_line_ptr(x,y) do {			\
+#define printat(x,y) do {			\
     __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\
     __asm__("sta %v",line_ptr);		\
     __asm__("lda #>(_BITMAP_BASE+%w)", (y*320+x*8) );	\
     __asm__("sta %v+1",line_ptr);					\
-  } while (0)
-
-#define printat(x,y) do {			\
-    set_line_ptr(x,y);				\
     PutLine();					\
 } while (0)
 
-#define printbigat(x) do {			\
-    set_line_ptr(x,0);				\
-    PutBigLine();				\
-} while (0) 
-    
 #endif

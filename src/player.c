@@ -125,9 +125,15 @@ void __fastcall__ totoro_set_pos(void)
   static uint8_t chu_anim_idx;
 #endif
 
+  chu_anim_idx=(game.counter&0xF)>>2;
+
   if(totoro[0].poison) {
-    chu_anim_idx=(game.counter&0x1F)>>3;
-    VIC.spr_color[2] = COLOR_BLUE;
+    if(totoro[0].ptype==PTYPE_SLOW) {
+      chu_anim_idx=(game.counter&0x1F)>>3;
+      VIC.spr_color[2] = COLOR_BLUE;
+    } else {
+      VIC.spr_color[2] = COLOR_VIOLET;
+    }
 
     totoro[0].poison--;
     //__asm__("lda %v+%b", totoro, 11); // offsetof(struct player_t,poison));
@@ -135,7 +141,6 @@ void __fastcall__ totoro_set_pos(void)
     //__asm__("dec %v+%b+1",totoro,11);  // offsetof(struct player_t,poison));
     //__asm__("skip: dec %v+%b",totoro,11); // offsetof(struct player_t,poison));
   } else {
-    chu_anim_idx=(game.counter&0xF)>>2;
     VIC.spr_color[2] = COLOR_LIGHTBLUE;
   }
 
@@ -197,7 +202,11 @@ void __fastcall__ chibi_set_pos(void)
 #endif
 
   if(totoro[1].poison) {
-    chibi_color = COLOR_BLUE;
+    if(totoro[1].ptype==PTYPE_SLOW) {
+      chibi_color = COLOR_BLUE;
+    } else {
+      chibi_color = COLOR_VIOLET;
+    }
     totoro[1].poison--;
   } else {
     chibi_color = COLOR_WHITE;
@@ -224,8 +233,11 @@ void __fastcall__ chibi_set_pos(void)
   } else {
     switch(totoro[1].state) {
     case PSTATE_RUN:
-      if(totoro[1].poison) chibi_anim_idx=(game.counter>>2)&1;
-      else chibi_anim_idx=(game.counter>>1)&1;
+      if(totoro[1].poison && (totoro[1].ptype==PTYPE_SLOW) ) {
+	chibi_anim_idx=(game.counter>>2)&1;
+      } else {
+	chibi_anim_idx=(game.counter>>1)&1;
+      }
       break;
     case PSTATE_JUMP:
       chibi_anim_idx=1;
@@ -363,7 +375,7 @@ void __fastcall__ process_input(void)
 	js=joy1()& 0x1c; // mask joy up and down
       }
     }
-    //    if(tcache.poison && (js&0x0c)) js^=0x0c;
+    if(tcache.poison && (tcache.ptype==PTYPE_INVERT) && (js&0x0c)) js^=0x0c;
   } else js=0x08; // simulate 'D'
   
   if(tcache.state!=PSTATE_JUMP) {
@@ -409,7 +421,7 @@ void __fastcall__ process_input(void)
       }
     }
   
-    if(tcache.poison) {
+    if(tcache.poison && (tcache.ptype==PTYPE_SLOW) ) {
       if(tcache.xv<-(MAX_XV/2)) tcache.xv=-MAX_XV/2;
       if(tcache.xv>(MAX_XV/2)) tcache.xv=MAX_XV/2;
     }
@@ -459,6 +471,8 @@ void __fastcall__ check_collision(void)
 	case OBJ_BERRY:
           // FIXME: start error sound
 	  tcache.poison+=(POISON_TIME*VFREQ);
+	  if((a->en)&0x80) tcache.ptype=PTYPE_INVERT;
+	  else tcache.ptype=PTYPE_SLOW;
 	  break;
 	case OBJ_APPLE:
 	  // FIXME: bonus sound
