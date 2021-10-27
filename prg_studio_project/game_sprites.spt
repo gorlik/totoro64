@@ -1436,16 +1436,16 @@
     </sdata>
    </sprite>
   <sprite>
-    <description></description>
+    <description>gameover2</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
-    <spbkgnd>12</spbkgnd>
-    <spcolour>2</spcolour>
+    <spbkgnd>11</spbkgnd>
+    <spcolour>0</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
-    <expandy>False</expandy>
+    <expandy>True</expandy>
     <sdata>
       <data>0</data>
       <data>0</data>
@@ -1763,14 +1763,14 @@
     <expandy>True</expandy>
     <sdata>
       <data>0</data>
-      <data>3936195</data>
-      <data>15477711</data>
-      <data>15469567</data>
-      <data>16714747</data>
-      <data>11471803</data>
-      <data>3083195</data>
-      <data>3133323</data>
-      <data>2762762</data>
+      <data>3936192</data>
+      <data>15477696</data>
+      <data>15469555</data>
+      <data>16714739</data>
+      <data>11471806</data>
+      <data>3083198</data>
+      <data>3133374</data>
+      <data>2762914</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
@@ -1798,14 +1798,14 @@
     <expandy>True</expandy>
     <sdata>
       <data>0</data>
-      <data>15990720</data>
-      <data>13302464</data>
-      <data>12775936</data>
-      <data>12778496</data>
-      <data>12775616</data>
-      <data>12776128</data>
-      <data>15990720</data>
-      <data>9087488</data>
+      <data>16580592</data>
+      <data>15908528</data>
+      <data>15776896</data>
+      <data>15777536</data>
+      <data>15776816</data>
+      <data>15776944</data>
+      <data>16580592</data>
+      <data>10660480</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
@@ -2251,9 +2251,9 @@
         <Cell>A0320000000000099;</Cell>
         <Cell>A0300000000000099;</Cell>
         <Cell>A0290000000000099;</Cell>
-        <Cell>A0620000000000199;</Cell>
-        <Cell>A0630000000000199;</Cell>
-        <Cell>A0640000000000199;</Cell>
+        <Cell>A0620000000000099;</Cell>
+        <Cell>A0630000000000099;</Cell>
+        <Cell>A0640000000000099;</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
@@ -2299,9 +2299,9 @@
         <Cell>A</Cell>
         <Cell>A0260000000001199;0270000000001199;0280000000001199;</Cell>
         <Cell>A</Cell>
-        <Cell>A0530000000000099;</Cell>
-        <Cell>A0540000000000099;</Cell>
-        <Cell>A0550000000000099;</Cell>
+        <Cell>A0530000000000199;</Cell>
+        <Cell>A0540000000000199;</Cell>
+        <Cell>A0550000000000199;</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
         <Cell>A</Cell>
