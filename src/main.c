@@ -236,8 +236,6 @@ uint8_t STR_BUF[64];
 uint8_t spr_mux;
 uint8_t cr;
 
-uint16_t last_rand;
-
 int __fastcall__ utoa10 (uint16_t val);
 int __fastcall__ delay  (uint8_t t);
 
@@ -461,7 +459,7 @@ unsigned char __fastcall__ acorn_free_slot(void)
 
 void __fastcall__ new_acorn()
 {
-  acorn[0].spr_ptr=(last_rand&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
+  acorn[0].spr_ptr=(game.random&0x08)?SPR_ACORN_LG:SPR_ACORN_SM;
   acorn[0].spr_color=COLOR_ORANGE;
   acorn[0].en=OBJ_ACORN;
 }
@@ -482,8 +480,8 @@ void __fastcall__ acorn_add(void)
     //    VIC.bordercolor++;
 
     game.acorn_cnt-=OBJECT_PERIOD;
-    alt=last_rand&0x80;
-    r=last_rand&0x3f;
+    alt=game.random&0x80;
+    r=game.random&0x3f;
     //    if((r>=36) || (abs(r-oldr)<8) ) return;
     if((r>=36) ) return;
     oldr=r;
@@ -505,7 +503,7 @@ void __fastcall__ acorn_add(void)
       acorn[0].ypos.val=ACORN_START_Y<<8;
       acorn[0].yv.val=4;
 
-      if((game.flags&SF_BERRIES) && (((last_rand>>8)&0x6)==4) ) {
+      if((game.flags&SF_BERRIES) && (((game.random>>8)&0x6)==4) ) {
 	acorn[0].spr_ptr=SPR_BERRY;
 	acorn[0].en=OBJ_BERRY|alt;
 	if(alt) {
@@ -513,7 +511,7 @@ void __fastcall__ acorn_add(void)
 	  else new_acorn();
 	} else acorn[0].spr_color=COLOR_BLUE;
 
-      } else if((game.apples) && (((last_rand>>8)&0x3f)==25) && (game.time<30) ) {
+      } else if((game.apples) && (((game.random>>8)&0x3f)==25) && (game.time<30) ) {
 	game.apples--;
 	acorn[0].spr_ptr=SPR_APPLE;
 	acorn[0].spr_color=COLOR_LIGHTRED;
@@ -525,8 +523,8 @@ void __fastcall__ acorn_add(void)
 
     if((game.flags&SF_SPIN)&&((game.counter&0xf)==13)&&(spin_top.en==0)) {
       // add a spin top
-      if(((last_rand>>8)&0xf0)==0x60) {
-	if(last_rand&0x10) {
+      if(((game.random>>8)&0xf0)==0x60) {
+	if(game.random&0x10) {
 	  //	  VIC.bordercolor=COLOR_GREEN;
 	  spin_top.xpos.val=380;
 	  spin_top.xv=-2;
@@ -941,7 +939,7 @@ void __fastcall__ game_loop(void)
 
   if(game.flags&SF_WIND1) {
     if(game.counter==187) {
-      tr=last_rand;
+      tr=game.random;
       game.wind_sp=(tr&7)+1;
       if(tr&0x80) game.wind_dir=1;
       else game.wind_dir=-1;
@@ -954,7 +952,7 @@ void __fastcall__ game_loop(void)
   if(game.time==20) vpb=VPB-1;
   if(game.time==10) vpb=VPB-2;
 
-  last_rand=rand();
+  game.random=rand();
   // black background for idle time
   DEBUG_BORDER(COLOR_BLACK);
   wait_line(GROUND_Y+23);

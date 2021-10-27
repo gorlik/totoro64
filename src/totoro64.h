@@ -203,6 +203,7 @@ struct game_state_t {
   uint8_t  acorn_cnt;
   // misc
   uint16_t hi_score;
+  uint16_t random;
 };
 
 struct acorn_t {
