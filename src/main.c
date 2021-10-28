@@ -21,8 +21,8 @@
 #include <conio.h>
 #include <string.h>
 #include <peekpoke.h>
-#include <zlib.h>
 #include <c64.h>
+#include <zlib.h>
 
 #include "totoro64.h"
 
@@ -33,7 +33,6 @@
 #define P1_SCORETXT_X 4
 #define P1_SCOREVAL_X 4
 #define P1_BAR_X      10
-
 #define TIME_ICON_X   13
 #define TIMEVAL_X     15
 
@@ -106,6 +105,8 @@
 // map symbols
 #pragma charmap(45,220) // '-'
 #pragma charmap(33,229) // '!'
+#pragma charmap(60,219) // '<'
+#pragma charmap(62,221) // '>'
 
 const unsigned char txt_score[]  = "SCORE";
 const unsigned char txt_bonus[]  = "BONUS";
@@ -150,10 +151,13 @@ const uint8_t p2_ctrl[] = {
   CTRL_OFF, CTRL_AUTO, CTRL_PLAY /*, CTRL_PLAY, */
 };
 
+
+const char press_fire[] = "FIRE TO START";
+
 const char * const mode_msg[] = {
-  "1P SOLO    ",
-  "1P STANDARD",
-  "2P CO-OP   ",
+  "<   1P SOLO   >",
+  "< 1P STANDARD >",
+  "<  2P CO-OP   >",
   /*  "2P VS      ", */
 };
 
@@ -652,7 +656,7 @@ void __fastcall__ setup_top_bar(uint8_t flag)
       printat(P2_SCORETXT_X,0);
     }
 
-    for(game.counter=(flag)?4:0;game.counter<9;game.counter++)
+    for(game.counter=(flag==BAR_BONUS)?2:0;game.counter<8;game.counter++)
       update_top_bar();
     game.counter=0;
   }
@@ -816,7 +820,7 @@ void __fastcall__ get_ready(void)
   CLR_CENTER();
 
 #ifdef SPRITE_MESSAGES
-  //  setup_top_bar(BAR_PLAY);
+  setup_top_bar(BAR_PLAY);
 #endif
   MESSAGEP(15,MSG_READY);
   MESSAGEP(15,MSG_SET);
@@ -824,7 +828,7 @@ void __fastcall__ get_ready(void)
 #ifndef SPRITE_MESSAGES
   //  setup_top_bar(BAR_PLAY);
 #endif
-    setup_top_bar(BAR_PLAY);
+  //    setup_top_bar(BAR_PLAY);
 }
 
 void __fastcall__ game_loop(void)
@@ -882,7 +886,6 @@ void __fastcall__ game_loop(void)
   // calculate new acorn positions
   acorn_update();
   acorn_add();
-  //  kiki_update();
   spin_top_update();
   DEBUG_BORDER(COLOR_BLACK);
 }
@@ -933,10 +936,12 @@ void main(void)
     setup_top_bar(BAR_BASIC);
     CLR_CENTER();
 
+    strcpy8f(press_fire);
+    printat(13,0);
     // loop for game selection
     do {
       strcpy8f(mode_msg[game.mode]);
-      printat(15,0);
+      printat(12,1);
       k_in=joy_any();
       if(k_in&0x0c) {
 	if(k_in&0x04) game.mode++;

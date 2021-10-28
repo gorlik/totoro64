@@ -30,7 +30,7 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.34"
+#define VERSION "v0.35b"
 
 #define USE_ZP
 
@@ -296,7 +296,7 @@ uint8_t __fastcall__ joyk(void);
 uint8_t __fastcall__ joy_any(void);
 void __fastcall__ string_pad(int8_t pad);
 int __fastcall__ utoa10 (uint16_t val);
-int __fastcall__ delay  (uint8_t t);
+void __fastcall__ delay  (uint8_t t);
 void __fastcall__ setup(void);
 void __fastcall__ CLR_TOP(void);
 void __fastcall__ CLR_CENTER(void);
