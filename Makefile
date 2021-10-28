@@ -6,7 +6,7 @@ c64: artwork
 	cd build-c64n; TV=NTSC make -f ../Makefile.c64
 	mkdir -p build-c64
 	cd build-c64; TV=PAL make -f ../Makefile.c64
-	grep ^ZDATA build-c64/game.map
+	grep ^ZDATA build-c64/totoro64.map
 
 #c128:
 #	mkdir -p build-c128

@@ -32,7 +32,7 @@ HeaderB:
 @reserved1:
 	.byt	$00,$00,$00,$00,$00,$00
 @Name:	;You put the name of the cartridge here.
-	.byt	"GMT"
+	.byt	"TOTORO64"
 
 .segment	"CHIP0"
 ChipB:
