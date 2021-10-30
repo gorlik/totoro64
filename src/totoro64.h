@@ -293,6 +293,7 @@ void __fastcall__ start_sound(void);
 uint8_t __fastcall__ joy1(void);
 uint8_t __fastcall__ joy2(void);
 uint8_t __fastcall__ joyk(void);
+uint8_t __fastcall__ joy2k(void);
 uint8_t __fastcall__ joy_any(void);
 void __fastcall__ string_pad(int8_t pad);
 int __fastcall__ utoa10 (uint16_t val);

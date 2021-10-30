@@ -352,10 +352,7 @@ void __fastcall__ process_input(void)
     if(p_idx==0) {
       // chu totoro
       t_accel=2;
-      js=joy2() & 0x1c; // mask joy up and down
-      if(((game.mode&GMODE_2P_MASK)==0)&&(js==0)) {
-	js=joyk();
-      }
+      js=joy2k() & 0x1c; // mask joy up and down
     } else {
       // chibi totoro
       t_accel=3;

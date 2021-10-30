@@ -29,6 +29,7 @@
 .export    _joy1
 .export    _joy2
 .export    _joyk
+.export    _joy2k	
 .export    _joy_any
 .export    _delay
 .export    _string_pad
@@ -41,6 +42,8 @@
 .export cpos
 
 .segment        "BSS"
+kjoytmp:
+	.res 1
 anyjtmp:
 	.res 1
 padtmp:
@@ -60,48 +63,65 @@ ccolor:
 .proc _joy_any: near
 	jsr _joy1
 	sta anyjtmp
-	jsr _joy2
-	ora anyjtmp
-	sta anyjtmp
-	jsr _joyk
+	jsr _joy2k
 	ora anyjtmp
 	rts
 .endproc
 
 ; ---------------------------------------------------------------
+; uint8_t __near__ __fastcall__ joy2k(void)
+; 
+; returns port 1 joystick
+.proc _joy2k: near
+	jsr _joy2
+	bne end
+	jsr _joyk
+end:	rts
+.endproc
+	
+; ---------------------------------------------------------------
 ; uint8_t __near__ __fastcall__ joyk (void)
 ; 
 ; returns keyboard presses as a joystick
 .proc _joyk: near
-	lda #0
-	ldx 203
-	cpx #10
-	bne skip1
-	ora #$04
-skip1:	cpx #18
-	bne skip2
-	ora #$08
-skip2:	tay
-	lda 653
-	and #$01
-	tax
+				;	sei
+	ldx #$80
+	stx CIA1_DDRB
+	lda CIA1_PRA
+				;	cli
+	ldx #$0
+	stx CIA1_DDRB
+	
+	eor #$ff
+	tay
+	and #$02
+	beq not_fire
+	ldx #$10 		; x contains the temp joy value
+not_fire:
+	stx kjoytmp
 	tya
-	cpx #1
-	bne end
-	ora #$10
-end:	rts
+	and #$18
+	lsr
+	ora kjoytmp
+	rts
 .endproc
+				;	tay
+				;	txa
+				;	cpy #$10
+				;	bne skip1
+				;	ora #$08
+				;skip1:	cpy #$08
+				;	bne end
+				;	ora #$04
+				;end:	rts
+				;.endproc
 
 ; ---------------------------------------------------------------
 ; uint8_t __near__ __fastcall__ joy1 (void)
 ; 
 ; returns port 1 joystick
 .proc _joy1: near
-	lda     #$7F
-        sei
-        sta     CIA1_PRA
-        lda     CIA1_PRB
-        cli
+ 	lda     CIA1_PRB
         and     #$1F
         eor     #$1F
         rts
@@ -112,14 +132,7 @@ end:	rts
 ; 
 ; returns port 2 joystick
 .proc _joy2: near
-	ldx #0
-	lda #$E0
-	ldy #$FF
-	sei
-	sta CIA1_DDRA
-	lda CIA1_PRA
-	sty CIA1_DDRA
-	cli
+	lda CIA1_PRA 		;	sty CIA1_DDRA
 	and #$1F
 	eor #$1F
 	rts

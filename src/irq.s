@@ -60,6 +60,5 @@ no_mux:
 	ldx #1*TRACK_T_SIZE
 	jsr play_track		; track[1]
 not_vic:
-	jmp $EA31 		; alway chain the standard kernel IRQ
+	jmp $EA81
 .endproc
-

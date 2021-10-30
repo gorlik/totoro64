@@ -166,6 +166,10 @@ void __fastcall__ setup(void)
   VIC.rasterline=1;
   VIC.imr=0x1; // enable raster interrupt
   VIC.bgcolor[0]=COLOR_WHITE;
+  CIA1.pra=0;
+  CIA1.prb=0;
+  CIA1.ddra=0;
+  CIA1.ddrb=0;
   
   Title_Sprite_Setup();
   //  mode_text();
