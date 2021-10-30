@@ -34,7 +34,7 @@
 .import   _itable
 
 .import color_save
-	
+
 .define SIDRestart  0
 
 .define TRACK_T_SIZE 10
@@ -100,20 +100,20 @@ SID_offset:
 				;.local loop
 	ldx trk_offset
 	lda track_ptr
-	sta _track+0,x
+	sta _track+TRACK_PTR0,x
 	lda track_ptr+1
-	sta _track+1,x
+	sta _track+TRACK_PTR1,x
 
 	lda timer
-	sta _track+2,x
+	sta _track+TIMER,x
 
 	lda instr
-	sta _track+3,x
+	sta _track+INSTR,x
 .endmacro
 
 .segment	"CODE"
 
-;; ****************** IRQ Interrupt *********************
+;; ****************** Music Player Interrupt *********************
 .proc play_track: near
         border_set 1
 	load_track_state
