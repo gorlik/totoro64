@@ -72,7 +72,7 @@
    </sprite>
   <sprite>
     <description>idle-L3</description>
-    <links></links>
+    <links>3 2 1</links>
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>5</spbkgnd>
@@ -107,10 +107,10 @@
    </sprite>
   <sprite>
     <description>idle-blink-L1</description>
-    <links></links>
+    <links>3 2 4</links>
     <include>True</include>
     <multi>False</multi>
-    <spbkgnd>1</spbkgnd>
+    <spbkgnd>5</spbkgnd>
     <spcolour>14</spcolour>
     <mcolour1>6</mcolour1>
     <mcolour2>7</mcolour2>
@@ -142,10 +142,10 @@
    </sprite>
   <sprite>
     <description>walkR1-L1</description>
-    <links></links>
+    <links>7 6 5</links>
     <include>True</include>
     <multi>False</multi>
-    <spbkgnd>1</spbkgnd>
+    <spbkgnd>5</spbkgnd>
     <spcolour>14</spcolour>
     <mcolour1>6</mcolour1>
     <mcolour2>7</mcolour2>
@@ -162,13 +162,13 @@
       <data>14784</data>
       <data>3968</data>
       <data>1920</data>
-      <data>0</data>
+      <data>256</data>
       <data>64</data>
       <data>14496</data>
       <data>64512</data>
-      <data>1047552</data>
-      <data>8387584</data>
-      <data>4193792</data>
+      <data>1048064</data>
+      <data>8388096</data>
+      <data>4194048</data>
       <data>261888</data>
       <data>1920</data>
       <data>230336</data>
@@ -177,7 +177,7 @@
    </sprite>
   <sprite>
     <description>walkR1-L2</description>
-    <links></links>
+    <links>10 9 8</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -232,13 +232,13 @@
       <data>2048</data>
       <data>344064</data>
       <data>348288</data>
-      <data>349312</data>
+      <data>349824</data>
       <data>344480</data>
       <data>328096</data>
       <data>672</data>
       <data>672</data>
       <data>672</data>
-      <data>128</data>
+      <data>640</data>
       <data>128</data>
       <data>0</data>
       <data>0</data>
@@ -247,7 +247,7 @@
    </sprite>
   <sprite>
     <description>walkR2-L1</description>
-    <links></links>
+    <links>10 9 8</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -335,7 +335,7 @@
       <data>2560</data>
       <data>2048</data>
       <data>344064</data>
-      <data>348288</data>
+      <data>348800</data>
       <data>349568</data>
       <data>344480</data>
       <data>328096</data>
@@ -343,7 +343,7 @@
       <data>672</data>
       <data>672</data>
       <data>640</data>
-      <data>128</data>
+      <data>640</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
@@ -352,10 +352,10 @@
    </sprite>
   <sprite>
     <description>walkR3-L1</description>
-    <links></links>
+    <links>13 12 11</links>
     <include>True</include>
     <multi>False</multi>
-    <spbkgnd>1</spbkgnd>
+    <spbkgnd>5</spbkgnd>
     <spcolour>14</spcolour>
     <mcolour1>6</mcolour1>
     <mcolour2>7</mcolour2>
@@ -442,13 +442,13 @@
       <data>2048</data>
       <data>344064</data>
       <data>348288</data>
-      <data>349312</data>
+      <data>349824</data>
       <data>344480</data>
       <data>328096</data>
       <data>672</data>
       <data>672</data>
       <data>672</data>
-      <data>128</data>
+      <data>640</data>
       <data>128</data>
       <data>0</data>
       <data>0</data>
@@ -457,7 +457,7 @@
    </sprite>
   <sprite>
     <description>brakeR-L1</description>
-    <links></links>
+    <links>16 15 14</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -562,7 +562,7 @@
    </sprite>
   <sprite>
     <description>walkL1-L1</description>
-    <links></links>
+    <links>19 18 17</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -667,7 +667,7 @@
    </sprite>
   <sprite>
     <description>walkL2-L1</description>
-    <links></links>
+    <links>22 21 20</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -772,7 +772,7 @@
    </sprite>
   <sprite>
     <description>walkL3-L1</description>
-    <links></links>
+    <links>25 24 23</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -877,7 +877,7 @@
    </sprite>
   <sprite>
     <description>brakeL-L1</description>
-    <links></links>
+    <links>28 27 26</links>
     <include>True</include>
     <multi>False</multi>
     <spbkgnd>1</spbkgnd>
@@ -1415,8 +1415,6 @@
       <data>0</data>
       <data>0</data>
       <data>0</data>
-      <data>0</data>
-      <data>0</data>
       <data>64</data>
       <data>320</data>
       <data>1088</data>
@@ -1432,6 +1430,8 @@
       <data>2720</data>
       <data>2720</data>
       <data>640</data>
+      <data>0</data>
+      <data>0</data>
       <data>0</data>
     </sdata>
    </sprite>
@@ -1471,12 +1471,12 @@
     </sdata>
    </sprite>
   <sprite>
-    <description></description>
+    <description>acorn_sm</description>
     <links></links>
     <include>True</include>
     <multi>True</multi>
     <spbkgnd>12</spbkgnd>
-    <spcolour>0</spcolour>
+    <spcolour>8</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
@@ -1488,21 +1488,21 @@
       <data>0</data>
       <data>0</data>
       <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
+      <data>16384</data>
+      <data>16384</data>
+      <data>349184</data>
+      <data>1398016</data>
+      <data>1398016</data>
+      <data>1484032</data>
+      <data>1747200</data>
+      <data>698368</data>
+      <data>702464</data>
+      <data>702464</data>
+      <data>702464</data>
+      <data>714752</data>
+      <data>188416</data>
+      <data>172032</data>
+      <data>32768</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1510,8 +1510,8 @@
     <links></links>
     <include>True</include>
     <multi>True</multi>
-    <spbkgnd>1</spbkgnd>
-    <spcolour>2</spcolour>
+    <spbkgnd>0</spbkgnd>
+    <spcolour>3</spcolour>
     <mcolour1>9</mcolour1>
     <mcolour2>7</mcolour2>
     <expandx>False</expandx>
@@ -1524,20 +1524,20 @@
       <data>0</data>
       <data>0</data>
       <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
-      <data>0</data>
+      <data>1398016</data>
+      <data>1398016</data>
+      <data>698368</data>
+      <data>698368</data>
+      <data>172032</data>
+      <data>258048</data>
+      <data>49152</data>
+      <data>32768</data>
+      <data>188416</data>
+      <data>172032</data>
+      <data>714752</data>
+      <data>784384</data>
+      <data>1398016</data>
+      <data>1398016</data>
     </sdata>
    </sprite>
   <sprite>
@@ -1734,8 +1734,8 @@
       <data>774095</data>
       <data>781291</data>
       <data>773067</data>
-      <data>720847</data>
-      <data>174634</data>
+      <data>720655</data>
+      <data>174122</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
@@ -1909,8 +1909,8 @@
       <data>4140992</data>
       <data>11480844</data>
       <data>3092268</data>
-      <data>16728060</data>
-      <data>11053728</data>
+      <data>16531452</data>
+      <data>10529440</data>
       <data>0</data>
       <data>0</data>
       <data>0</data>
