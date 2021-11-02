@@ -346,16 +346,16 @@ extern uint8_t spr_mux;
 #define memset8s(addr, v, c) \
   __asm__("ldx #%b",c);	    \
   __asm__("lda #%b",v);		      \
-  __asm__("l%v: sta %v-1,x",addr,addr);   \
+  __asm__("ms8s%s: sta %v-1,x",__LINE__,addr);   \
   __asm__("dex"); \
-  __asm__("bne l%v",addr);
+  __asm__("bne ms8s%s",__LINE__);
 
 #define memset8c(addr, v, c) \
   __asm__("ldx #%b",c);	    \
   __asm__("lda #%b",v);		      \
-  __asm__("@l22: sta %w-1,x",addr);	\
+  __asm__("ms8c%s: sta %w-1,x",__LINE__,addr);	\
   __asm__("dex"); \
-  __asm__("bne @l22");
+  __asm__("bne ms8c%s",__LINE__);
 
 #define printat(x,y) do {			\
     __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\
