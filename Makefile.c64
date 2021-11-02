@@ -6,7 +6,7 @@ VPATH=../src
 INCLUDE=../src
 SYS_INCLUDE=../src
 
-CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -O -t $(TARGET) -D${TV}
+CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -Oirs -t $(TARGET) -D${TV}
 
 OBJECTS=  player.o variables.o sprites.o charset.o \
           irq.o irqplayer.o irqmux.o putchar.o util.o \
