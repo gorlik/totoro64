@@ -260,18 +260,8 @@ static void __fastcall__ Title_Sprite_Setup(void)
   __asm__("bne loopt");
 
   // setup sprite position
-  //  memcpy(0xd000,tpos,sizeof(tpos));
-  __asm__("ldy #%b",sizeof(tpos));
-  __asm__("loop: lda %v-1,y",tpos);
-  __asm__("sta %w-1,y",0xd000); // VIC address
-  __asm__("dey");
-  __asm__("bne loop");
+  memcpy8c(0xd000,tpos,sizeof(tpos));
 
   //  setup sprite colors
-  //  memcpy(0xd027,tpos,sizeof(tcol));
-  __asm__("ldy #%b",sizeof(tcol));
-  __asm__("cloop: lda %v-1,y",tcol);
-  __asm__("sta %w-1,y",0xd027); // VIC spr color address
-  __asm__("dey");
-  __asm__("bne cloop");
+  memcpy8c(0xd027,tcol,sizeof(tcol));
 }
