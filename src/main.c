@@ -217,8 +217,8 @@ uint8_t STR_BUF[64];
 
 uint8_t spr_mux;
 
-#define totoro_update_m(p)			\
-  do { p_idx=p;					\
+#define totoro_update_m(p) do {			\
+    p_idx=p;					\
     totoro_update();				\
   } while (0)
 
@@ -258,9 +258,8 @@ void __fastcall__ stage_init()
   __asm__("skip:");
   __asm__("stx %v",stage_idx);
   __asm__("txa");
-#if (sizeof(struct stage_t)!=5)
-#error "sizeof(struct stage_t) must be 5 to use this code"
-#endif
+//  static_assert(sizeof(struct stage_t)!=5,
+//          "sizeof(struct stage_t) must be 5 to use this code");
   __asm__("asl");             // multiply by 5
   __asm__("asl");
   __asm__("clc");
@@ -309,9 +308,9 @@ static void __fastcall__ spin_top_update()
   }
 }
 
-#define acorn_update_a(idx) do {	       \
-  __asm__ volatile ("ldy #%b",idx*sizeof(struct acorn_t)); \
-  acorn_update_asm();			       \
+#define acorn_update_a(idx) do {				\
+    __asm__ volatile ("ldy #%b",idx*sizeof(struct acorn_t));	\
+    acorn_update_asm();						\
   } while (0)
 
 static void __fastcall__ acorn_update_asm()
@@ -361,20 +360,19 @@ static void __fastcall__ acorn_update_asm()
   __asm__("end:");
 }
 
-#define acorn_update_m(a)                   \
-do {	                                    \
-    if(acorn[a].ypos.val) {		    \
-      acorn[a].yv.val+=game.accel;        \
-      acorn[a].ypos.val+=(acorn[a].yv.val); \
-      if((acorn[a].ypos.hi)>GROUND_Y) {     \
-      	acorn[a].en=0;			    \
-	acorn[a].ypos.val=0;                \
-      } else {                              \
-        if(game.wind_cnt==0)              \
+#define acorn_update_m(a) do {		      \
+    if(acorn[a].ypos.val) {		      \
+      acorn[a].yv.val+=game.accel;	      \
+      acorn[a].ypos.val+=(acorn[a].yv.val);   \
+      if((acorn[a].ypos.hi)>GROUND_Y) {	      \
+	acorn[a].en=0;			      \
+	acorn[a].ypos.val=0;		      \
+      } else {				      \
+        if(game.wind_cnt==0)		      \
           acorn[a].xpos.val+=game.wind_dir;   \
-      }					    \
-   }   \
-} while(0)
+      }					      \
+    }					      \
+  } while(0)
 
 void __fastcall__ acorn_update(void)
 {
