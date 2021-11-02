@@ -343,26 +343,46 @@ extern uint8_t vpb;
 extern uint8_t p_idx;
 extern uint8_t spr_mux;
 
-#define memset8s(addr, v, c) \
-  __asm__("ldx #%b",c);	    \
-  __asm__("lda #%b",v);		      \
+#define memset8s(addr,v,c) do {			 \
+  __asm__("ldx #%b",c);				 \
+  __asm__("lda #%b",v);				 \
   __asm__("ms8s%s: sta %v-1,x",__LINE__,addr);   \
-  __asm__("dex"); \
-  __asm__("bne ms8s%s",__LINE__);
+  __asm__("dex");				 \
+  __asm__("bne ms8s%s",__LINE__);		 \
+  } while (0)
 
-#define memset8c(addr, v, c) \
-  __asm__("ldx #%b",c);	    \
-  __asm__("lda #%b",v);		      \
-  __asm__("ms8c%s: sta %w-1,x",__LINE__,addr);	\
-  __asm__("dex"); \
-  __asm__("bne ms8c%s",__LINE__);
+#define memset8c(addr,v,c) do {			    \
+  __asm__("ldx #%b",c);				    \
+  __asm__("lda #%b",v);				    \
+  __asm__("ms8c%s: sta %w-1,x",__LINE__,addr);	    \
+  __asm__("dex");				    \
+  __asm__("bne ms8c%s",__LINE__);		    \
+  } while (0)
 
-#define printat(x,y) do {			\
+#define memcpy8c(dst,src,len) do {		\
+    __asm__("ldy #%b",len);			\
+    __asm__("mc8c%s: lda %v-1,y",__LINE__,src); \
+    __asm__("sta %w-1,y",dst);			\
+    __asm__("dey");				\
+    __asm__("bne mc8c%s",__LINE__);		\
+  } while (0)
+
+#define memcpy8s(dst,src,len) do {		\
+    __asm__("ldy #%b",len);			\
+    __asm__("mc8s%s: lda %v-1,y",__LINE__,src); \
+    __asm__("sta %v-1,y",dst);			\
+    __asm__("dey");				\
+    __asm__("bne mc8s%s",__LINE__);		\
+  } while (0)
+
+// #define printat(x,y) printat_f(y*40+x)
+
+#define printat(x,y) do {				\
     __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\
-    __asm__("sta %v",line_ptr);		\
+    __asm__("sta %v",line_ptr);				\
     __asm__("lda #>(_BITMAP_BASE+%w)", (y*320+x*8) );	\
-    __asm__("sta %v+1",line_ptr);					\
-    PutLine();					\
-} while (0)
+    __asm__("sta %v+1",line_ptr);			\
+    PutLine();						\
+  } while (0)
 
 #endif
