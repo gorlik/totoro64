@@ -132,6 +132,9 @@
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2
 
+#define SCR_SPLIT_EN  0x01
+#define SPR_MUX_EN    0x80
+
 // sprite position constants/limits
 #define GROUND_Y 220
 #define ACORN_START_Y 74
@@ -368,7 +371,7 @@ extern struct  spin_top_t spin_top;
 
 // other global variables
 extern uint8_t p_idx;
-extern uint8_t spr_mux;
+extern uint8_t irq_ctrl;
 extern uint8_t STR_BUF[64];
 
 #ifdef VSPR

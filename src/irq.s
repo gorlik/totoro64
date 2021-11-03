@@ -22,7 +22,7 @@
 .define IPDebug     0
 .include "macros.inc"
 
-.import   _spr_mux
+.import   _irq_ctrl
 .import   spr_mux_irq
 .import   play_track
 
@@ -51,8 +51,8 @@ color_save:
 	lda VIC_IRR
 	bpl not_vic	; check if IRQ from VIC
 	sta VIC_IRR	; clear VIC IRQ flag
-        lda _spr_mux
-        beq no_mux
+        lda _irq_ctrl
+        bpl no_mux
         jsr spr_mux_irq
 no_mux:
 	ldx #0*TRACK_T_SIZE

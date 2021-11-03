@@ -160,7 +160,7 @@ void __fastcall__ setup(void)
   
   setup_sid();
   
-  spr_mux=0;
+  irq_ctrl=0;
   CIA1.icr=0x7f; // disable all CIA1 interrupts
   *((unsigned int *)0x0314)=(unsigned int)IRQ;
   VIC.rasterline=1;

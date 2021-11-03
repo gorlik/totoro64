@@ -215,7 +215,7 @@ uint8_t vpb;
 
 uint8_t STR_BUF[64];
 
-uint8_t spr_mux;
+uint8_t irq_ctrl;
 
 #define totoro_update_m(p) do {			\
     p_idx=p;					\
@@ -508,9 +508,9 @@ void __fastcall__ mode_bitmap(void)
 
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
 
-  VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
   //  VIC.addr = ((SCREEN_BASE-VIC_BASE)>>7)|((BITMAP_BASE-VIC_BASE)>>11);
   VIC.addr =0x08; // screen at base +0x0000, bitmap at base + 0x2000
+  VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
 }
 
@@ -720,7 +720,7 @@ static const uint8_t msg_pos[] = {
 
 static void __fastcall__ sprite_message2(uint8_t msg)
 {
-  spr_mux=0;
+  irq_ctrl&=~SPR_MUX_EN;
   waitvsync();
 
   // setup sprite pointers and color
@@ -730,7 +730,6 @@ static void __fastcall__ sprite_message2(uint8_t msg)
   //  VSPR_COLOR(5)=COLOR_BLACK;
   //  VSPR_COLOR(6)=COLOR_BLACK;
   //  VSPR_COLOR(7)=COLOR_BLACK;
-
 
   __A__=msg;
   __asm__("ldy #2");
@@ -970,7 +969,7 @@ void main(void)
       get_ready();
 
       game_sprite_setup();
-      spr_mux=1;
+      irq_ctrl|=SPR_MUX_EN;
 
       game.state=GSTATE_PLAY;
 
