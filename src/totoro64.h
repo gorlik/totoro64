@@ -375,7 +375,6 @@ extern uint8_t spr_mux;
     __asm__("bne mc8s%s",__LINE__);		\
   } while (0)
 
-// #define printat(x,y) printat_f(y*40+x)
 
 #define printat(x,y) do {				\
     __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\

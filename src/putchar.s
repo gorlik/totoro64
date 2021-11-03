@@ -35,7 +35,8 @@
 .export   _CLR_TOP
 .export   _CLR_CENTER
 .export   _print_col
-.export   color_column
+.export   _print_acorn
+.export   _print_hourglass
 
 .segment "BSS"
 ;;  can't put these in zptmp because printbig uses temp_ptr
@@ -45,16 +46,10 @@ line1:
 	.res 1
 save_ptr:
 	.res 2
+ccolor:
+	.res 1
 
 .segment	"CODE"
-
-; ****************** printbigat *********************
-;  Put a line of text
-;  a: position
-.proc _printbigat: near
-	jsr     SetLinePtr
-	jmp     _PutBigLine	; position is still in a
-.endproc
 
 save_line_ptr:
 	lda _line_ptr
@@ -175,6 +170,14 @@ ret:
  	rts
 .endproc
 
+; *********** printbigat *********************
+;  print a line of large text
+;  a: position
+.proc _printbigat: near
+	jsr     SetLinePtr
+	jmp     _PutBigLine	; position is still in a
+.endproc
+
 ; ****************** clr top *********************
 ;  Clear top 2 lines of screen
 .proc _CLR_TOP: near
@@ -187,13 +190,13 @@ loopb:  sta _BITMAP_BASE-1,x
 	dex
 	bne loopb
 	ldx #80
-loopc:	lda #$FB 		; light gray and dark gray
+loop:	lda #$FB 		; light gray and dark gray
 	;	lda #$78                ; YELLOW and ORANGE
 	sta _SCREEN_BASE-1,x
 	lda #1 			; COLOR_WHITE
 	sta _COLOR_BASE-1,x
 	dex
-	bne loopc
+	bne loop
 	rts
 .endproc
 
@@ -207,14 +210,14 @@ loopb:  sta _BITMAP_BASE+88-1,x
 	dex
 	bne loopb
 	ldx #18
-loopc:	lda #$FB 		; light gray and dark gray
+loop:	lda #$FB 		; light gray and dark gray
 	sta _SCREEN_BASE+11-1,x
 	sta _SCREEN_BASE+40+11-1,x
 	lda #1 			; COLOR_WHITE
 	sta _COLOR_BASE+11-1,x
 	sta _COLOR_BASE+40+11-1,x
 	dex
-	bne loopc
+	bne loop
 	rts
 .endproc
 
@@ -257,4 +260,45 @@ skip:	stx _STR_BUF
 	jmp color_column
 .endproc
 
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_acorn (unsigned char)
+; ---------------------------------------------------------------
+.proc	_print_acorn: near
+	sta     cpos
+	ldy     #$09		; BROWN
+	sty     ccolor
+	ldy     #223
+	jmp     print_color_char
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ __fastcall__ print_hourglass (unsigned char)
+; ---------------------------------------------------------------
+.proc	_print_hourglass: near
+	sta     cpos
+	ldy     #$03		; CYAN
+	sty     ccolor
+	ldy     #222
+	jmp     print_color_char
+.endproc
+
+; ---------------------------------------------------------------
+; print_color_char
+; ---------------------------------------------------------------
+; char to print in Y
+; position in A and cpos
+; color in ccolor
+; ---------------------------------------------------------------
+.proc	print_color_char: near
+	sty _STR_BUF
+	ldy #$00
+	sty _STR_BUF+1
+	jsr _printbigat
+	ldy cpos
+	lda ccolor
+	jsr color_column
+	iny
+	lda ccolor
+	jmp color_column
+.endproc
 

@@ -24,7 +24,6 @@
 .import    _STR_BUF
 .import    _waitvsync
 .import    _printbigat
-.import    color_column
 
 .export    _joy1
 .export    _joy2
@@ -35,8 +34,6 @@
 .export    _string_pad
 .export    _utoa10
 
-.export   _print_acorn
-.export   _print_hourglass
 .export   _print_p
 
 .export cpos
@@ -49,8 +46,6 @@ anyjtmp:
 padtmp:
 	.res	1,$00
 cpos:
-	.res	1,$00
-ccolor:
 	.res	1,$00
 
 .segment	"CODE"
@@ -165,49 +160,6 @@ skip:	stx     _STR_BUF
 	stx     _STR_BUF+2
 	jsr     _printbigat	; position is still in a
 	rts
-.endproc
-
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ print_acorn (unsigned char)
-; ---------------------------------------------------------------
-.proc	_print_acorn: near
-	sta     cpos
-	ldy     #$09		; BROWN
-	sty     ccolor
-	ldy     #223
-	jmp     print_color_char
-.endproc
-
-; ---------------------------------------------------------------
-; void __near__ __fastcall__ print_hourglass (unsigned char)
-; ---------------------------------------------------------------
-.proc	_print_hourglass: near
-
-	sta     cpos
-	ldy     #$03		; CYAN
-	sty     ccolor
-	ldy     #222
-	jmp     print_color_char
-.endproc
-
-; ---------------------------------------------------------------
-; print_color_char
-; ---------------------------------------------------------------
-; char to print in Y
-; position in A and cpos
-; color in ccolor
-; ---------------------------------------------------------------
-.proc	print_color_char: near
-	sty _STR_BUF
-	ldy #$00
-	sty _STR_BUF+1
-	jsr _printbigat
-	ldy cpos
-	lda ccolor
-	jsr color_column
-	iny
-	lda ccolor
-	jmp color_column
 .endproc
 
 ; ---------------------------------------------------------------

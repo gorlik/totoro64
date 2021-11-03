@@ -60,5 +60,5 @@ no_mux:
 	ldx #1*TRACK_T_SIZE
 	jsr play_track		; track[1]
 not_vic:
-	jmp $EA81
+	jmp $EA81		; KERNAL IRQ end
 .endproc

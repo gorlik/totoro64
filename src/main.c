@@ -288,6 +288,7 @@ static void __fastcall__ spin_top_update()
 {
   if(spin_top.en) {
     VIC.spr_ena|=0x20;
+    VIC.spr_color[5]=COLOR_BLACK;
     SPR_PTR[5]=SPR_SPIN+spin_top.idx;
     spin_top.idx++;
     if(spin_top.idx>4) spin_top.idx=0;
@@ -500,18 +501,17 @@ void __fastcall__ acorn_add(void)
 
 void __fastcall__ mode_bitmap(void)
 {
+  VIC.spr_ena=0;
+  VIC.bgcolor[0]=COLOR_BLACK;
+  VIC.spr_mcolor0=COLOR_BROWN;
+  VIC.spr_mcolor1=COLOR_YELLOW;
+
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
 
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
   //  VIC.addr = ((SCREEN_BASE-VIC_BASE)>>7)|((BITMAP_BASE-VIC_BASE)>>11);
   VIC.addr =0x08; // screen at base +0x0000, bitmap at base + 0x2000
-  
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
-  VIC.bgcolor[0]=COLOR_BLACK;
-  VIC.spr_ena=0;
-
-  VIC.spr_mcolor0=COLOR_BROWN;
-  VIC.spr_mcolor1=COLOR_YELLOW;
 }
 
 static void __fastcall__ mode_text(void)
@@ -662,7 +662,6 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 
 void __fastcall__ game_sprite_setup(void)
 {
-  VIC.spr_color[5]=COLOR_BLACK;
 
   VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
   VIC.spr_exp_x=0x1C;
@@ -743,12 +742,7 @@ static void __fastcall__ sprite_message2(uint8_t msg)
   __asm__("bpl sloop");
   
   // setup sprite position
-  //  memcpy(0xd00a,tpos,sizeof(msg_pos));
-  __asm__("ldy #%b",sizeof(msg_pos));
-  __asm__("loop: lda %v-1,y",msg_pos);
-  __asm__("sta %w-1,y",0xd00a); // VIC address
-  __asm__("dey");
-  __asm__("bne loop");
+  memcpy8c(0xd00a,msg_pos,sizeof(msg_pos));
   
   VIC.spr_exp_x &= 0x1f;
 
