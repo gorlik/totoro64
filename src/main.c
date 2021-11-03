@@ -287,22 +287,22 @@ void __fastcall__ stage_init()
 static void __fastcall__ spin_top_update()
 {
   if(spin_top.en) {
-    VIC.spr_ena|=0x20;
-    VIC.spr_color[5]=COLOR_BLACK;
-    SPR_PTR[5]=SPR_SPIN+spin_top.idx;
+    SPR_EN|=0x20;
+    VSPR_COLOR(5)=COLOR_BLACK;
+    VSPR_PTR(5)=SPR_SPIN+spin_top.idx;
     spin_top.idx++;
     if(spin_top.idx>4) spin_top.idx=0;
     spin_top.xpos.val+=spin_top.xv;
     //    spin_top.xpos.val=0xb0;
 
-    VIC.spr_pos[5].y=spin_top.ypos;
-    VIC.spr_pos[5].x=spin_top.xpos.lo;
-    if(spin_top.xpos.hi) VIC.spr_hi_x|=0x20;
-    else VIC.spr_hi_x&=0xdf;
+    VSPR_YPOS(5)=spin_top.ypos;
+    VSPR_XPOS(5)=spin_top.xpos.lo;
+    if(spin_top.xpos.hi) SPR_HX|=0x20;
+    else SPR_HX&=0xdf;
 
     if((spin_top.xpos.val<3) || (spin_top.xpos.val>400)) {
       spin_top.en=0;
-      VIC.spr_ena&=0xdf;
+      SPR_EN&=0xdf;
     } 
   } else {
     //    VIC.bordercolor=COLOR_RED;
@@ -662,14 +662,13 @@ void __fastcall__ setup_top_bar(uint8_t flag)
 
 void __fastcall__ game_sprite_setup(void)
 {
+  SPR_MC=0xf0;  // spr 5 is  multicolor
+  SPR_EX=0x1c;
+  SPR_EY=0x1c;
 
-  VIC.spr_mcolor=0xF0; // spr 5 is  multicolor
-  VIC.spr_exp_x=0x1C;
-  VIC.spr_exp_y=0x1C;
-
-  //  VIC.spr_ena=0;
-  //  if(totoro[0].ctrl) VIC.spr_ena|=0x1c;
-  //  if(totoro[1].ctrl) VIC.spr_ena|=0x03;
+  //  SPR_EN=0;
+  //  if(totoro[0].ctrl) SPR_EN|=0x1c;
+  //  if(totoro[1].ctrl) SPR_EN|=0x03;
 
   __asm__("lda #0");
   __asm__("ldx %v+%b+%b",totoro,0*sizeof(struct player_t),offsetof(struct player_t,ctrl));
@@ -678,7 +677,9 @@ void __fastcall__ game_sprite_setup(void)
   __asm__("skip1: ldx %v+%b+%b",totoro,1*sizeof(struct player_t),offsetof(struct player_t,ctrl));
   __asm__("beq skip2");
   __asm__("ora #$03");
-  __asm__("skip2: sta $d015");
+  __asm__("skip2:");
+
+  SPR_EN=__A__;
 }
 
 void __fastcall__ start_sound(void)
@@ -723,12 +724,13 @@ static void __fastcall__ sprite_message2(uint8_t msg)
   waitvsync();
 
   // setup sprite pointers and color
-  //    SPR_PTR[5]=msg-2;
-  //    SPR_PTR[6]=msg-1;
-  //    SPR_PTR[7]=msg;
-  //  VIC.spr_color[5]=COLOR_BLACK;
-  //  VIC.spr_color[6]=COLOR_BLACK;
-  //  VIC.spr_color[7]=COLOR_BLACK;
+  //  VSPR_PTR(5)=msg-2;
+  //  VSPR_PTR(6)=msg-1;
+  //  VSPR_PTR(7)=msg;
+  //  VSPR_COLOR(5)=COLOR_BLACK;
+  //  VSPR_COLOR(6)=COLOR_BLACK;
+  //  VSPR_COLOR(7)=COLOR_BLACK;
+
 
   __A__=msg;
   __asm__("ldy #2");
@@ -744,16 +746,16 @@ static void __fastcall__ sprite_message2(uint8_t msg)
   // setup sprite position
   memcpy8c(0xd00a,msg_pos,sizeof(msg_pos));
   
-  VIC.spr_exp_x &= 0x1f;
+   SPR_EX&=0x1f;
 
   if(msg<SPR_TXT_READY)
-    VIC.spr_exp_y |= 0xe0;
+    SPR_EY|= 0xe0;
   else
-    VIC.spr_exp_y &= 0x1f;
+    SPR_EY&=0x1f;
 
-  VIC.spr_hi_x  &= 0x1f;
-  VIC.spr_mcolor |= 0xe0;
-  VIC.spr_ena |= 0xe0;
+  SPR_HX&= 0x1f;
+  SPR_MC|=0xe0;
+  SPR_EN|=0xe0;
 }
 
 static void __fastcall__ sprite_message2p(uint8_t msg)

@@ -27,6 +27,7 @@
 //#define NTSC
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
+//#define VSPR
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
@@ -94,7 +95,38 @@
 #define SPR_64            (71+SPR_DATA_OFFSET)
 #define SPR_TITLE_MOVIE_1 (72+SPR_DATA_OFFSET)
 
+#ifdef VSPR
+#define VSPR_FIELD   0
+#define VSPR_BAR     1
+#define VZONES 2
+#define VNUM 3
+#define VTSIZE (VNUM*2)
+#define VIDX(a) ((a-(8-VNUM)))
 
+#define SPR_EN vspr_ctl[VSPR_FIELD].en
+#define SPR_MC vspr_ctl[VSPR_FIELD].mc
+#define SPR_EX vspr_ctl[VSPR_FIELD].exp_x
+#define SPR_EY vspr_ctl[VSPR_FIELD].exp_y
+#define SPR_HX vspr_ctl[VSPR_FIELD].hi_x
+
+#define VSPR_XPOS(x)  vspr_pos[VIDX(x)*2]
+#define VSPR_YPOS(x)  vspr_pos[VIDX(x)*2+1]
+#define VSPR_PTR(x)   vspr_pc[VIDX(x)]
+#define VSPR_COLOR(x) vspr_pc[VIDX(x)+VNUM]
+
+#else
+#define SPR_EN VIC.spr_ena
+#define SPR_MC VIC.spr_mcolor
+#define SPR_EX VIC.spr_exp_x
+#define SPR_EY VIC.spr_exp_y
+#define SPR_HX VIC.spr_hi_x
+
+#define VSPR_XPOS(s)  VIC.spr_pos[s].x
+#define VSPR_YPOS(s)  VIC.spr_pos[s].y
+#define VSPR_PTR(s)   SPR_PTR[s]
+#define VSPR_COLOR(s) VIC.spr_color[s]
+
+#endif
 
 // the following must be kept in sync with the assembly code
 #define MAX_ACORNS 8
@@ -328,20 +360,28 @@ extern uint8_t SPR_DATA[];     // sprite data
 extern uint8_t SPR_PTR[];      // sprite pointers
 extern uint8_t VIC_BASE[];     // base pointer of VIC memory
 
-// global variables
-extern uint8_t STR_BUF[64];
+// global state
 extern struct  game_state_t game;
 extern struct  player_t totoro[2];
 extern struct  acorn_t acorn[MAX_ACORNS];
 extern struct  spin_top_t spin_top;
+
+// other global variables
+extern uint8_t p_idx;
+extern uint8_t spr_mux;
+extern uint8_t STR_BUF[64];
+
+#ifdef VSPR
+extern struct vspr_ctl_t  vspr_ctl[VZONES];
+extern uint8_t vspr_pos[VTSIZE*VZONES];
+extern uint8_t vspr_pc[VTSIZE*VZONES];
+#endif
 
 // irq player interface
 extern const   uint8_t track0_data[];
 extern const   uint8_t track1_data[];
 extern struct  track_t track[2];
 extern uint8_t vpb;
-extern uint8_t p_idx;
-extern uint8_t spr_mux;
 
 #define memset8s(addr,v,c) do {			 \
   __asm__("ldx #%b",c);				 \

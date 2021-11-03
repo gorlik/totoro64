@@ -154,8 +154,8 @@ void __fastcall__ totoro_set_pos(void)
   VIC.spr_pos[4].y   = totoro[0].ypos.hi;*/
   VIC.spr_pos[2].y   = VIC.spr_pos[3].y   = VIC.spr_pos[4].y   = totoro[0].ypos.hi;
 
-  if(totoro[0].xpos.hi)   VIC.spr_hi_x |=0x1C;
-  else VIC.spr_hi_x &= 0xE3;
+  if(totoro[0].xpos.hi)   SPR_HX |=0x1C;
+  else SPR_HX &= 0xE3;
 
   switch(totoro[0].state) {
   case PSTATE_IDLE:
@@ -215,8 +215,8 @@ void __fastcall__ chibi_set_pos(void)
   VIC.spr_pos[0].x  = VIC.spr_pos[1].x   = totoro[1].xpos.lo;
   VIC.spr_pos[0].y  = VIC.spr_pos[1].y   = totoro[1].ypos.hi;
 
-  if(totoro[1].xpos.hi)   VIC.spr_hi_x |=0x03;
-  else VIC.spr_hi_x &= 0xFC;
+  if(totoro[1].xpos.hi)   SPR_HX |=0x03;
+  else SPR_HX &= 0xFC;
 
   if (totoro[1].state==PSTATE_IDLE) {
     if(totoro[1].blink) {
