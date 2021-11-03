@@ -47,7 +47,7 @@ background: artwork/background.s tools
 	utils/bin_to_c src/background-color2.bin.deflate color2_data ZDATA  >>src/bitmap.c
 
 test: all
-	x64 -cart16 build-c64/game64.bin
+	x64 -cart16 build-c64/totoro64.bin
 
 #	x128 -extfrom build-c128/cterm128.bin -extfunc 1
 
