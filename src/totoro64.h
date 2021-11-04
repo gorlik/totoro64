@@ -27,7 +27,7 @@
 //#define NTSC
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
-//#define VSPR
+//#define HIRES
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
@@ -95,7 +95,7 @@
 #define SPR_64            (71+SPR_DATA_OFFSET)
 #define SPR_TITLE_MOVIE_1 (72+SPR_DATA_OFFSET)
 
-#ifdef VSPR
+#ifdef HIRES
 #define VSPR_FIELD   0
 #define VSPR_BAR     1
 #define VZONES 2
@@ -294,6 +294,17 @@ struct instr_t {
   uint8_t sr;
 };
 
+struct vspr_ctl_t {
+  uint8_t hi_x;
+  uint8_t en;
+  uint8_t exp_y;
+  uint8_t mc;
+  uint8_t exp_x;
+  uint8_t pad;
+  //  uint8_t mc0;
+  //  uint8_t mc1;
+};
+
 // ASM function prototypes
 void IRQ(void);
 
@@ -304,6 +315,7 @@ void __fastcall__ ClrLine(uint8_t l);
 void __fastcall__ PutLine(void);
 void __fastcall__ PutBigLine(void);
 void __fastcall__ PutCharHR(void);
+void __fastcall__ printat_f(uint8_t pos);
 void __fastcall__ printbigat(uint8_t x);
 void __fastcall__ print_acorn(uint8_t c);
 void __fastcall__ print_hourglass(uint8_t c);
@@ -374,7 +386,7 @@ extern uint8_t p_idx;
 extern uint8_t irq_ctrl;
 extern uint8_t STR_BUF[64];
 
-#ifdef VSPR
+#ifdef HIRES
 extern struct vspr_ctl_t  vspr_ctl[VZONES];
 extern uint8_t vspr_pos[VTSIZE*VZONES];
 extern uint8_t vspr_pc[VTSIZE*VZONES];
@@ -418,7 +430,7 @@ extern uint8_t vpb;
     __asm__("bne mc8s%s",__LINE__);		\
   } while (0)
 
-
+#ifndef HIRES
 #define printat(x,y) do {				\
     __asm__("lda #<(_BITMAP_BASE+%w)", (y*320+x*8) );	\
     __asm__("sta %v",line_ptr);				\
@@ -426,5 +438,7 @@ extern uint8_t vpb;
     __asm__("sta %v+1",line_ptr);			\
     PutLine();						\
   } while (0)
-
+#else
+#define printat(x,y) printat_f(y*40+x)
+#endif
 #endif

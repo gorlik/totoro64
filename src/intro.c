@@ -176,7 +176,11 @@ void __fastcall__ setup(void)
   VIC.spr_ena=0x0f;
 
   scr_strcpy8(AT(5,16),present_txt);
+#ifndef HIRES
   inflatemem (CHARSET, charset_data);
+#else
+  inflatemem((uint8_t *)(0x6000-2048),charset_data);
+#endif
   VIC.spr_ena=0xff;
   
   scr_strcpy8(AT(11,33),version_txt);

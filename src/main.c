@@ -217,6 +217,12 @@ uint8_t STR_BUF[64];
 
 uint8_t irq_ctrl;
 
+#ifdef HIRES
+struct vspr_ctl_t  vspr_ctl[VZONES];
+uint8_t vspr_pos[VTSIZE*VZONES];
+uint8_t vspr_pc[VTSIZE*VZONES];
+#endif
+
 #define totoro_update_m(p) do {			\
     p_idx=p;					\
     totoro_update();				\
@@ -508,10 +514,18 @@ void __fastcall__ mode_bitmap(void)
 
   CIA2.pra=(CIA2.pra&0xfc)|0x2;  // selects VIC page 0x4000-0x7FFF
 
+#ifndef HIRES
   //  VIC.addr = ((SCREEN_BASE-VIC_BASE)>>7)|((BITMAP_BASE-VIC_BASE)>>11);
   VIC.addr =0x08; // screen at base +0x0000, bitmap at base + 0x2000
   VIC.ctrl1=0x3B; // enable bitmap, no extended color, no blank, 25 rows, ypos=3
   VIC.ctrl2=0xD8; // multicolor, 40 cols, xpos=0
+#else
+  memset8s(vspr_ctl,0,sizeof(struct vspr_ctl_t)*VZONES);
+  vspr_ctl[VSPR_BAR].mc=0xe0;
+  vspr_ctl[VSPR_FIELD].mc=0xe0;
+
+  irq_ctrl|=SCR_SPLIT_EN;
+#endif
 }
 
 static void __fastcall__ mode_text(void)
