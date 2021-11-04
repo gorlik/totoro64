@@ -80,14 +80,18 @@
 #define TXT_PTR 0x400
 #define AT(r,c) (TXT_PTR+40*r+c)
 
-#define scr_strcpy8(dst,src)  do {		\
-    __asm__("ldx #$FF");			\
-    __asm__("ls%v: inx",src);			\
-    __asm__("lda %v,x",src);			\
-    __asm__("beq fs%v",src);			\
-    __asm__("sta %w,x",dst);			\
-    __asm__("bne ls%v",src);			\
-    __asm__("fs%v:",src);			\
+#define scr_cpy8(dst,src,color)  do {	\
+    __asm__("ldx #$FF");		\
+    __asm__("clv");			\
+    __asm__("lc%s: inx",__LINE__);	\
+    __asm__("lda #%b",color);		\
+    __asm__("lda %v,x",src);		\
+    __asm__("beq fs%v",src);		\
+    __asm__("sta %w,x",dst);		\
+    __asm__("lda #%b",color);		\
+    __asm__("sta $d400+%w,x",dst);	\
+    __asm__("bvc lc%s",__LINE__);	\
+    __asm__("fs%v:",src);		\
   } while (0)
 
 
@@ -110,15 +114,19 @@ const unsigned char license_txt[] =
 //  "version.";
 #endif
 
+const unsigned char url[] =
+  "http://gglabs.us";
+
+
 static const uint8_t tpos[17] = {
   SPR_CENTER_X-48, 60,
   SPR_CENTER_X-24, 60,
   SPR_CENTER_X,    60,
   SPR_CENTER_X+24, 60,
-  SPR_CENTER_X-96, 105,
-  SPR_CENTER_X-48, 105,
-  SPR_CENTER_X,    105,
-  SPR_CENTER_X+48, 105,
+  SPR_CENTER_X-96, 112,
+  SPR_CENTER_X-48, 112,
+  SPR_CENTER_X,    112,
+  SPR_CENTER_X+48, 112,
   0, // VIC.spr_hi_x
 };
 
@@ -175,15 +183,18 @@ void __fastcall__ setup(void)
   //  mode_text();
   VIC.spr_ena=0x0f;
 
-  scr_strcpy8(AT(5,16),present_txt);
+
+  scr_cpy8(AT(6,16),present_txt,COLOR_LIGHTBLUE);
   inflatemem (CHARSET_PTR, charset_data);
   VIC.spr_ena=0xff;
   
-  scr_strcpy8(AT(11,33),version_txt);
-  scr_strcpy8(AT(14,0),intro_txt);
+  scr_cpy8(AT(12,33),version_txt,COLOR_BLACK);
+  scr_cpy8(AT(15,0),intro_txt,COLOR_LIGHTBLUE);
 #if (DEBUG==0)
-  scr_strcpy8(AT(18,0),license_txt);
+  scr_cpy8(AT(19,0),license_txt,COLOR_LIGHTBLUE);
 #endif
+
+  scr_cpy8(AT(23,12),url,COLOR_BLACK);
   
   inflatemem (BITMAP_BASE, bitmap_data);
   inflatemem (SCREEN_BASE, color1_data);

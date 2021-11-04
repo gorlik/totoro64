@@ -24,14 +24,17 @@
 #include <stdint.h>
 
 // user modifiable compile time options
-//#define NTSC
 #define SPRITE_MESSAGES
 //#define MOVIE_TITLE
-//#define HIRES
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.37"
+// these are set in the makefile
+//#define NTSC
+//#define HIRES
+
+// end of user modifiable configuration
+#define VERSION "v0.38"
 
 #define USE_ZP
 

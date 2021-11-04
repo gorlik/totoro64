@@ -5,9 +5,8 @@ Help chu-totoro catch the acorns before the timer expires.
 Avoid the poison berries and catch the bonus apples.
 Single player and two player cooperative mode.
 Good for kids to learn coding while having fun.
-'A', 'D' and shift or joystick in port 2 to play.
-In two player mode keyboard input is disabled and two 
-joysticks are required.
+'V', 'N' and left-shift or joystick in port 2 to play.
+In two player mode, the secon player uses joystick in port 1.
 
 <img alt="totoro64 screenshot" src="screenshot.png" width="700">
 
@@ -17,15 +16,21 @@ Can be played with VICE if the real HW is not avaiable.
 # Building
 To build the game cc65, a GNU compatible make and zopfli are required.
 just type make to build.
-type make test to build and invoke VICE to test the game.
+Type make test to build and invoke VICE to test the game.
 The makefile will build the PAL and NTSC version of the game automatically.
 There are a few compile time options in the totoro.h header file.
 #define STAGE_TIME 60
 default time for the stages. Can be any number from 1 to 99
 #define SPRITE_MESSAGES
-use sprites for some on screen messages 
+use sprites for most on screen messages 
 #define MOVIE_TITLE
-use a font similar to the movie for the title
+use a font similar to the movie for the title screen
+
+The makefile will also build two slightly different layouts.
+The 'normal' layout uses a standard multicolor bitmap for the
+entire screen. The 'HIRES' layout uses a raster irq to split
+the screen in a non multicolor text mode area in the first
+16 scanlines to display high resolution text.
 
 # Graphics editors
 Three different editors have been used for the artwork.
