@@ -31,7 +31,7 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.35b"
+#define VERSION "v0.36"
 
 #define USE_ZP
 
@@ -103,6 +103,8 @@
 #define VTSIZE (VNUM*2)
 #define VIDX(a) ((a-(8-VNUM)))
 
+#define CHARSET_PTR VIC_CHARSET
+
 #define SPR_EN vspr_ctl[VSPR_FIELD].en
 #define SPR_MC vspr_ctl[VSPR_FIELD].mc
 #define SPR_EX vspr_ctl[VSPR_FIELD].exp_x
@@ -115,6 +117,8 @@
 #define VSPR_COLOR(x) vspr_pc[VIDX(x)+VNUM]
 
 #else
+#define CHARSET_PTR CHARSET
+
 #define SPR_EN VIC.spr_ena
 #define SPR_MC VIC.spr_mcolor
 #define SPR_EX VIC.spr_exp_x
@@ -367,13 +371,16 @@ extern const uint8_t color1_data[];
 extern const uint8_t color2_data[];
 
 // base pointers for graphics data
-extern uint8_t BITMAP_BASE[];  // bitmap base
-extern uint8_t SCREEN_BASE[];  // character screen base
-extern uint8_t COLOR_BASE[];   // color ram
-extern uint8_t CHARSET[];      // uncompressed charset
-extern uint8_t SPR_DATA[];     // sprite data
-extern uint8_t SPR_PTR[];      // sprite pointers
 extern uint8_t VIC_BASE[];     // base pointer of VIC memory
+extern uint8_t SCREEN_BASE[];  // character screen base
+extern uint8_t SPR_PTR[];      // sprite pointers
+extern uint8_t SPR_DATA[];     // sprite data
+extern uint8_t VIC_CHARSET[];  // uncompressed charset (in vic memory)
+extern uint8_t BITMAP_BASE[];  // bitmap base
+
+extern uint8_t CHARSET[];      // uncompressed charset
+extern uint8_t VIC_REG[];      // VIC register base
+extern uint8_t COLOR_BASE[];   // color ram
 
 // global state
 extern struct  game_state_t game;

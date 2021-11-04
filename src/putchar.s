@@ -27,7 +27,6 @@
 .import   _BITMAP_BASE
 .import   _COLOR_BASE
 .import   _STR_BUF
-.import   cpos
 
 .export   _PutLine
 .export   _PutBigLine
@@ -47,6 +46,8 @@ line1:
 save_ptr:
 	.res 2
 ccolor:
+	.res 1
+cpos:
 	.res 1
 
 .segment	"CODE"

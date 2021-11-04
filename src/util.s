@@ -36,17 +36,13 @@
 
 .export   _print_p
 
-.export cpos
-
 .segment        "BSS"
 kjoytmp:
 	.res 1
 anyjtmp:
 	.res 1
 padtmp:
-	.res	1,$00
-cpos:
-	.res	1,$00
+	.res	1
 
 .segment	"CODE"
 

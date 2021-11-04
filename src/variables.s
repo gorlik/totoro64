@@ -25,11 +25,13 @@
 
 
 .export _VIC_BASE
-.export _BITMAP_BASE
 .export _SCREEN_BASE
-.export _SPR_DATA
 .export _SPR_PTR
+.export _SPR_DATA
+.export _VIC_CHARSET
+.export _BITMAP_BASE
 .export _CHARSET
+.export _VIC_REG
 .export _COLOR_BASE
 
 .segment "ZP_2" : zeropage
@@ -45,12 +47,13 @@ _zptmp1:
 _zptmp2:
 	.res 1
 
-
 _VIC_BASE    = $4000
-_BITMAP_BASE = _VIC_BASE   + $2000
 _SCREEN_BASE = _VIC_BASE
-_COLOR_BASE  = $d800
 _SPR_PTR     = _SCREEN_BASE + $3f8
 _SPR_DATA    = _VIC_BASE + $400
+_VIC_CHARSET = _VIC_BASE + $1800
+_BITMAP_BASE = _VIC_BASE   + $2000
 _CHARSET     = $c000
+_VIC_REG     = $d000
+_COLOR_BASE  = $d800
 

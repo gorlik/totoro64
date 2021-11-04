@@ -747,18 +747,30 @@ static void __fastcall__ sprite_message2(uint8_t msg)
 
   __A__=msg;
   __asm__("ldy #2");
+#ifndef HIRES
   __asm__("sloop: sta %v+5,y",SPR_PTR);
+#else
+  __asm__("sloop: sta %v,y",vspr_pc);
+#endif
   __asm__("tax");
   __asm__("dex");
   __asm__("lda #0");
+#ifndef HIRES
   __asm__("sta %w+5,y",0xd027);
+#else
+  __asm__("sta %v+3,y",vspr_pc);
+#endif
   __asm__("txa");
   __asm__("dey");
   __asm__("bpl sloop");
-  
+
   // setup sprite position
+#ifndef HIRES
   memcpy8c(0xd00a,msg_pos,sizeof(msg_pos));
-  
+#else
+  memcpy8s(vspr_pos,msg_pos,sizeof(msg_pos));
+#endif
+
    SPR_EX&=0x1f;
 
   if(msg<SPR_TXT_READY)
