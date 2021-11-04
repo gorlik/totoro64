@@ -21,7 +21,7 @@ c64: artwork
 
 clean:
 	rm -rf build-c64 build-c64n build-c64-hr build-c64n-hr build-c128
-	rm -rf src/charset.* src/sprites.* src/background*
+	rm -rf src/charset.* src/charset-hr.* src/sprites.* src/background*
 	rm -rf src/bitmap.c src/color1.c src/color2.c src/*~
 	cd utils; make clean
 
