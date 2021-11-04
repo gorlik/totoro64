@@ -14,6 +14,7 @@
 ASIZE = 9
 
 .export spr_mux_irq
+.export restore_irq
 
 ;;  sprite mux setup
 .define LINES_EARLY  4
@@ -143,9 +144,10 @@ not_last:
 	rts
 .endproc
 
-.proc set_next_raster: near
+set_early_raster:
 	sec
 	sbc #LINES_EARLY
+set_raster:
 	sta VIC_HLINE
 	lda irq_table,x
 	sta IRQVec
@@ -153,14 +155,13 @@ not_last:
 	sta IRQVec+1
 	border_restore
 	jmp $EA81
-.endproc
 
 .macro IRQ_CODE idx
 	border_set_sprite (idx)
 	setup_AXY idx
 	jsr irq_body		; expects mask in A, indexes in X and Y
 	ldx #(idx*2)
-	jmp set_next_raster
+	jmp set_early_raster
 .endmacro
 
 IRQ2: 	IRQ_CODE 2
@@ -179,5 +180,5 @@ IRQ7:
 	jsr irq_body
 restore_irq:
 	ldx #0			; vector back to _IRQ
-	lda #20+LINES_EARLY	; rasterline 20
-	jmp set_next_raster
+	lda #20	                ; rasterline 20
+	jmp set_raster

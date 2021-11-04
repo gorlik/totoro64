@@ -49,16 +49,19 @@ color_save:
 ;; ****************** IRQ Interrupt *********************
 .proc _IRQ: near
 	lda VIC_IRR
-	bpl not_vic	; check if IRQ from VIC
+	bpl end		; check if IRQ from VIC
 	sta VIC_IRR	; clear VIC IRQ flag
+
         lda _irq_ctrl
         bpl no_mux
         jsr spr_mux_irq
 no_mux:
-	ldx #0*TRACK_T_SIZE
+	border_set 2
+	ldx #0*TRACK_T_SIZE     ; play music
 	jsr play_track		; track[0]
 	ldx #1*TRACK_T_SIZE
 	jsr play_track		; track[1]
-not_vic:
+	border_restore
+end:
 	jmp $EA81		; KERNAL IRQ end
 .endproc
