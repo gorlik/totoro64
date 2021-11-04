@@ -31,7 +31,7 @@
 #define STAGE_TIME 60
 #define POISON_TIME 5
 
-#define VERSION "v0.36"
+#define VERSION "v0.37"
 
 #define USE_ZP
 

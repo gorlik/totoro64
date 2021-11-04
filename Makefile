@@ -3,17 +3,25 @@ all: c64
 
 c64: artwork
 	mkdir -p build-c64n
-	cd build-c64n; TV=NTSC make -f ../Makefile.c64
+	cd build-c64n; TV=NTSC MODE=MC make -f ../Makefile.c64
 	mkdir -p build-c64
-	cd build-c64; TV=PAL make -f ../Makefile.c64
+	cd build-c64; TV=PAL MODE=MC make -f ../Makefile.c64
+	mkdir -p build-c64n-hr
+	cd build-c64n-hr; TV=NTSC MODE=HIRES make -f ../Makefile.c64
+	mkdir -p build-c64-hr
+	cd build-c64-hr; TV=PAL MODE=HIRES make -f ../Makefile.c64
 	grep ^ZDATA build-c64/totoro64.map
+	grep ^ZDATA build-c64n/totoro64.map
+	grep ^ZDATA build-c64-hr/totoro64.map
+	grep ^ZDATA build-c64n-hr/totoro64.map
 
 #c128:
 #	mkdir -p build-c128
 #	cd build-c128; make -f ../Makefile.c128
 
 clean:
-	rm -rf build-c64 build-c64n build-c128 src/charset.* src/sprites.* src/background*
+	rm -rf build-c64 build-c64n build-c64-hr build-c64n-hr build-c128
+	rm -rf src/charset.* src/sprites.* src/background*
 	rm -rf src/bitmap.c src/color1.c src/color2.c src/*~
 	cd utils; make clean
 
@@ -23,10 +31,13 @@ bin: all
 
 artwork: charset sprites background
 
-charset: tools artwork/totoro_mc-charset.bin
+charset: tools artwork/totoro*-charset.bin
 	utils/make_font_table artwork/totoro_mc-charset.bin >src/charset.bin
 	cd src; zopfli --i100 --deflate charset.bin
 	utils/bin_to_c src/charset.bin.deflate charset_data ZDATA >src/charset.c
+	cp artwork/totoro_hires-charset.bin src/charset-hr.bin
+	cd src; zopfli --i100 --deflate charset-hr.bin
+	utils/bin_to_c src/charset-hr.bin.deflate charset_data ZDATA >src/charset-hr.c
 
 sprites: prg_studio_project/sprites.bin tools
 	cat prg_studio_project/game_sprites.bin prg_studio_project/title_sprites.bin >src/sprites.bin
