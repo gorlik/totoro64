@@ -25,14 +25,14 @@
 // sprite max speed
 #ifdef NTSC
 #define MAX_XV 13
-// should be 8 with .66 acceleration
-// approximate to 9 and .75 acceleration
-#define JUMP_V 0x900
-#define JUMP_A 200
+// V=8.33 A=0.523
+#define JUMP_V 0x0855
+#define JUMP_A 0x0086
 #else
 #define MAX_XV 16
-#define JUMP_V 0xa00
-#define JUMP_A 200
+// V=10.00 A=0.75
+#define JUMP_V 0x0a00
+#define JUMP_A 0x00c0
 #endif
 
 #define PGROUND_Y (GROUND_Y-23)
