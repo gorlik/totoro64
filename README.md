@@ -8,7 +8,8 @@ Good for kids to learn coding while having fun.
 'V', 'N' and left-shift or joystick in port 2 to play.
 In two player mode, the second player uses joystick in port 1.
 
-<img alt="totoro64 screenshot" src="screenshot.png" width="700">
+<img alt="totoro64 MC screenshot" src="screenshots/totoro64-hr-v038.png" width="400">
+<img alt="totoro64 HR screenshot" src="screenshots/totoro64-v035.png" width="400">
 
 The game fits on a standard 16K Commdore 64 cartridge.
 Can be played with VICE if the real HW is not avaiable.
