@@ -23,6 +23,7 @@ clean:
 	rm -rf build-c64 build-c64n build-c64-hr build-c64n-hr build-c128
 	rm -rf src/charset.* src/charset-hr.* src/sprites.* src/background*
 	rm -rf src/bitmap.c src/color1.c src/color2.c src/*~
+	rm -rf release
 	cd utils; make clean
 
 bin: all
@@ -59,8 +60,15 @@ background: artwork/background.s tools
 
 test: all
 	x64 -cart16 build-c64/totoro64.bin
-
 #	x128 -extfrom build-c128/cterm128.bin -extfunc 1
+
+release: all
+	mkdir -p release
+	cp build-c64/totoro64.crt release/totoro64-pal.crt
+	cp build-c64n/totoro64.crt release/totoro64-ntsc.crt
+	cp build-c64-hr/totoro64.crt release/totoro64-hires-pal.crt
+	cp build-c64n-hr/totoro64.crt release/totoro64-hires-ntsc.crt
+	zip totoro64.zip release/*.crt
 
 tools: utils/*.c
 	cd utils; make
