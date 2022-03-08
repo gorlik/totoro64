@@ -43,8 +43,8 @@ Chibi-totoro is made up of 2 single color layered sprites.
 One sprite is reserved for the spin top and potential additional game items.
 The two remaining sprites are used by the multiplexer to display up to 8 falling items.
 
-The music plyer is implemented using a custom IRQ player that is locked to VSYNC. The game has correction for PAL and NTSC timing for both playback speed and pitch.
+The music player is implemented using a custom IRQ player that is locked to VSYNC. The game has correction for PAL and NTSC timing for both playback speed and pitch.
 
 Most game assets are compressed to fit into the 16K cartridge limit. Decompression is done in the title screen using the cc65 zlib routines.
 
-In the hires game mode the IRQ to do split screen is not perfetly stable. A black line between the hires and the multicolor sections is used to hide the artifacts. In hires mode additional sprite multiplexing is used to dispaly the icons in the status bar.
+In the hires game mode the IRQ to do split screen is not perfectly stable. A black line between the hires and the multicolor sections is used to hide the artifacts. In hires mode additional sprite multiplexing is used to display the icons in the status bar.
