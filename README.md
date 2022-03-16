@@ -11,7 +11,7 @@ In two player mode, the second player uses joystick in port 1.
 <img alt="totoro64 MC screenshot" src="screenshots/totoro64-hr-v038.png" width="700">
 
 The game fits on a standard 16K Commdore 64 cartridge.
-Can be played with VICE if the real HW is not avaiable.
+Can be played with VICE or online at <a href="https://c64online.com/c64-games/totoro64/">C64 Online</a> if the real HW is not avaiable.
 
 # Building
 To build the game cc65, a GNU compatible make and zopfli are required.
