@@ -1,7 +1,7 @@
 /******************************************************************************
  *  TOTORO64                                                                  *
  *  A Studio Ghibli inspired game for the Commodore 64                        *
- *  Copyright 2021 Gabriele Gorla                                             *
+ *  Copyright 2021-2022 Gabriele Gorla                                        *
  *                                                                            *
  *  This program is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
@@ -34,7 +34,7 @@
 //#define HIRES
 
 // end of user modifiable configuration
-#define VERSION "v0.38"
+#define VERSION "v0.39"
 
 #define USE_ZP
 
@@ -135,6 +135,12 @@
 
 #endif
 
+#define SFX_NONE   0
+#define SFX_ACORN  1
+#define SFX_BONUS  2
+#define SFX_SLOW   3
+#define SFX_INVERT 4
+
 // the following must be kept in sync with the assembly code
 #define MAX_ACORNS 8
 #define MUX_SLOTS  2
@@ -175,10 +181,6 @@
 #define OBJ_ACORN  0x1
 #define OBJ_BERRY  0x2
 #define OBJ_APPLE  0x3
-
-
-#define stop_sound() \
-  do { SID.v3.ctrl=0x20; } while(0)
 
 // player states
 #define PSTATE_IDLE  0
@@ -280,6 +282,8 @@ struct player_t {
 };
 
 struct sound_t {
+  uint8_t type;
+  uint8_t last;
   uint8_t timer;
   uint8_t index;
 };
@@ -343,7 +347,9 @@ uint8_t __fastcall__ acorn_find(void);
 void __fastcall__ acorn_add(void);
 
 // misc
-void __fastcall__ start_sound(void);
+void __fastcall__ start_sound(uint8_t t);
+void __fastcall__ process_sound(void);
+void __fastcall__ stop_sound(void);
 uint8_t __fastcall__ joy1(void);
 uint8_t __fastcall__ joy2(void);
 uint8_t __fastcall__ joyk(void);

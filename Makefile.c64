@@ -10,7 +10,7 @@ CFLAGS=-I. -I$(INCLUDE) -I$(SYS_INCLUDE) -Oirs -t $(TARGET) -D${TV} -D${MODE}
 
 OBJECTS=  player.o variables.o sprites.o \
           irqplayer.o irqmux.o util.o \
-	  bitmap.o music.o intro.o
+	  bitmap.o music.o intro.o sfx.o
 
 ifeq ($(MODE),HIRES)
 OBJECTS+= irq-hr.o putchar-hr.o charset-hr.o

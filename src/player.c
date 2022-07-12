@@ -452,7 +452,7 @@ void __fastcall__ check_collision(void)
 	#if 1
 	switch((a->en)&OBJ_TYPE_MASK) {
 	case OBJ_ACORN:
-	  start_sound();
+	  start_sound(SFX_ACORN);
 
 	  if(p_idx) {
 	    if(tcache.ctrl==CTRL_AUTO)
@@ -466,13 +466,17 @@ void __fastcall__ check_collision(void)
 	  if(game.acorns) game.acorns--;
 	  break;
 	case OBJ_BERRY:
-          // FIXME: start error sound
 	  tcache.poison+=(POISON_TIME*VFREQ);
-	  if((a->en)&0x80) tcache.ptype=PTYPE_INVERT;
-	  else tcache.ptype=PTYPE_SLOW;
+	  if((a->en)&0x80) {
+	    start_sound(SFX_INVERT);
+	    tcache.ptype=PTYPE_INVERT;
+	  } else {
+	    start_sound(SFX_SLOW);
+	    tcache.ptype=PTYPE_SLOW;
+	  }
 	  break;
 	case OBJ_APPLE:
-	  // FIXME: bonus sound
+	  start_sound(SFX_BONUS);
 	  game.time+=10;
 	  break;
 	}

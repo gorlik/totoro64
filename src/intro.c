@@ -1,7 +1,7 @@
 /******************************************************************************
  *  TOTORO64                                                                  *
  *  A Studio Ghibli inspired game for the Commodore 64                        *
- *  Copyright 2021 Gabriele Gorla                                             *
+ *  Copyright 2021-2022 Gabriele Gorla                                        *
  *                                                                            *
  *  This program is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
@@ -248,10 +248,6 @@ static void __fastcall__ setup_sid(void)
   track[1].voice_offset=7;
 
   vpb = VPB;
-
-  //  sound effects
-  SID.v3.ad = 0x00;
-  SID.v3.sr = 0xa9;
 }
 
 static void __fastcall__ Title_Sprite_Setup(void)

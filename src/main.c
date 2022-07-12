@@ -1,7 +1,7 @@
 /******************************************************************************
  *  TOTORO64                                                                  *
  *  A Studio Ghibli inspired game for the Commodore 64                        *
- *  Copyright 2021 Gabriele Gorla                                             *
+ *  Copyright 2021-2022 Gabriele Gorla                                        *
  *                                                                            *
  *  This program is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
@@ -139,14 +139,6 @@ const unsigned char txt_clear[]  = "GREAT!";
     __asm__("bcc l1");		     \
   } while(0)
 
-const uint16_t sound_seq[] = {
-  0x22d0,
-  0x1f04,
-  0x2714,
-  0x2e79,
-  0x2714,
-};
-
 const uint8_t p2_ctrl[] = {
   CTRL_OFF, CTRL_AUTO, CTRL_PLAY /*, CTRL_PLAY, */
 };
@@ -208,7 +200,6 @@ struct game_state_t game;
 
 struct acorn_t acorn[MAX_ACORNS];
 struct spin_top_t spin_top;
-struct sound_t sound;
 
 struct track_t track[2];
 uint8_t vpb;
@@ -694,33 +685,6 @@ void __fastcall__ game_sprite_setup(void)
   __asm__("skip2:");
 
   SPR_EN=__A__;
-}
-
-void __fastcall__ start_sound(void)
-{
-  stop_sound();
-  if(STATE_PLAY_DEMO()) {
-    sound.timer=10;
-    sound.index=0;
-  }
-}
-
-void __fastcall__ process_sound(void)
-{
-    if(sound.timer==0) {
-      stop_sound();
-      return;
-    }
-    SID.v3.freq=sound_seq[sound.index];
-
-    if(sound.index==0) {
-      SID.v3.ctrl=0x21;
-    }
-    // VIC.bordercolor=sound.index+1;
-    // use index 0 only the first time
-    if(sound.index>=(sizeof(sound_seq)/2)) sound.index=0;
-    sound.index++;
-    sound.timer--;
 }
 
 #ifdef SPRITE_MESSAGES
